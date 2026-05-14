@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta Web Centro de Padres - Jardín Infantil</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary: #4A90E2;
+            --secondary: #67C23A;
+            --text: #2C3E50;
+            --bg: #F9FBFF;
+            --card-bg: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 20px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid #EEE;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7F8C8D;
+        }
+
+        h2 {
+            color: var(--primary);
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin-top: 40px;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .concept-card {
+            border: 1px solid #EEE;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #FFF;
+        }
+
+        .concept-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .concept-info {
+            padding: 20px;
+        }
+
+        .concept-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .plan-box {
+            background: #F0F7FF;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #95A5A6;
+            border-top: 1px solid #EEE;
+            padding-top: 20px;
+        }
+
+        @media print {
+            body { background: white; }
+            .container { 
+                box-shadow: none; 
+                margin: 0; 
+                padding: 20px;
+                max-width: 100%;
+            }
+            .concept-card { break-inside: avoid; }
+            button { display: none; }
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .print-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-button" onclick="window.print()">Descargar como PDF / Imprimir</button>
+
+    <div class="container">
+        <header>
+            <h1>Portal Centro de Padres</h1>
+            <p class="subtitle">Propuesta Integral de Gestión y Transparencia</p>
+        </header>
+
+        <p>Esta propuesta detalla la creación de una plataforma web diseñada para facilitar la comunicación, la transparencia financiera y la gestión administrativa del Centro de Padres del Jardín Infantil.</p>
+
+        <h2>🎨 Conceptos de Diseño Sugeridos</h2>
+        <div class="concept-grid">
+            <div class="concept-card">
+                <img src="C:/Users/silva/.gemini/antigravity/brain/9826d910-98c5-473f-8a81-ae9b7bf45b0c/estilo_calido_espanol_1778777939080.png" alt="Estilo Cálido">
+                <div class="concept-info">
+                    <div class="concept-title">Opción 1: Cálido y Tierno</div>
+                    <p>Enfoque en la comunidad. Colores suaves, cercanía y textos claros en español.</p>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <img src="C:/Users/silva/.gemini/antigravity/brain/9826d910-98c5-473f-8a81-ae9b7bf45b0c/estilo_moderno_espanol_1778777952092.png" alt="Estilo Moderno">
+                <div class="concept-info">
+                    <div class="concept-title">Opción 2: Moderno y Transparente</div>
+                    <p>Enfoque en la gestión financiera con indicadores en español fáciles de entender.</p>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <img src="C:/Users/silva/.gemini/antigravity/brain/9826d910-98c5-473f-8a81-ae9b7bf45b0c/estilo_infantil_espanol_1778777973166.png" alt="Estilo Infantil">
+                <div class="concept-info">
+                    <div class="concept-title">Opción 3: Infantil Profesional</div>
+                    <p>Enfoque lúdico optimizado para el jardín con navegación intuitiva en español.</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>🛠️ Funcionalidades Incluidas</h2>
+        <ul class="feature-list">
+            <li><strong>Gestión de Cuotas:</strong> Control detallado de cuota del centro y cuota mensual (voluntaria).</li>
+            <li><strong>Transparencia Financiera:</strong> Visualización del saldo actual y registro de gastos con fotos de comprobantes.</li>
+            <li><strong>Muro de Requerimientos:</strong> Listado de necesidades del equipo técnico/educativo con opción de registrar donaciones.</li>
+            <li><strong>Panel de Administración:</strong> Interfaz simplificada para que tú, (la encargada) gestione todo desde tu móvil.</li>
+            <li><strong>Sección de Reflexión:</strong> Espacio dedicado al bienestar de los niños.</li>
+        </ul>
+
+        <h2>📋 Plan de Trabajo</h2>
+        <div class="plan-box">
+            <p><strong>Fase 1:</strong> Elección de estilo y estructura base.<br>
+            <strong>Fase 2:</strong> Implementación del módulo financiero y galería de gastos.<br>
+            <strong>Fase 3:</strong> Panel de administración privado y carga de datos iniciales.<br>
+            <strong>Fase 4:</strong> Pruebas y lanzamiento final.</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Propuesta de Desarrollo Web - Centro de Padres Jardín Infantil</p>
+        </footer>
+    </div>
+
+</body>
+</html>

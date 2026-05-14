@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Privado - Centro de Padres</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card login-card">
+        <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+            <i class="fas fa-user-lock"></i>
+            Acceso Admin
+        </div>
+        <p>Introduce la clave para gestionar el portal.</p>
+        <form id="login-form">
+            <input type="password" id="admin-pass" placeholder="Contraseña" required>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar al Panel</button>
+        </form>
+        <a href="index.html" style="display: block; margin-top: 20px; color: var(--p-text-light); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Volver al inicio
+        </a>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === 'admin123') { // Clave por defecto
+                sessionStorage.setItem('isAdmin', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                alert('Clave incorrecta. Inténtalo de nuevo.');
+            }
+        });
+    </script>
+</body>
+</html>

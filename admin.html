@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Centro de Padres</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-nav {
+            background: var(--p-white);
+            padding: 15px 0;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        .admin-nav .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-logout {
+            background: #f1f5f9;
+            color: var(--p-text);
+            border: 1px solid #ddd;
+        }
+        .btn-logout:hover {
+            background: var(--p-red);
+            color: white;
+            border-color: var(--p-red);
+        }
+        .admin-card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .proof-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .proof-btn.uploaded {
+            background: var(--p-green);
+            color: white;
+            border-color: var(--p-green);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="admin-nav">
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                Panel Administrativo
+                <span>Privado</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-eye"></i> Vista Padres
+                </a>
+                <button onclick="logout()" class="btn btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        // Verificación de seguridad simple
+        if (sessionStorage.getItem('isAdmin') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <main class="container">
+        <div class="dashboard-grid">
+            
+            <!-- 1. Gestión de Pagos (Alumnos) -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="admin-card-title">
+                    <h3><i class="fas fa-users"></i> Control de Pagos y Comprobantes</h3>
+                    <span style="font-size: 0.9rem; color: var(--p-text-light);">Haz clic en el icono de cámara para subir comprobante</span>
+                </div>
+                <div class="table-container">
+                    <table id="students-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre Alumno</th>
+                                <th>Cuota Centro</th>
+                                <th>Mensual (Vol.)</th>
+                                <th>Comprobantes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Generado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Registro de Gastos -->
+            <div class="card">
+                <h3><i class="fas fa-cart-plus"></i> Registrar Gasto / Compra</h3>
+                <form id="expense-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                    <div class="input-group">
+                        <label>Descripción</label>
+                        <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
+                    </div>
+                    <div class="input-group">
+                        <label>Monto $</label>
+                        <input type="number" id="exp-amount" placeholder="0" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
+                    </div>
+                    <div class="input-group">
+                        <label>Foto de Boleta/Ticket</label>
+                        <input type="file" id="exp-image" accept="image/*" class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Gasto</button>
+                </form>
+            </div>
+
+            <!-- 3. Gestión de Requerimientos -->
+            <div class="card">
+                <h3><i class="fas fa-bullhorn"></i> Requerimiento de Tías</h3>
+                <form id="request-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                    <div class="input-group">
+                        <label>¿Qué se necesita?</label>
+                        <input type="text" id="req-item" placeholder="Ej: Resmas de papel, Temperas" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
+                    </div>
+                    <div class="input-group">
+                        <label>Nota / Detalle</label>
+                        <textarea id="req-note" placeholder="Más detalles..." class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left; height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
+                </form>
+            </div>
+
+            <!-- 4. Gestión de Co-Administradores -->
+            <div class="card">
+                <div class="admin-card-title">
+                    <h2>Gestión de Administradores</h2>
+                    <button class="btn" style="background: var(--p-green); color: white;" onclick="addCoAdmin()">+ Invitar Mamá/Papá</button>
+                </div>
+                <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--p-text-light);">Personas autorizadas para gestionar el portal.</p>
+                <div id="admins-list">
+                    <!-- Generado por JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 40px; background: #fff; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
+            <h2 style="margin-bottom: 20px;"><i class="fas fa-edit"></i> Gestionar Contenido Publicado</h2>
+            <div class="dashboard-grid">
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Gastos Registrados</h3>
+                    <div id="expenses-gallery" style="display: grid; gap: 15px;"></div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--p-red);">Requerimientos Activos</h3>
+                    <div id="requests-list" style="display: grid; gap: 15px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="container" style="padding: 40px 0; text-align: center; border-top: 1px solid #eee;">
+            <p style="color: #95a5a6; font-size: 0.9rem;">Portal Centro de Padres &copy; 2026</p>
+            <a href="login.html" style="color: #ddd; text-decoration: none; font-size: 0.7rem;">Acceso Administrativo</a>
+        </section>
+    </main>
+
+    <!-- Modal para subir comprobante de pago de alumno -->
+    <div id="modal-proof" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+        <div class="card" style="max-width: 400px; width: 90%;">
+            <h3>Subir Comprobante</h3>
+            <p id="proof-target-name" style="margin-bottom: 20px; font-weight: bold;"></p>
+            <input type="file" id="student-proof-file" accept="image/*" class="btn" style="width: 100%; border: 1px solid #ddd; margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" id="save-proof-btn">Guardar</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('modal-proof').style.display='none'">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat version para fácil integración) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+    <div class="watermark">
+        <i class="fas fa-rocket"></i>
+        Hecho por <span class="z-brand">Zaviso</span>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Lógica específica de la página de admin
+        if (typeof renderAdminStudents === 'function') {
+            renderAdminStudents();
+        }
+    </script>
+</body>
+</html>

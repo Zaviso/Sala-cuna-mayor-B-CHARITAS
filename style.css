@@ -1,0 +1,362 @@
+/* 
+   REDISEÑO TOTAL: ESTILO INFANTIL PROFESIONAL (Opción 3)
+   Inspirado exactamente en la propuesta aprobada.
+*/
+
+:root {
+    --p-red: #FF6B6B;
+    --p-blue: #4D96FF;
+    --p-yellow: #FFD93D;
+    --p-green: #6BCB77;
+    --p-white: rgba(255, 255, 255, 0.95);
+    --p-bg: #E0F2FE; /* Un azul cielo muy suave */
+    --p-text: #2D3436;
+    --p-text-light: #636E72;
+    
+    --radius-lg: 40px;
+    --radius-md: 25px;
+    --shadow: 0 15px 40px rgba(77, 150, 255, 0.15);
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--p-bg);
+    background-image: 
+        url('https://www.transparenttextures.com/patterns/kids-coupon.png');
+    background-attachment: fixed;
+    color: var(--p-text);
+    overflow-x: hidden;
+}
+
+/* --- Header Profesional --- */
+header {
+    background: var(--p-white);
+    padding: 15px 0;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    con
+    gap: 15px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--p-blue);
+}
+
+.logo span {
+    background: var(--p-yellow);
+    padding: 5px 12px;
+    border-radius: 12px;
+    color: var(--p-text);
+    font-size: 0.9rem;
+    box-shadow: 0 3px 0 #EAB308;
+}
+
+/* --- Hero --- */
+.hero {
+    text-align: center;
+    padding: 40px 20px;
+    min-height: 400px; /* Restaurado a tamaño original */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Mueve el contenido hacia abajo */
+    align-items: center;
+    background: #E0F2FE url('banner-hero.webp') no-repeat center;
+    background-size: cover;
+    border-bottom-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.4); /* Opacidad reducida para que se vea mejor el banner */
+    z-index: 1;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    color: var(--p-blue);
+    margin-bottom: 15px;
+}
+
+/* --- Layout 3 Columnas Compacto --- */
+.main-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1.5fr; /* Tabla | Stats | Gastos */
+    gap: 20px;
+    max-width: 1400px; /* Un poco más ancho para 3 columnas */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.column-table {
+    /* La tabla se mantiene amplia */
+}
+
+.column-stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.column-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.feed-section {
+    background: white;
+    padding: 25px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    border-top: 10px solid var(--p-blue); /* Línea de acento profesional */
+}
+
+.feed-section:nth-child(2) {
+    border-top-color: var(--p-yellow); /* Diferente color para la segunda sección */
+}
+
+.feed-container .card {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: var(--radius-md);
+}
+
+.feed-container .card img {
+    max-height: 150px;
+    object-fit: cover;
+}
+
+/* Scrollbar Bonito */
+.feed-container::-webkit-scrollbar {
+    width: 8px;
+}
+.feed-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.feed-container::-webkit-scrollbar-thumb {
+    background: var(--p-blue);
+    border-radius: 10px;
+}
+
+.column-feed h2 {
+    font-size: 1.4rem;
+    color: var(--p-blue);
+    margin-bottom: 15px;
+    border-bottom: 3px solid var(--p-yellow);
+    display: inline-block;
+}
+
+.stat-card {
+    padding: 25px 20px; /* Aumentado un poco tras achicarlo mucho */
+}
+
+.stat-value {
+    font-size: 2.2rem; /* Aumentado un poco tras achicarlo mucho */
+    font-weight: 800;
+    margin: 5px 0;
+}
+
+.hero p {
+    font-size: 1.3rem;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    color: var(--p-text-light);
+}
+
+.reflection-card {
+    background: var(--p-white);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    border: 4px dashed var(--p-yellow);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* --- Dashboard Cards (Vibrantes) --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--p-white);
+    padding: 20px 30px; /* Reducido de 40px */
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border-bottom: 8px solid transparent;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+
+.stat-card {
+    padding: 15px 20px; /* Aún más compacto para las stats */
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.card:nth-child(1) { border-color: var(--p-green); }
+.card:nth-child(2) { border-color: var(--p-blue); }
+.card:nth-child(3) { border-color: var(--p-red); }
+
+.card:hover {
+    transform: scale(1.03) translateY(-5px);
+}
+
+.card i {
+    margin-bottom: 10px;
+    font-size: 1.5rem; /* Iconos más pequeños */
+}
+
+.stat-value {
+    font-size: 1.8rem; /* Reducido de 3rem */
+    font-weight: 800;
+    margin: 5px 0;
+}
+
+/* --- Buttons --- */
+.btn {
+    padding: 15px 35px;
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+}
+
+.btn-primary { background: var(--p-blue); color: white; }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #3b82f6; }
+
+.btn-secondary { background: var(--p-yellow); color: var(--p-text); }
+.btn-secondary:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #EAB308; }
+
+/* --- Forms --- */
+input, textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    background: #F8FAFC;
+    font-family: inherit;
+    margin-bottom: 15px;
+}
+
+input:focus {
+    border-color: var(--p-blue);
+    outline: none;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1200px) {
+    .main-layout { 
+        grid-template-columns: 1fr 1fr; /* Pasa a 2 columnas en pantallas medianas */
+    }
+    .column-table { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .column-table, .column-stats, .column-feed { grid-column: span 1; }
+    .header-content { flex-direction: column; gap: 10px; }
+}
+
+/* --- Estilos para la Tabla Pública --- */
+.public-table-card {
+    margin-top: 40px;
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.status-paid { background: #DCFCE7; color: #166534; }
+.status-pending { background: #FEF2F2; color: #991B1B; }
+
+/* --- Marca de Agua Zaviso --- */
+.watermark {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 8px 18px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.4);
+    z-index: 1000;
+    pointer-events: none;
+    font-size: 0.9rem;
+    color: var(--p-text);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.watermark i {
+    color: var(--p-blue);
+    font-size: 1.2rem;
+}
+
+.z-brand {
+    color: #FF3B30; /* Rojo profesional de Zaviso */
+    font-weight: 800;
+}
