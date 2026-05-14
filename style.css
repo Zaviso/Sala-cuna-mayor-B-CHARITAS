@@ -706,30 +706,142 @@ input:focus, textarea:focus {
     color: white;
 }
 
-/* Específico para la Galería en Admin (Miniaturas) */
-#moments-gallery.feed-container {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 15px;
-}
-
-.admin-moment-card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #edf2f7;
-    overflow: hidden;
+/* --- Estructura de Escritorio (Desktop) --- */
+.admin-layout {
     display: flex;
     flex-direction: column;
+    gap: 30px;
 }
 
-.admin-moment-card img {
+.admin-dashboard-wrapper {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr; /* Tabla ancha | Herramientas rápidas */
+    gap: 25px;
+}
+
+.admin-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas abajo */
+    gap: 25px;
+}
+
+/* --- Mejoras de Mobile Admin --- */
+.mobile-only-btn {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2100;
+    padding: 12px 20px;
+    background: var(--p-blue);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-responsive {
     width: 100%;
-    height: 100px;
-    object-fit: cover;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
 }
 
-.admin-moment-card .actions {
-    padding: 10px;
-    display: flex;
-    justify-content: center;
+#students-table {
+    min-width: 600px;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .mobile-only-btn { display: flex; }
+    
+    .admin-dashboard-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-grid-bottom {
+        display: none; /* Se oculta de la vista normal para ir al menú */
+    }
+
+    .admin-sidebar-mobile {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 320px;
+        height: 100vh;
+        background: #f8fafc;
+        z-index: 2500;
+        padding: 20px;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.4s ease;
+    }
+
+    .admin-sidebar-mobile.active {
+        transform: translateX(0);
+    }
+}
+
+.sidebar-header {
+    display: none;
+}
+
+/* --- Ajustes Específicos para el Portal de Padres (Móvil) --- */
+@media (max-width: 768px) {
+    /* Reducir texto del Hero */
+    .hero h1 {
+        font-size: 1.8rem !important;
+        line-height: 1.2;
+    }
+    .hero p {
+        font-size: 1rem !important;
+    }
+
+    /* Reducir texto del Rincón de la Directiva */
+    #announcements-container .card p {
+        font-size: 0.85rem !important;
+        line-height: 1.4;
+    }
+    #announcements-container h2 {
+        font-size: 1.3rem !important;
+    }
+
+    /* Reordenar: Stats arriba de la Tabla */
+    .main-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .column-stats {
+        order: -1; /* Empuja las stats al principio */
+        margin-bottom: 20px;
+    }
+    
+    .column-table {
+        order: 1;
+    }
+
+    /* Hacer la tabla de padres responsive */
+    .public-table-card {
+        padding: 15px !important;
+    }
+    
+    .public-table-card .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .public-table-card table {
+        min-width: 500px; /* Evita que se amontone */
+    }
+
+    /* Textos generales de tarjetas */
+    .card h2, .card h3 {
+        font-size: 1.2rem !important;
+    }
 }

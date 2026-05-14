@@ -76,33 +76,43 @@
         }
     </script>
 
-    <main class="container">
-        <!-- SECCIÓN SUPERIOR: CONTROL TOTAL -->
+    <!-- Botón Menú Hamburguesa (Solo Móvil) -->
+    <button id="mobile-menu-btn" class="mobile-only-btn" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i> Herramientas de Gestión
+    </button>
+
+    <main class="admin-layout container">
         <div class="admin-dashboard-wrapper">
-            <!-- Izquierda: Tabla de Pagos (Ahora más ancha y centrada) -->
+            <!-- Izquierda: Tabla Principal -->
             <div class="card admin-main-card">
                 <div class="admin-card-title">
-                    <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
+                    <h2><i class="fas fa-users"></i> Control Centro de Padres</h2>
+                    <span class="badge">Año 2026</span>
                 </div>
                 <div class="table-responsive">
-                    <table id="students-table" style="width: 100%;">
+                    <table id="students-table">
                         <thead>
                             <tr>
-                                <th>Nombre Alumno</th>
-                                <th>Centro</th>
+                                <th>Alumno</th>
+                                <th>Cuota Centro</th>
                                 <th>Mensual</th>
                                 <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Generado por JS -->
+                            <!-- Se carga dinámicamente -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Derecha: Acciones Rápidas (Gastos y Requerimientos) -->
-            <div class="admin-quick-actions">
+            <!-- Derecha: Acciones Rápidas (Ahora dentro del Menú en Móvil) -->
+            <div class="admin-sidebar-mobile" id="admin-sidebar">
+                <div class="sidebar-header mobile-only">
+                    <h3>Herramientas</h3>
+                    <button onclick="toggleMobileMenu()" class="close-menu">&times;</button>
+                </div>
+                <div class="admin-quick-actions">
                 <div class="card action-card">
                     <h3><i class="fas fa-cart-plus"></i> Registrar Gasto</h3>
                     <form id="expense-form">
@@ -137,22 +147,23 @@
                     </form>
                 </div>
 
-                <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
-                <div class="card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
-                    <div class="admin-card-title">
-                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
-                        <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
-                    </div>
-                    <div id="users-list-container" style="margin-top: 10px;">
-                        <!-- Lista de usuarios -->
+                    <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
+                    <div class="card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
+                        <div class="admin-card-title">
+                            <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
+                            <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
+                        </div>
+                        <div id="users-list-container" style="margin-top: 10px;">
+                            <!-- Lista de usuarios -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN INFERIOR: CONTENIDO Y EVENTOS -->
-        <div class="admin-grid-bottom">
-            <div class="card">
+        <!-- SECCIÓN INFERIOR: Solo visible en Escritorio o se mueve al menú en móvil -->
+        <div class="admin-grid-bottom" id="admin-bottom-tools">
+            <div class="card tool-card">
                 <h3><i class="fas fa-images"></i> 📸 Galería</h3>
                 <form id="gallery-form">
                     <div class="form-group">
@@ -163,7 +174,7 @@
                 </form>
             </div>
 
-            <div class="card" id="event-creation-section">
+            <div class="card tool-card" id="event-creation-section">
                 <h3><i class="fas fa-star"></i> ✨ Evento</h3>
                 <form id="event-form">
                     <div class="form-group">
@@ -174,8 +185,7 @@
                 </form>
             </div>
 
-            <!-- NUEVA SECCIÓN: COMUNICADOS A PADRES -->
-            <div class="card">
+            <div class="card tool-card">
                 <h3><i class="fas fa-bullhorn"></i> Rincón Directiva</h3>
                 <form id="announcement-form">
                     <div class="form-group">
@@ -306,6 +316,38 @@
 
     <script src="app.js"></script>
     <script>
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('admin-sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('active');
+            }
+        }
+
+        // Función para mover las herramientas según el tamaño de pantalla
+        function adjustLayout() {
+            const isMobile = window.innerWidth <= 900;
+            const bottomTools = document.getElementById('admin-bottom-tools');
+            const sidebarActions = document.querySelector('.admin-quick-actions');
+            const toolCards = document.querySelectorAll('.tool-card');
+
+            toolCards.forEach(card => {
+                if (isMobile) {
+                    // Mover al sidebar si es móvil
+                    if (card.parentElement !== sidebarActions) {
+                        sidebarActions.appendChild(card);
+                    }
+                } else {
+                    // Devolver a la grilla inferior si es escritorio
+                    if (card.parentElement !== bottomTools) {
+                        bottomTools.appendChild(card);
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustLayout);
+        window.addEventListener('load', adjustLayout);
+
         // Lógica específica de la página de admin
         if (typeof renderAdminStudents === 'function') {
             renderAdminStudents();
