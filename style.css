@@ -717,92 +717,54 @@ input:focus, textarea:focus {
     display: grid;
     grid-template-columns: 1.5fr 1fr; /* Tabla ancha | Herramientas rápidas */
     gap: 25px;
-/* --- Estructura Administrativa (Escritorio) --- */
-.admin-dashboard-wrapper {
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* Tabla ancha | Acciones */
-    gap: 25px;
-    margin-bottom: 25px;
-}
-
-.admin-grid-bottom {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 bloques abajo */
-    gap: 25px;
-}
-
-.admin-main-card {
-    grid-column: span 1;
-}
-
-.admin-quick-actions {
+/* --- Mejoras de Header y Navegación --- */
+.header-content {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
 }
 
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
+.header-left h1 {
+    font-size: 1.5rem;
+    margin: 0;
 }
 
-/* --- Ajustes para Móvil (Solo pantallas pequeñas) --- */
-@media (max-width: 900px) {
-    .admin-dashboard-wrapper, .admin-grid-bottom {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .admin-main-card {
-        margin-bottom: 20px;
-    }
+.header-left p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0;
 }
 
-/* --- Estilos de las Tarjetas (Cards) --- */
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border-bottom: 5px solid transparent;
-}
-
-/* Estilos de las tablas admin */
-#students-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#students-table th {
-    text-align: left;
-    padding: 12px;
-    background: #f8fafc;
-    color: var(--p-text-light);
-    font-size: 0.85rem;
-}
-
-#students-table td {
-    padding: 12px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-/* --- Mejoras de Mobile Admin --- */
 .mobile-only-btn {
     display: none;
-    position: fixed;
-    bottom: 30px;
-    right: 25px;
-    z-index: 2100;
-    width: 60px;
-    height: 60px;
-    background: var(--p-blue);
-    color: white;
+    background: none;
     border: none;
-    border-radius: 50%;
-    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
+    color: white;
+    font-size: 1.6rem;
     cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+@media (max-width: 900px) {
+    .mobile-only-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+
+    .header-left h1 {
+        font-size: 1.2rem;
+    }
+    
+    .header-left p {
+        font-size: 0.8rem;
+    }
 }
 
 /* Fondo oscuro cuando el menú está abierto */
