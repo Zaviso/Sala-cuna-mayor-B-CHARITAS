@@ -64,54 +64,91 @@ let state = {
     students: initialStudents.map(s => ({ ...s, proofCentro: null, proofMonthly: null })),
     expenses: [],
     requests: [],
-    admins: [{ name: "Mamá Encargada (Tú)", role: "Principal" }],
+    events: [],
+    gallery: [],
+    announcements: [], // Nuevo: Comunicados de la directiva
+    users: [],
     balance: 0
 };
 
 // --- Sync Logic with Firebase ---
 function saveState() {
-    // Guardamos en la nube
-    db.ref('jardin_state').set(state);
+    db.ref('jardin_state').set(state).then(() => {
+        console.log("Datos sincronizados");
+    }).catch(err => console.error("Error al sincronizar:", err));
 }
 
-// Escuchar cambios en tiempo real
 db.ref('jardin_state').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        state = data;
-        render(); // Re-renderizar automáticamente cuando alguien cambie algo
+        state = { ...state, ...data };
+        render(); 
+        checkPermissions(); // Verificar qué puede ver el usuario actual
     } else {
-        // Si la base de datos está vacía, la inicializamos por primera vez
         saveState();
     }
 });
 
-// --- Navigation Logic ---
+// --- Security & Permissions Logic ---
+function checkPermissions() {
+    const userDataStr = sessionStorage.getItem('userData');
+    if (!userDataStr) return;
+    const user = JSON.parse(userDataStr);
 
-// --- Navigation Logic ---
-const btnAdmin = document.getElementById('btn-admin-access');
-if (btnAdmin) {
-    btnAdmin.addEventListener('click', () => {
-        window.location.href = 'admin.html';
-    });
+    // 1. Mostrar Gestión de Equipo solo a la Dueña (Owner)
+    const userMgmt = document.getElementById('user-management-section');
+    if (userMgmt) {
+        userMgmt.style.display = (user.role === 'Owner') ? 'block' : 'none';
+    }
+
+    // 2. Si es Owner o tiene Acceso Total, no ocultamos nada
+    if (user.role === 'Owner' || user.permissions?.full) return;
+
+    // 3. Ocultar secciones según permisos individuales
+    const perms = user.permissions || {};
+    
+    // Secciones de creación (Formularios)
+    if (document.querySelector('.admin-main-card')) 
+        document.querySelector('.admin-main-card').style.display = perms.payments ? 'block' : 'none';
+    
+    const actionCards = document.querySelectorAll('.action-card');
+    if (actionCards[0]) actionCards[0].style.display = perms.expenses ? 'block' : 'none';
+    if (actionCards[1]) actionCards[1].style.display = perms.requests ? 'block' : 'none';
+    
+    const bottomCards = document.querySelectorAll('.admin-grid-bottom .card');
+    if (bottomCards[0]) bottomCards[0].style.display = perms.gallery ? 'block' : 'none';
+    if (bottomCards[2]) bottomCards[2].style.display = perms.events ? 'block' : 'none';
+
+    // Secciones de gestión de contenido (Abajo)
+    if (document.getElementById('manage-expenses-container')) 
+        document.getElementById('manage-expenses-container').style.display = perms.expenses ? 'block' : 'none';
+    if (document.getElementById('manage-requests-container')) 
+        document.getElementById('manage-requests-container').style.display = perms.requests ? 'block' : 'none';
+    if (document.getElementById('manage-events-container')) 
+        document.getElementById('manage-events-container').style.display = perms.events ? 'block' : 'none';
+    if (document.getElementById('manage-moments-container')) 
+        document.getElementById('manage-moments-container').style.display = perms.gallery ? 'block' : 'none';
 }
 
 // --- Rendering Functions ---
 function render() {
-    console.log("Rendering view...");
     if (document.getElementById('current-balance')) renderBalance();
     if (document.getElementById('expenses-gallery')) renderExpenses();
     if (document.getElementById('requests-list')) renderRequests();
+    if (document.getElementById('events-list')) renderEvents();
+    if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
-    if (document.getElementById('admins-list')) renderAdminsList();
+    if (document.getElementById('users-list-container')) renderUsersList();
+    if (document.getElementById('announcements-container')) renderAnnouncements();
+    if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
 }
 
 function renderBalance() {
     const totalIncome = state.students.reduce((acc, s) => {
         return acc + (s.paidCentro ? 10000 : 0) + (s.paidMonthly ? 2000 : 0);
     }, 0);
-    const totalExpenses = state.expenses.reduce((acc, e) => acc + Number(e.amount), 0);
+    const totalExpenses = (state.expenses || []).reduce((acc, e) => acc + Number(e.amount), 0);
     state.balance = totalIncome - totalExpenses;
     document.getElementById('current-balance').textContent = `$${state.balance.toLocaleString('es-CL')}`;
 }
@@ -119,38 +156,155 @@ function renderBalance() {
 function renderExpenses() {
     const gallery = document.getElementById('expenses-gallery');
     if (!gallery) return;
-    if (state.expenses.length === 0) {
-        gallery.innerHTML = '<p class="empty-msg">No hay gastos registrados aún.</p>';
+    if (!state.expenses || state.expenses.length === 0) {
+        gallery.innerHTML = '<p class="empty-msg">No hay gastos registrados.</p>';
         return;
     }
     const isAdmin = !!document.getElementById('students-table');
-    gallery.innerHTML = state.expenses.map(exp => `
-        <div class="card">
-            <img src="${exp.image || 'https://via.placeholder.com/300x200?text=Comprobante'}" alt="Comprobante" style="width:100%; border-radius:10px; margin-bottom:10px;">
-            <h4>${exp.desc}</h4>
-            <p style="color: var(--p-red); font-weight: bold;">Monto: $${Number(exp.amount).toLocaleString('es-CL')}</p>
-            <p style="font-size: 0.8rem; color: var(--p-text-light);">Fecha: ${exp.date}</p>
-            ${isAdmin ? `<button class="btn" style="background:var(--p-red); color:white; margin-top:10px; padding: 5px 10px; font-size: 0.8rem;" onclick="deleteExpense(${exp.id})">Borrar</button>` : ''}
-        </div>
-    `).join('');
+    if (isAdmin) {
+        gallery.innerHTML = state.expenses.map(exp => `
+            <div class="admin-mini-card">
+                <img src="${exp.image || 'https://via.placeholder.com/100?text=S/I'}" class="admin-thumb">
+                <div class="admin-card-info">
+                    <p>${exp.desc}</p>
+                    <span>$${Number(exp.amount).toLocaleString('es-CL')} | ${exp.date}</span>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn-mini btn-mini-delete" onclick="deleteExpense(${exp.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        gallery.innerHTML = state.expenses.map(exp => `
+            <div class="card">
+                <img src="${exp.image || 'https://via.placeholder.com/300x200?text=Comprobante'}" style="width:100%; border-radius:10px; margin-bottom:10px;">
+                <h4>${exp.desc}</h4>
+                <p style="color: var(--p-red); font-weight: bold;">Monto: $${Number(exp.amount).toLocaleString('es-CL')}</p>
+            </div>
+        `).join('');
+    }
 }
 
 function renderRequests() {
     const list = document.getElementById('requests-list');
     if (!list) return;
-    if (state.requests.length === 0) {
-        list.innerHTML = '<p class="empty-msg">No hay solicitudes pendientes.</p>';
+    if (!state.requests || state.requests.length === 0) {
+        list.innerHTML = '<p class="empty-msg">No hay solicitudes.</p>';
         return;
     }
     const isAdmin = !!document.getElementById('students-table');
-    list.innerHTML = state.requests.map(req => `
-        <div class="card" style="border-top: 5px solid ${req.status === 'Donado' ? 'var(--p-green)' : 'var(--p-yellow)'}">
-            <h3>${req.item}</h3>
-            <p><strong>Estado:</strong> ${req.status}</p>
-            ${req.donor ? `<p><strong>Gracias a:</strong> ${req.donor}</p>` : ''}
-            <p style="font-size: 0.9rem; margin-top: 10px;">${req.note}</p>
-            ${isAdmin ? `<button class="btn" style="background:var(--p-red); color:white; margin-top:10px; padding: 5px 10px; font-size: 0.8rem;" onclick="deleteRequest(${req.id})">Borrar</button>` : ''}
-        </div>
+    if (isAdmin) {
+        list.innerHTML = state.requests.map(req => `
+            <div class="admin-mini-card">
+                <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background:var(--p-yellow);"><i class="fas fa-bullhorn" style="color:white;"></i></div>
+                <div class="admin-card-info"><p>${req.item}</p><span>${req.status}</span></div>
+                <div class="admin-actions">
+                    <button class="btn-mini btn-mini-delete" onclick="deleteRequest(${req.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        list.innerHTML = state.requests.map(req => `
+            <div class="card" style="border-top: 5px solid var(--p-yellow)">
+                <h3>${req.item}</h3>
+                <p>${req.note || ''}</p>
+            </div>
+        `).join('');
+    }
+}
+
+function renderEvents() {
+    const list = document.getElementById('events-list');
+    if (!list) return;
+    if (!state.events || state.events.length === 0) {
+        list.innerHTML = '<p class="empty-msg">No hay eventos.</p>';
+        return;
+    }
+    const isAdmin = !!document.getElementById('students-table');
+    if (isAdmin) {
+        list.innerHTML = state.events.map(ev => `
+            <div class="admin-mini-card">
+                <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background:var(--p-blue);"><i class="fas fa-calendar" style="color:white;"></i></div>
+                <div class="admin-card-info"><p>${ev.name}</p><span>${ev.date}</span></div>
+                <div class="admin-actions">
+                    <button class="btn-mini btn-mini-delete" onclick="deleteEvent(${ev.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        list.innerHTML = state.events.map(ev => `
+            <div class="card" style="border-left: 5px solid var(--p-blue);">
+                <h4>${ev.name}</h4>
+                <p style="color: var(--p-blue); font-weight:bold;">${ev.date}</p>
+            </div>
+        `).join('');
+    }
+}
+
+function renderMomentsGallery() {
+    const gal = document.getElementById('moments-gallery');
+    if (!gal) return;
+    if (!state.gallery || state.gallery.length === 0) {
+        gal.innerHTML = '<p class="empty-msg" style="grid-column: 1/-1;">Galería vacía.</p>';
+        return;
+    }
+    const isAdmin = !!document.getElementById('students-table');
+    if (isAdmin) {
+        gal.innerHTML = state.gallery.map(img => `
+            <div class="admin-moment-card">
+                <img src="${img.url}">
+                <button class="btn-mini btn-mini-delete" onclick="deletePhoto(${img.id})" style="width:100%"><i class="fas fa-trash"></i> Eliminar</button>
+            </div>
+        `).join('');
+    } else {
+        gal.innerHTML = state.gallery.map(img => `
+            <div class="gallery-item">
+                <div class="gallery-img-container">
+                    <img src="${img.url}" loading="lazy">
+                </div>
+                <div class="gallery-info"><p>${img.desc}</p></div>
+                <div class="gallery-actions">
+                    <a href="${img.url}" download="jardin_charitas_${img.id}.jpg" class="gallery-btn btn-download" title="Descargar esta foto en tu dispositivo">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button onclick="openPreview('${img.url}')" class="gallery-btn btn-view" title="Ver foto en pantalla completa">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+window.openPreview = (url) => {
+    const modal = document.getElementById('modal-preview');
+    const img = document.getElementById('preview-img');
+    if (modal && img) {
+        img.src = url;
+        modal.style.display = 'flex';
+    }
+};
+
+function renderAdminStudents() {
+    const tableBody = document.querySelector('#students-table tbody');
+    if (!tableBody) return;
+    tableBody.innerHTML = state.students.map(s => `
+        <tr>
+            <td>${s.name}</td>
+            <td>
+                <div class="proof-container-admin">
+                    <input type="checkbox" ${s.paidCentro ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidCentro')">
+                    ${s.proofCentro ? `<div class="thumb-wrapper"><img src="${s.proofCentro}" onclick="window.open('${s.proofCentro}')"><button class="btn-del-proof" onclick="deleteProof(${s.id}, 'proofCentro')">×</button></div>` : `<i class="fas fa-camera proof-btn" onclick="openProofModal(${s.id}, 'proofCentro')"></i>`}
+                </div>
+            </td>
+            <td>
+                <div class="proof-container-admin">
+                    <input type="checkbox" ${s.paidMonthly ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidMonthly')">
+                    ${s.proofMonthly ? `<div class="thumb-wrapper"><img src="${s.proofMonthly}" onclick="window.open('${s.proofMonthly}')"><button class="btn-del-proof" onclick="deleteProof(${s.id}, 'proofMonthly')">×</button></div>` : `<i class="fas fa-camera proof-btn" onclick="openProofModal(${s.id}, 'proofMonthly')"></i>`}
+                </div>
+            </td>
+            <td style="font-size:0.75rem;">${(s.proofCentro || s.proofMonthly) ? '<span style="color:var(--p-green)">OK</span>' : '...'}</td>
+        </tr>
     `).join('');
 }
 
@@ -160,192 +314,211 @@ function renderPublicPayments() {
     tableBody.innerHTML = state.students.map(s => `
         <tr>
             <td>${s.name}</td>
-            <td>
-                <span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">
-                    ${s.paidCentro ? 'PAGADO' : 'PENDIENTE'}
-                </span>
-            </td>
-            <td>
-                <span class="status-badge ${s.paidMonthly ? 'status-paid' : 'status-pending'}">
-                    ${s.paidMonthly ? 'PAGADO' : 'PENDIENTE'}
-                </span>
-            </td>
+            <td><span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">${s.paidCentro ? 'PAGADO' : 'PEND.'}</span></td>
+            <td><span class="status-badge ${s.paidMonthly ? 'status-paid' : 'status-pending'}">${s.paidMonthly ? 'PAGADO' : 'PEND.'}</span></td>
         </tr>
     `).join('');
 }
 
-let currentProofTarget = null;
+// --- Action Functions ---
+window.togglePayment = (id, field) => {
+    const s = state.students.find(x => x.id === id);
+    if (s) { s[field] = !s[field]; saveState(); }
+};
 
-function renderAdminStudents() {
-    const tableBody = document.querySelector('#students-table tbody');
-    if (!tableBody) return;
-    console.log("Rendering admin students table...");
-    tableBody.innerHTML = state.students.map(s => `
-        <tr>
-            <td>${s.name}</td>
-            <td>
-                <div style="display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" ${s.paidCentro ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidCentro')">
-                    <i class="fas fa-camera proof-btn ${s.proofCentro ? 'uploaded' : ''}" onclick="openProofModal(${s.id}, 'proofCentro')" title="Subir comprobante"></i>
-                </div>
-            </td>
-            <td>
-                <div style="display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" ${s.paidMonthly ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidMonthly')">
-                    <i class="fas fa-camera proof-btn ${s.proofMonthly ? 'uploaded' : ''}" onclick="openProofModal(${s.id}, 'proofMonthly')" title="Subir comprobante"></i>
-                </div>
-            </td>
-            <td style="font-size: 0.7rem; color: var(--p-text-light);">
-                ${(s.proofCentro || s.proofMonthly) ? '✅ Archivos listos' : 'Pendiente'}
-            </td>
-        </tr>
-    `).join('');
-}
-
-function renderAdminsList() {
-    const list = document.getElementById('admins-list');
-    if (!list) return;
-    list.innerHTML = state.admins.map(adm => `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border-radius: 10px; margin-bottom: 10px;">
-            <span>${adm.name}</span>
-            <span class="btn" style="padding: 2px 8px; font-size: 0.7rem; background: ${adm.role === 'Principal' ? 'var(--p-blue)' : 'var(--p-green)'}; color: white;">${adm.role}</span>
-        </div>
-    `).join('');
-}
+window.deleteExpense = (id) => { if (confirm("¿Borrar gasto?")) { state.expenses = state.expenses.filter(e => e.id !== id); saveState(); } };
+window.deleteRequest = (id) => { if (confirm("¿Borrar requerimiento?")) { state.requests = state.requests.filter(r => r.id !== id); saveState(); } };
+window.deleteEvent = (id) => { if (confirm("¿Borrar evento?")) { state.events = state.events.filter(ev => ev.id !== id); saveState(); } };
+window.deletePhoto = (id) => { if (confirm("¿Borrar foto?")) { state.gallery = state.gallery.filter(g => g.id !== id); saveState(); } };
+window.deleteProof = (id, type) => { if (confirm("¿Borrar comprobante?")) { state.students.find(s => s.id === id)[type] = null; saveState(); } };
 
 window.openProofModal = (id, type) => {
     currentProofTarget = { id, type };
-    const student = state.students.find(s => s.id === id);
-    document.getElementById('proof-target-name').textContent = `${student.name} - ${type === 'proofCentro' ? 'Cuota Centro' : 'Mensual'}`;
     document.getElementById('modal-proof').style.display = 'flex';
 };
 
 document.getElementById('save-proof-btn')?.addEventListener('click', () => {
-    const fileInput = document.getElementById('student-proof-file');
-    
-    if (!fileInput.files[0]) {
-        alert("Por favor, selecciona un archivo primero.");
-        return;
-    }
-    
-    if (!currentProofTarget) {
-        alert("Error: No se ha seleccionado un alumno válido. Cierra el modal e intenta de nuevo.");
-        return;
-    }
-
-    compressImage(fileInput.files[0], (compressedBase64) => {
-        try {
-            const student = state.students.find(s => s.id === currentProofTarget.id);
-            if (!student) throw new Error("Alumno no encontrado");
-
-            student[currentProofTarget.type] = compressedBase64;
-            
-            // Marcar como pagado automáticamente
-            const paymentField = currentProofTarget.type === 'proofCentro' ? 'paidCentro' : 'paidMonthly';
-            student[paymentField] = true;
-            
+    const file = document.getElementById('student-proof-file').files[0];
+    if (file) {
+        compressImage(file, (base64) => {
+            const s = state.students.find(x => x.id === currentProofTarget.id);
+            s[currentProofTarget.type] = base64;
+            s[currentProofTarget.type === 'proofCentro' ? 'paidCentro' : 'paidMonthly'] = true;
             saveState();
-            
             document.getElementById('modal-proof').style.display = 'none';
-            fileInput.value = '';
-            alert("¡Comprobante guardado y optimizado con éxito!");
-        } catch (err) {
-            console.error(err);
-            alert("Error al guardar: " + err.message);
-        }
-    });
-});
-
-// --- Action Functions ---
-window.togglePayment = (id, field) => {
-    const student = state.students.find(s => s.id === id);
-    if (student) {
-        student[field] = !student[field];
-        saveState();
+        });
     }
-};
+});
 
 document.getElementById('expense-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('exp-desc').value;
     const amount = document.getElementById('exp-amount').value;
-    const fileInput = document.getElementById('exp-image');
-    
-    if (fileInput.files[0]) {
-        compressImage(fileInput.files[0], (compressedBase64) => {
-            const newExpense = {
-                id: Date.now(),
-                desc,
-                amount,
-                image: compressedBase64,
-                date: new Date().toLocaleDateString()
-            };
-            state.expenses.push(newExpense);
-            saveState();
-            e.target.reset();
-            alert("Gasto registrado y optimizado con éxito.");
-        });
-    } else {
-        const newExpense = {
-            id: Date.now(),
-            desc,
-            amount,
-            image: null,
-            date: new Date().toLocaleDateString()
-        };
-        state.expenses.push(newExpense);
-        saveState();
-        e.target.reset();
-        alert("Gasto registrado con éxito (sin imagen).");
-    }
+    const file = document.getElementById('exp-image').files[0];
+    const save = (img) => {
+        state.expenses.push({ id: Date.now(), desc, amount, image: img, date: new Date().toLocaleDateString() });
+        saveState(); e.target.reset();
+    };
+    if (file) compressImage(file, save); else save(null);
 });
 
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const item = document.getElementById('req-item').value;
-    const note = document.getElementById('req-note').value;
-    
-    const newRequest = {
-        id: Date.now(),
-        item,
-        note,
-        status: 'Pendiente',
-        donor: null
-    };
-    state.requests.push(newRequest);
-    saveState();
-    e.target.reset();
-    alert("Requerimiento publicado con éxito");
+    state.requests.push({ id: Date.now(), item: document.getElementById('req-item').value, note: document.getElementById('req-note').value, status: 'Pendiente' });
+    saveState(); e.target.reset();
 });
 
-window.deleteExpense = (id) => {
-    if (confirm("¿Seguro que deseas borrar este gasto?")) {
-        state.expenses = state.expenses.filter(e => e.id !== id);
+document.getElementById('event-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    state.events.push({ id: Date.now(), name: document.getElementById('event-name').value, date: document.getElementById('event-date').value });
+    saveState(); e.target.reset();
+});
+
+// --- Announcements Logic ---
+function renderAnnouncements() {
+    const container = document.getElementById('announcements-container');
+    if (!container) return;
+    if (!state.announcements || state.announcements.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No hay comunicados recientes.</p>';
+        return;
+    }
+    container.innerHTML = state.announcements.map(ann => `
+        <div class="card" style="border-left: 5px solid ${ann.type === 'Reclamo' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: white; padding: 20px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <span style="font-weight: 800; color: var(--p-text-light); font-size: 0.75rem;">${ann.type.toUpperCase()}</span>
+                <span style="color: #999; font-size: 0.75rem;">${ann.date}</span>
+            </div>
+            <p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-line;">${ann.text}</p>
+        </div>
+    `).join('');
+}
+
+function renderAnnouncementsAdmin() {
+    const list = document.getElementById('announcements-list');
+    if (!list) return;
+    if (!state.announcements || state.announcements.length === 0) {
+        list.innerHTML = '<p class="empty-msg">No hay comunicados activos.</p>';
+        return;
+    }
+    list.innerHTML = state.announcements.map((ann, index) => `
+        <div class="admin-mini-card">
+            <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background: ${ann.type === 'Reclamo' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'};">
+                <i class="fas fa-comment" style="color:white;"></i>
+            </div>
+            <div class="admin-card-info">
+                <p>${ann.text.substring(0, 30)}...</p>
+                <span>${ann.type} - ${ann.date}</span>
+            </div>
+            <div class="admin-actions">
+                <button class="btn-mini btn-mini-delete" onclick="deleteAnnouncement(${index})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+document.getElementById('announcement-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = document.getElementById('ann-text').value;
+    const type = document.getElementById('ann-type').value;
+    if (!state.announcements) state.announcements = [];
+    state.announcements.unshift({ id: Date.now(), text, type, date: new Date().toLocaleDateString() });
+    saveState(); e.target.reset();
+    alert("Comunicado publicado con éxito.");
+});
+
+window.deleteAnnouncement = (index) => {
+    if (confirm("¿Borrar este comunicado?")) {
+        state.announcements.splice(index, 1);
         saveState();
     }
 };
 
-window.deleteRequest = (id) => {
-    if (confirm("¿Seguro que deseas borrar este requerimiento?")) {
-        state.requests = state.requests.filter(r => r.id !== id);
-        saveState();
+document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const file = document.getElementById('photo-file').files[0];
+    if (file) compressImage(file, (url) => {
+        state.gallery.push({ id: Date.now(), desc: document.getElementById('photo-desc').value, url });
+        saveState(); e.target.reset();
+    });
+});
+// --- User Management Logic (SuperAdmin Only) ---
+function renderUsersList() {
+    const container = document.getElementById('users-list-container');
+    if (!container) return;
+    if (!state.users || state.users.length === 0) {
+        container.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center;">No hay colaboradores invitados.</p>';
+        return;
     }
+    container.innerHTML = state.users.map((u, index) => `
+        <div class="admin-mini-card" style="margin-bottom:10px;">
+            <div class="admin-card-info">
+                <p>${u.realname} (@${u.username})</p>
+                <span>${u.permissions?.full ? 'Acceso Total' : 'Acceso Limitado'}</span>
+            </div>
+            <div class="admin-actions">
+                <button class="btn-mini btn-mini-delete" onclick="deleteUserAccount(${index})" title="Eliminar Acceso">
+                    <i class="fas fa-user-times"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.openUserModal = () => document.getElementById('modal-user').style.display = 'flex';
+window.closeUserModal = () => {
+    document.getElementById('modal-user').style.display = 'none';
+    document.getElementById('user-form').reset();
 };
 
-window.logout = () => {
-    sessionStorage.removeItem('isAdmin');
-    window.location.href = 'index.html';
-};
+document.getElementById('user-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newUser = {
+        realname: document.getElementById('new-user-realname').value,
+        username: document.getElementById('new-username').value.toLowerCase().trim(),
+        password: document.getElementById('new-password').value,
+        role: 'Collaborator',
+        permissions: {
+            payments: document.getElementById('p-payments').checked,
+            expenses: document.getElementById('p-expenses').checked,
+            requests: document.getElementById('p-requests').checked,
+            gallery: document.getElementById('p-gallery').checked,
+            events: document.getElementById('p-events').checked,
+            full: document.getElementById('p-full').checked
+        }
+    };
 
-window.addCoAdmin = () => {
-    const name = prompt("Nombre del nuevo administrador:");
-    if (name) {
-        state.admins.push({ name, role: "Co-Admin" });
+    if (!state.users) state.users = [];
+    state.users.push(newUser);
+    saveState();
+    closeUserModal();
+    alert("¡Acceso creado con éxito! Ya puedes entregarle el usuario y clave a la persona.");
+});
+
+window.deleteUserAccount = (index) => {
+    if (confirm("¿Seguro que deseas eliminar este acceso? La persona ya no podrá entrar.")) {
+        state.users.splice(index, 1);
         saveState();
-        alert("Administrador agregado con éxito.");
     }
 };
 
 // Initialize
-render();
-console.log("Portal initialized with", state.students.length, "students.");
+window.addEventListener('DOMContentLoaded', () => {
+    const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+    const isLoginPage = window.location.href.includes('login.html');
+    const isIndexPage = window.location.href.includes('index.html') || window.location.pathname.endsWith('/');
+
+    if (!isAdmin && !isLoginPage && !isIndexPage) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    render();
+    if (isAdmin) {
+        setTimeout(checkPermissions, 100); // Pequeño delay para asegurar que el DOM está listo
+    }
+});
+
+window.logout = () => {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+};

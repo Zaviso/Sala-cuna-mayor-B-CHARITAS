@@ -77,22 +77,21 @@
     </script>
 
     <main class="container">
-        <div class="dashboard-grid">
-            
-            <!-- 1. Gestión de Pagos (Alumnos) -->
-            <div class="card" style="grid-column: span 2;">
+        <!-- SECCIÓN SUPERIOR: CONTROL TOTAL -->
+        <div class="admin-dashboard-wrapper">
+            <!-- Izquierda: Tabla de Pagos (Ahora más ancha y centrada) -->
+            <div class="card admin-main-card">
                 <div class="admin-card-title">
-                    <h3><i class="fas fa-users"></i> Control de Pagos y Comprobantes</h3>
-                    <span style="font-size: 0.9rem; color: var(--p-text-light);">Haz clic en el icono de cámara para subir comprobante</span>
+                    <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
                 </div>
-                <div class="table-container">
-                    <table id="students-table">
+                <div class="table-responsive">
+                    <table id="students-table" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th>Nombre Alumno</th>
-                                <th>Cuota Centro</th>
-                                <th>Mensual (Vol.)</th>
-                                <th>Comprobantes</th>
+                                <th>Centro</th>
+                                <th>Mensual</th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,55 +101,154 @@
                 </div>
             </div>
 
-            <!-- 2. Registro de Gastos -->
-            <div class="card">
-                <h3><i class="fas fa-cart-plus"></i> Registrar Gasto / Compra</h3>
-                <form id="expense-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-                    <div class="input-group">
-                        <label>Descripción</label>
-                        <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
-                    </div>
-                    <div class="input-group">
-                        <label>Monto $</label>
-                        <input type="number" id="exp-amount" placeholder="0" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
-                    </div>
-                    <div class="input-group">
-                        <label>Foto de Boleta/Ticket</label>
-                        <input type="file" id="exp-image" accept="image/*" class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Gasto</button>
-                </form>
-            </div>
-
-            <!-- 3. Gestión de Requerimientos -->
-            <div class="card">
-                <h3><i class="fas fa-bullhorn"></i> Requerimiento de Tías</h3>
-                <form id="request-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-                    <div class="input-group">
-                        <label>¿Qué se necesita?</label>
-                        <input type="text" id="req-item" placeholder="Ej: Resmas de papel, Temperas" required class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left;">
-                    </div>
-                    <div class="input-group">
-                        <label>Nota / Detalle</label>
-                        <textarea id="req-note" placeholder="Más detalles..." class="btn" style="width: 100%; border: 1px solid #ddd; background: white; text-align: left; height: 80px;"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
-                </form>
-            </div>
-
-            <!-- 4. Gestión de Co-Administradores -->
-            <div class="card">
-                <div class="admin-card-title">
-                    <h2>Gestión de Administradores</h2>
-                    <button class="btn" style="background: var(--p-green); color: white;" onclick="addCoAdmin()">+ Invitar Mamá/Papá</button>
+            <!-- Derecha: Acciones Rápidas (Gastos y Requerimientos) -->
+            <div class="admin-quick-actions">
+                <div class="card action-card">
+                    <h3><i class="fas fa-cart-plus"></i> Registrar Gasto</h3>
+                    <form id="expense-form">
+                        <div class="form-group">
+                            <label>¿En qué se gastó?</label>
+                            <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto ($)</label>
+                            <input type="number" id="exp-amount" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Foto de Boleta</label>
+                            <input type="file" id="exp-image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Gasto</button>
+                    </form>
                 </div>
-                <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--p-text-light);">Personas autorizadas para gestionar el portal.</p>
-                <div id="admins-list">
-                    <!-- Generado por JS -->
+
+                <div class="card action-card">
+                    <h3><i class="fas fa-bullhorn"></i> Requerimiento de las Tías</h3>
+                    <form id="request-form">
+                        <div class="form-group">
+                            <label>Artículo necesario</label>
+                            <input type="text" id="req-item" placeholder="Ej: Resmas de papel" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nota / Detalle</label>
+                            <textarea id="req-note" placeholder="Más detalles..." style="height: 60px;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
+                    </form>
+                </div>
+
+                <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
+                <div class="card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
+                    <div class="admin-card-title">
+                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
+                        <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
+                    </div>
+                    <div id="users-list-container" style="margin-top: 10px;">
+                        <!-- Lista de usuarios -->
+                    </div>
                 </div>
             </div>
-
         </div>
+
+        <!-- SECCIÓN INFERIOR: CONTENIDO Y EVENTOS -->
+        <div class="admin-grid-bottom">
+            <div class="card">
+                <h3><i class="fas fa-images"></i> 📸 Galería</h3>
+                <form id="gallery-form">
+                    <div class="form-group">
+                        <input type="text" id="photo-desc" placeholder="Título del momento" required>
+                        <input type="file" id="photo-file" accept="image/*" required style="margin-top:10px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Foto</button>
+                </form>
+            </div>
+
+            <div class="card" id="event-creation-section">
+                <h3><i class="fas fa-star"></i> ✨ Evento</h3>
+                <form id="event-form">
+                    <div class="form-group">
+                        <input type="text" id="event-name" placeholder="Nombre del evento" required>
+                        <input type="date" id="event-date" required style="margin-top:10px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Programar</button>
+                </form>
+            </div>
+
+            <!-- NUEVA SECCIÓN: COMUNICADOS A PADRES -->
+            <div class="card">
+                <h3><i class="fas fa-bullhorn"></i> Rincón Directiva</h3>
+                <form id="announcement-form">
+                    <div class="form-group">
+                        <select id="ann-type" style="margin-bottom: 10px;">
+                            <option value="Aviso">📢 Aviso Importante</option>
+                            <option value="Consejo">💡 Consejo / Tip</option>
+                            <option value="Reclamo">⚠️ Nota / Reclamo</option>
+                        </select>
+                        <textarea id="ann-text" placeholder="Palabras para los papás..." required style="height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Publicar</button>
+                </form>
+            </div>
+        </div>
+
+    <!-- Modal para Crear/Editar Usuario y Permisos -->
+    <div id="modal-user" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+        <div class="card" style="max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <h3 id="user-modal-title">Crear Nuevo Acceso</h3>
+            <form id="user-form" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label>Nombre de la Persona</label>
+                    <input type="text" id="new-user-realname" placeholder="Ej: Tía María" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" id="new-username" placeholder="ej: maria2026" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="new-password" placeholder="Clave privada" required>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #eef2f6;">
+                    <label style="font-weight: 800; display: block; margin-bottom: 15px; color: var(--p-blue); font-size: 1rem;">
+                        <i class="fas fa-check-square"></i> Permisos de Acceso:
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-payments" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>Gestionar Pagos</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-expenses" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>Registrar Gastos</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-requests" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>Requerimientos Tías</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-gallery" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>Galería de Fotos</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-events" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>Programar Eventos</span>
+                        </label>
+                        <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; color: var(--p-red);">
+                            <input type="checkbox" id="p-full" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <span>ACCESO TOTAL</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;">GUARDAR</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()" style="flex: 1; padding: 12px;">CERRAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
         <div style="margin-top: 40px; background: #fff; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
             <h2 style="margin-bottom: 20px;"><i class="fas fa-edit"></i> Gestionar Contenido Publicado</h2>
@@ -161,7 +259,19 @@
                 </div>
                 <div>
                     <h3 style="margin-bottom: 15px; color: var(--p-red);">Requerimientos Activos</h3>
-                    <div id="requests-list" style="display: grid; gap: 15px;"></div>
+                    <div id="requests-list" class="feed-container" style="display: grid; gap: 15px;"></div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Eventos Programados</h3>
+                    <div id="events-list" class="feed-container" style="display: grid; gap: 15px;"></div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--p-green);">Galería (Momentos)</h3>
+                    <div id="moments-gallery" class="feed-container" style="display: grid; gap: 15px;"></div>
+                </div>
+                <div id="manage-announcements-container">
+                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Comunicados Activos</h3>
+                    <div id="announcements-list" class="feed-container" style="display: grid; gap: 15px;"></div>
                 </div>
             </div>
         </div>
@@ -190,8 +300,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <div class="watermark">
-        <i class="fas fa-rocket"></i>
-        Hecho por <span class="z-brand">Zaviso</span>
+        <img src="zaviso-brand-mark.jpg" alt="Logo Zaviso" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+        Hecho por <span class="z-brand" style="margin-left: 5px;">Zaviso</span>
     </div>
 
     <script src="app.js"></script>
