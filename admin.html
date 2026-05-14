@@ -76,18 +76,13 @@
         }
     </script>
 
-    <!-- Botón Menú Hamburguesa (Solo Móvil) -->
-    <button id="mobile-menu-btn" class="mobile-only-btn" onclick="toggleMobileMenu()">
-        <i class="fas fa-bars"></i> Herramientas de Gestión
-    </button>
-
-    <main class="admin-layout container">
+    <main class="container">
+        <!-- SECCIÓN SUPERIOR: CONTROL TOTAL -->
         <div class="admin-dashboard-wrapper">
-            <!-- Izquierda: Tabla Principal -->
+            <!-- Izquierda: Tabla de Pagos -->
             <div class="card admin-main-card">
                 <div class="admin-card-title">
-                    <h2><i class="fas fa-users"></i> Control Centro de Padres</h2>
-                    <span class="badge">Año 2026</span>
+                    <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
                 </div>
                 <div class="table-responsive">
                     <table id="students-table">
@@ -100,77 +95,61 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Se carga dinámicamente -->
+                            <!-- Generado por JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Derecha: Acciones Rápidas (Ahora dentro del Menú en Móvil) -->
-            <div class="admin-sidebar-mobile" id="admin-sidebar">
-                <div class="sidebar-header mobile-only">
-                    <h3>Herramientas</h3>
-                    <button onclick="toggleMobileMenu()" class="close-menu">&times;</button>
-                </div>
-                <div class="admin-quick-actions">
+            <!-- Derecha: Acciones Rápidas -->
+            <div class="admin-quick-actions">
                 <div class="card action-card">
                     <h3><i class="fas fa-cart-plus"></i> Registrar Gasto</h3>
                     <form id="expense-form">
                         <div class="form-group">
-                            <label>¿En qué se gastó?</label>
-                            <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Monto ($)</label>
-                            <input type="number" id="exp-amount" placeholder="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Foto de Boleta</label>
-                            <input type="file" id="exp-image" accept="image/*">
+                            <input type="text" id="expense-desc" placeholder="¿En qué se gastó?" required>
+                            <input type="number" id="expense-amount" placeholder="Monto $" required style="margin-top:10px;">
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Gasto</button>
                     </form>
                 </div>
 
                 <div class="card action-card">
-                    <h3><i class="fas fa-bullhorn"></i> Requerimiento de las Tías</h3>
+                    <h3><i class="fas fa-clipboard-list"></i> Requerimiento Tías</h3>
                     <form id="request-form">
                         <div class="form-group">
-                            <label>Artículo necesario</label>
                             <input type="text" id="req-item" placeholder="Ej: Resmas de papel" required>
                         </div>
                         <div class="form-group">
-                            <label>Nota / Detalle</label>
                             <textarea id="req-note" placeholder="Más detalles..." style="height: 60px;"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar</button>
                     </form>
                 </div>
 
-                    <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
-                    <div class="card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
-                        <div class="admin-card-title">
-                            <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
-                            <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
-                        </div>
-                        <div id="users-list-container" style="margin-top: 10px;">
-                            <!-- Lista de usuarios -->
-                        </div>
+                <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
+                <div class="card action-card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
+                    <div class="admin-card-title">
+                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Equipo</h3>
+                        <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
+                    </div>
+                    <div id="users-list-container" style="margin-top: 10px;">
+                        <!-- Lista de usuarios -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN INFERIOR: Solo visible en Escritorio o se mueve al menú en móvil -->
+        <!-- SECCIÓN INFERIOR: CONTENIDO Y EVENTOS -->
         <div class="admin-grid-bottom" id="admin-bottom-tools">
             <div class="card tool-card">
                 <h3><i class="fas fa-images"></i> 📸 Galería</h3>
                 <form id="gallery-form">
                     <div class="form-group">
-                        <input type="text" id="photo-desc" placeholder="Título del momento" required>
+                        <input type="text" id="photo-desc" placeholder="Título" required>
                         <input type="file" id="photo-file" accept="image/*" required style="margin-top:10px;">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Foto</button>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir</button>
                 </form>
             </div>
 
@@ -178,7 +157,7 @@
                 <h3><i class="fas fa-star"></i> ✨ Evento</h3>
                 <form id="event-form">
                     <div class="form-group">
-                        <input type="text" id="event-name" placeholder="Nombre del evento" required>
+                        <input type="text" id="event-name" placeholder="Evento" required>
                         <input type="date" id="event-date" required style="margin-top:10px;">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Programar</button>
@@ -190,11 +169,11 @@
                 <form id="announcement-form">
                     <div class="form-group">
                         <select id="ann-type" style="margin-bottom: 10px;">
-                            <option value="Aviso">📢 Aviso Importante</option>
-                            <option value="Consejo">💡 Consejo / Tip</option>
-                            <option value="Reclamo">⚠️ Nota / Reclamo</option>
+                            <option value="Aviso">📢 Aviso</option>
+                            <option value="Consejo">💡 Consejo</option>
+                            <option value="Reclamo">⚠️ Nota</option>
                         </select>
-                        <textarea id="ann-text" placeholder="Palabras para los papás..." required style="height: 80px;"></textarea>
+                        <textarea id="ann-text" placeholder="Palabras..." required style="height: 60px;"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Publicar</button>
                 </form>
@@ -315,11 +294,40 @@
     </div>
 
     <script src="app.js"></script>
+    <!-- Fondo para el menú móvil -->
+    <div id="menu-backdrop" class="menu-backdrop" onclick="toggleMobileMenu()"></div>
+
     <script>
         function toggleMobileMenu() {
             const sidebar = document.getElementById('admin-sidebar');
-            if (sidebar) {
+            const backdrop = document.getElementById('menu-backdrop');
+            if (sidebar && backdrop) {
                 sidebar.classList.toggle('active');
+                backdrop.classList.toggle('active');
+            }
+        }
+
+        // --- Lógica de Swipe (Deslizar para cerrar) ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        const sidebar = document.getElementById('admin-sidebar');
+        
+        sidebar.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        sidebar.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            // Si el deslizamiento es de izquierda a derecha (más de 100px)
+            if (touchEndX - touchStartX > 100) {
+                if (sidebar.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
             }
         }
 
@@ -329,20 +337,29 @@
             const bottomTools = document.getElementById('admin-bottom-tools');
             const sidebarActions = document.querySelector('.admin-quick-actions');
             const toolCards = document.querySelectorAll('.tool-card');
+            const teamSection = document.getElementById('user-management-section');
 
             toolCards.forEach(card => {
                 if (isMobile) {
-                    // Mover al sidebar si es móvil
                     if (card.parentElement !== sidebarActions) {
                         sidebarActions.appendChild(card);
                     }
                 } else {
-                    // Devolver a la grilla inferior si es escritorio
                     if (card.parentElement !== bottomTools) {
                         bottomTools.appendChild(card);
                     }
                 }
             });
+
+            // Mover gestión de equipo al final solo en móvil
+            if (isMobile && teamSection) {
+                sidebarActions.appendChild(teamSection);
+            } else if (!isMobile && teamSection) {
+                // En escritorio lo devolvemos a su sitio (antes del primer tool-card si es necesario, 
+                // pero ya está estático en el HTML del sidebar)
+                const reqCard = document.querySelector('.action-card:last-child');
+                if (reqCard) reqCard.after(teamSection);
+            }
         }
 
         window.addEventListener('resize', adjustLayout);

@@ -717,78 +717,168 @@ input:focus, textarea:focus {
     display: grid;
     grid-template-columns: 1.5fr 1fr; /* Tabla ancha | Herramientas rápidas */
     gap: 25px;
+/* --- Estructura Administrativa (Escritorio) --- */
+.admin-dashboard-wrapper {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Tabla ancha | Acciones */
+    gap: 25px;
+    margin-bottom: 25px;
 }
 
 .admin-grid-bottom {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas abajo */
+    grid-template-columns: repeat(3, 1fr); /* 3 bloques abajo */
     gap: 25px;
+}
+
+.admin-main-card {
+    grid-column: span 1;
+}
+
+.admin-quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* --- Ajustes para Móvil (Solo pantallas pequeñas) --- */
+@media (max-width: 900px) {
+    .admin-dashboard-wrapper, .admin-grid-bottom {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .admin-main-card {
+        margin-bottom: 20px;
+    }
+}
+
+/* --- Estilos de las Tarjetas (Cards) --- */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-bottom: 5px solid transparent;
+}
+
+/* Estilos de las tablas admin */
+#students-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#students-table th {
+    text-align: left;
+    padding: 12px;
+    background: #f8fafc;
+    color: var(--p-text-light);
+    font-size: 0.85rem;
+}
+
+#students-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 /* --- Mejoras de Mobile Admin --- */
 .mobile-only-btn {
     display: none;
     position: fixed;
-    top: 20px;
-    right: 20px;
+    bottom: 30px;
+    right: 25px;
     z-index: 2100;
-    padding: 12px 20px;
+    width: 60px;
+    height: 60px;
     background: var(--p-blue);
     color: white;
     border: none;
-    border-radius: 30px;
-    font-weight: 700;
-    box-shadow: var(--shadow-lg);
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
     cursor: pointer;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    font-size: 1.5rem;
 }
 
-.table-responsive {
+/* Fondo oscuro cuando el menú está abierto */
+.menu-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 10px;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(3px);
+    z-index: 2400;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-#students-table {
-    min-width: 600px;
-    width: 100%;
+.menu-backdrop.active {
+    display: block;
+    opacity: 1;
 }
 
-@media (max-width: 900px) {
-    .mobile-only-btn { display: flex; }
-    
-    .admin-dashboard-wrapper {
-        grid-template-columns: 1fr;
-    }
+.admin-sidebar-mobile {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 85%; /* Casi toda la pantalla pero deja ver el fondo */
+    max-width: 350px;
+    height: 100vh;
+    background: white; /* Blanco puro para contraste */
+    z-index: 2500;
+    padding: 25px;
+    box-shadow: -15px 0 35px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    transform: translateX(105%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 30px 0 0 30px; /* Bordes redondeados elegantes */
+}
 
-    .admin-grid-bottom {
-        display: none; /* Se oculta de la vista normal para ir al menú */
-    }
-
-    .admin-sidebar-mobile {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 320px;
-        height: 100vh;
-        background: #f8fafc;
-        z-index: 2500;
-        padding: 20px;
-        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-        overflow-y: auto;
-        transform: translateX(100%);
-        transition: transform 0.4s ease;
-    }
-
-    .admin-sidebar-mobile.active {
-        transform: translateX(0);
-    }
+.admin-sidebar-mobile.active {
+    transform: translateX(0);
 }
 
 .sidebar-header {
-    display: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.sidebar-header h3 {
+    color: var(--p-blue);
+    font-weight: 800;
+    font-size: 1.4rem;
+}
+
+.close-menu {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.close-menu:hover {
+    background: #fee2e2;
+    color: #ef4444;
 }
 
 /* --- Ajustes Específicos para el Portal de Padres (Móvil) --- */
