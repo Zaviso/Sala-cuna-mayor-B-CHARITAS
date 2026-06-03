@@ -350,6 +350,10 @@ function renderAdminStudents() {
                 </button>
             </td>
             ${mesesBtn}
+            <td style="padding:6px 4px; text-align:center;">
+                <button onclick="removeStudent(${s.id})" title="Eliminar alumno"
+                    style="width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; background:#fee; color:var(--p-red); font-size:0.85rem; font-weight:700;">✕</button>
+            </td>
         </tr>`;
     }).join('');
 }
@@ -368,6 +372,24 @@ function renderPublicPayments() {
 
 const MESES_CURSO = ['Dic'];
 const MESES_MENSUAL = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+window.addStudent = () => {
+    const input = document.getElementById('new-student-name');
+    const name = input.value.trim();
+    if (!name) return;
+    const newId = Date.now();
+    state.students.push({ id: newId, name, paidCentro: false, paidMonthly: false, proofCentro: null, proofMonthly: null });
+    saveState();
+    input.value = '';
+    document.getElementById('add-student-form').style.display = 'none';
+};
+
+window.removeStudent = (id) => {
+    if (!confirm('¿Eliminar este alumno de la lista?')) return;
+    state.students = state.students.filter(s => s.id !== id);
+    if (state.monthlyHistory) delete state.monthlyHistory[id];
+    saveState();
+};
 
 window.toggleMonthlyPayment = (studentId, mes) => {
     if (!state.monthlyHistory) state.monthlyHistory = {};

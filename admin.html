@@ -93,6 +93,11 @@
             <div class="card admin-main-card">
                 <div class="admin-card-title">
                     <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
+                    <button class="btn btn-mini" onclick="document.getElementById('add-student-form').style.display = document.getElementById('add-student-form').style.display === 'none' ? 'flex' : 'none'" style="background:var(--p-green); color:white;">+ Alumno</button>
+                </div>
+                <div id="add-student-form" style="display:none; gap:10px; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
+                    <input type="text" id="new-student-name" placeholder="Nombre completo del alumno" style="flex:1; min-width:200px; padding:8px 12px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
+                    <button onclick="addStudent()" class="btn btn-mini" style="background:var(--p-green); color:white;">Agregar</button>
                 </div>
                 <div class="table-responsive" style="margin-top: 15px; overflow-x: auto;">
                     <table id="students-table" style="width: 100%; font-size: 0.82rem;">
@@ -100,6 +105,7 @@
                             <tr>
                                 <th style="white-space:nowrap;">Alumno</th>
                                 <th style="text-align:center;">Cuota Curso (Dic)</th>
+                                <th></th>
                                 <th style="text-align:center;">Mar</th>
                                 <th style="text-align:center;">Abr</th>
                                 <th style="text-align:center;">May</th>
