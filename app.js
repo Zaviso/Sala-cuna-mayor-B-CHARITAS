@@ -70,7 +70,8 @@ let state = {
     donations: [],
     reviews: [],
     users: [],
-    balance: 0
+    balance: 0,
+    paymentHistory: []
 };
 
 // --- Sync Logic with Firebase ---
@@ -145,6 +146,8 @@ function render() {
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('cuota-curso-table')) renderCuotaCurso();
     if (document.getElementById('cuota-mensual-table')) renderCuotaMensual();
+    if (document.getElementById('historial-curso-table')) renderHistorialCurso();
+    if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
     if (document.getElementById('announcements-container')) renderAnnouncements();
     if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
@@ -353,6 +356,50 @@ function renderPublicPayments() {
     `).join('');
 }
 
+const MESES_CURSO = ['Dic'];
+const MESES_MENSUAL = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function renderHistorialCurso() {
+    const tbody = document.getElementById('historial-curso-table');
+    if (!tbody) return;
+    tbody.innerHTML = state.students.map(s => `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px 8px;">${s.name}</td>
+            <td style="padding:10px 8px; text-align:center;">
+                <span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">${s.paidCentro ? 'PAGADO' : 'PENDIENTE'}</span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderHistorialMensual() {
+    const tbody = document.getElementById('historial-mensual-table');
+    if (!tbody) return;
+    if (!state.monthlyHistory) {
+        tbody.innerHTML = state.students.map(s => `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:10px 8px; white-space:nowrap;">${s.name}</td>
+                ${MESES_MENSUAL.map(() => `<td style="padding:10px 4px; text-align:center;">—</td>`).join('')}
+            </tr>
+        `).join('');
+        return;
+    }
+    tbody.innerHTML = state.students.map(s => {
+        const pagos = state.monthlyHistory[s.id] || {};
+        return `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:10px 8px; white-space:nowrap;">${s.name}</td>
+                ${MESES_MENSUAL.map(mes => {
+                    const paid = pagos[mes];
+                    return `<td style="padding:10px 4px; text-align:center;">
+                        <span style="display:inline-block; width:28px; height:28px; border-radius:50%; background:${paid ? 'var(--p-green)' : '#f1f5f9'}; color:${paid ? 'white' : '#aaa'}; font-size:0.7rem; line-height:28px; font-weight:700;">${paid ? '✓' : '—'}</span>
+                    </td>`;
+                }).join('')}
+            </tr>
+        `;
+    }).join('');
+}
+
 function renderCuotaCurso() {
     const tableBody = document.getElementById('cuota-curso-table');
     if (!tableBody) return;
@@ -382,7 +429,19 @@ function renderCuotaMensual() {
 // --- Action Functions ---
 window.togglePayment = (id, field) => {
     const s = state.students.find(x => x.id === id);
-    if (s) { s[field] = !s[field]; saveState(); }
+    if (!s) return;
+    s[field] = !s[field];
+    if (!state.paymentHistory) state.paymentHistory = [];
+    if (s[field]) {
+        state.paymentHistory.unshift({
+            id: Date.now(),
+            student: s.name,
+            type: field === 'paidCentro' ? 'Cuota Curso' : 'Cuota Mensual',
+            amount: field === 'paidCentro' ? 10000 : 2000,
+            date: new Date().toLocaleDateString('es-CL')
+        });
+    }
+    saveState();
 };
 
 window.deleteExpense = (id) => { if (confirm("¿Borrar gasto?")) { state.expenses = state.expenses.filter(e => e.id !== id); saveState(); } };
