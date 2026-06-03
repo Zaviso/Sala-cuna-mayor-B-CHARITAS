@@ -207,13 +207,10 @@ function renderExpenses() {
             const noImg = `<div style="height:140px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:#ccc;border:1px dashed #ddd;"><i class="fas fa-receipt fa-2x"></i></div>`;
             const fotos = imgs.length > 0
                 ? imgs.map(src => `
-                    <div class="gallery-img-container" style="margin-bottom:8px;">
+                    <div class="gallery-img-container" style="margin-bottom:8px; position:relative;">
                         <img src="${src}" loading="lazy" style="width:100%; height:160px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="openPreview('${src}')">
                     </div>
                     <div class="gallery-actions" style="margin-bottom:8px;">
-                        <a href="${src}" download="boleta_gasto.jpg" class="gallery-btn btn-download" title="Descargar boleta">
-                            <i class="fas fa-download"></i>
-                        </a>
                         <button onclick="openPreview('${src}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
                             <i class="fas fa-expand"></i>
                         </button>
