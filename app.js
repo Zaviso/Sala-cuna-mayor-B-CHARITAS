@@ -202,28 +202,59 @@ function renderExpenses() {
             </div>`;
         }).join('');
     } else {
-        gallery.innerHTML = state.expenses.map(exp => {
-            const imgs = exp.images || (exp.image ? [exp.image] : []);
-            const noImg = `<div style="height:140px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:#ccc;border:1px dashed #ddd;"><i class="fas fa-receipt fa-2x"></i></div>`;
-            const fotos = imgs.length > 0
-                ? imgs.map(src => `
-                    <div class="gallery-img-container" style="margin-bottom:8px; position:relative;">
-                        <img src="${src}" loading="lazy" style="width:100%; height:160px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="openPreview('${src}')">
+        // Agrupar por fecha
+        const byDate = {};
+        state.expenses.forEach(exp => {
+            const key = exp.date || 'Sin fecha';
+            if (!byDate[key]) byDate[key] = [];
+            byDate[key].push(exp);
+        });
+
+        // Ordenar fechas más recientes primero
+        const sortedDates = Object.keys(byDate).sort((a, b) => {
+            const parse = d => {
+                const parts = d.split('/');
+                if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
+                return new Date(0);
+            };
+            return parse(b) - parse(a);
+        });
+
+        gallery.innerHTML = `<div class="expense-timeline">` +
+        sortedDates.map(fecha => {
+            const exps = byDate[fecha];
+            const total = exps.reduce((s, e) => s + Number(e.amount), 0);
+            const items = exps.map(exp => {
+                const imgs = exp.images || (exp.image ? [exp.image] : []);
+                const foto = imgs.length > 0
+                    ? `<img src="${imgs[0]}" onclick="openPreview('${imgs[0]}')"
+                        loading="lazy"
+                        style="width:64px;height:64px;object-fit:cover;border-radius:10px;cursor:pointer;flex-shrink:0;">`
+                    : `<div style="width:64px;height:64px;background:#f1f5f9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-receipt" style="color:#ccc;font-size:1.3rem;"></i></div>`;
+                const masImgs = imgs.length > 1
+                    ? `<span style="font-size:0.75rem;color:var(--p-blue);cursor:pointer;" onclick="openPreview('${imgs[1]}')">(+${imgs.length - 1} foto${imgs.length > 2 ? 's' : ''})</span>`
+                    : '';
+                return `
+                <div class="expense-item">
+                    ${foto}
+                    <div class="expense-item-info">
+                        <p class="expense-item-desc">${exp.desc}</p>
+                        ${masImgs}
                     </div>
-                    <div class="gallery-actions" style="margin-bottom:8px;">
-                        <button onclick="openPreview('${src}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    </div>`).join('')
-                : noImg;
+                    <span class="expense-item-amount">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
+                </div>`;
+            }).join('');
+
             return `
-            <div class="card" style="padding:15px;">
-                ${fotos}
-                <h4 style="margin-bottom:4px;">${exp.desc}</h4>
-                <p style="color:var(--p-red); font-weight:bold;">$${Number(exp.amount).toLocaleString('es-CL')}</p>
-                <p style="color:#aaa; font-size:0.78rem;">${exp.date || ''}</p>
+            <div class="expense-day-block">
+                <div class="expense-day-header">
+                    <span class="expense-day-date"><i class="fas fa-calendar-day"></i> ${fecha}</span>
+                    <span class="expense-day-total">Total: $${total.toLocaleString('es-CL')}</span>
+                </div>
+                <div class="expense-day-items">${items}</div>
             </div>`;
-        }).join('');
+        }).join('') +
+        `</div>`;
     }
 }
 
