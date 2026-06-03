@@ -420,13 +420,15 @@ function renderAdminStudents() {
 
         return `
         <tr>
-            <td style="white-space:nowrap; padding:8px 6px; font-size:0.8rem;">${s.name}</td>
+            <td style="white-space:nowrap; padding:8px 6px; font-size:0.8rem;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button onclick="removeStudent(${s.id})" title="Eliminar alumno"
+                        style="width:22px; height:22px; border-radius:50%; border:none; cursor:pointer; background:#fee; color:var(--p-red); font-size:0.7rem; font-weight:700; flex-shrink:0;">✕</button>
+                    <span>${s.name}</span>
+                </div>
+            </td>
             ${mesesCursoBtn}
             ${mesesMensualBtn}
-            <td style="padding:6px 4px; text-align:center;">
-                <button onclick="removeStudent(${s.id})" title="Eliminar alumno"
-                    style="width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; background:#fee; color:var(--p-red); font-size:0.85rem; font-weight:700;">✕</button>
-            </td>
         </tr>`;
     }).join('');
     setTimeout(() => adminSwitchTab(activeTab), 0);
