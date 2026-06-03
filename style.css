@@ -1355,35 +1355,205 @@ img {
     height: auto;
 }
 
-/* --- Mobile Fixes --- */
-@media (max-width: 900px) {
-    .desktop-nav { display: none; }
-    .action-grid, .requests-grid, .footer-grid, .grid-2 {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Arreglo vital para el fondo en móviles: 
-       Al achicar la pantalla, la franja azul de la imagen se hace muy finita. 
-       Ajustamos el tamaño del fondo y el padding para que el texto siga dentro de la franja. */
-    .page-wrapper {
-        background-size: 250% auto; /* Hacemos la imagen más grande en móvil para que la franja azul sea gruesa */
-        background-position: center top;
+/* --- Botón hamburguesa y menú móvil --- */
+.hamburger-public {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--p-blue);
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1100;
+}
+
+.mobile-nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 75%;
+    max-width: 280px;
+    height: 100%;
+    background: white;
+    z-index: 1200;
+    padding: 70px 25px 30px;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mobile-nav.open { right: 0; }
+.mobile-nav-overlay.open { display: block; }
+
+.mobile-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--p-text);
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: var(--transition);
+}
+
+.mobile-nav a:hover { background: #f1f5f9; color: var(--p-blue); }
+.mobile-nav a i { width: 20px; color: var(--p-blue); }
+
+.mobile-nav-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #888;
+    cursor: pointer;
+}
+
+/* =============================================
+   RESPONSIVE - MÓVIL (hasta 768px)
+   ============================================= */
+@media (max-width: 768px) {
+
+    /* --- Navbar móvil --- */
+    .main-header { padding: 10px 0; }
+    .header-left-spacer { display: none; }
+    .logo-area { justify-content: flex-start; flex: 1; }
+    .logo-text { font-size: 1rem; }
+    .logo-imgs img { height: 28px !important; }
+    .desktop-nav.desktop-nav-right { display: none; }
+    .hamburger-public { display: block; }
+
+    /* --- Fondo y hero en móvil --- */
+    body.portal-body {
+        background-size: 250% auto;
+        background-position: center 60px;
         padding-top: 60px;
     }
-    
-    .new-hero { 
-        padding: 40px 10px 20px; /* Reducimos el padding superior porque la franja es más pequeña */
+
+    .new-hero {
+        padding: 10px 15px 40px;
     }
-    
-    .new-hero h1 { 
-        font-size: 2rem; /* Achicamos el texto para que quepa en la franja */
+
+    .saldo-card {
+        padding: 16px 30px;
     }
-    
-    .hero-illustrations { display: none; }
-    .main-header { padding: 10px 0; }
-    .logo-text { font-size: 1.1rem; }
-    
+
+    .saldo-label {
+        font-size: 0.8rem;
+    }
+
+    .saldo-amount {
+        font-size: 2.2rem;
+    }
+
+    /* --- Botones de acción: 1 columna en móvil --- */
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 0 5%;
+    }
+
+    .action-btn-card {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 14px 20px;
+        gap: 15px;
+    }
+
+    .action-btn-card span {
+        font-size: 1rem;
+    }
+
+    .card-icon {
+        padding: 8px;
+        min-width: 50px;
+    }
+
     .action-grid-wrapper {
-        margin-top: 20px;
+        margin-top: 25px;
+    }
+
+    /* --- Secciones de contenido --- */
+    .section-title {
+        font-size: 1.5rem;
+        margin: 40px 0 25px;
+    }
+
+    .main-content-area {
+        padding: 0 15px;
+    }
+
+    /* --- Grillas: 1 columna en móvil --- */
+    .updates-grid,
+    .gallery-grid,
+    .requests-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* --- Tabla responsive --- */
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    table th, table td {
+        padding: 8px 6px !important;
+    }
+
+    /* --- Cards de teacher --- */
+    .teacher-card { margin-bottom: 10px; }
+    .teacher-content-inner { flex-direction: column; gap: 10px; }
+    .teacher-ill { display: none; }
+
+    /* --- Footer --- */
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .copyright {
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    /* --- Watermark más chico en móvil --- */
+    .watermark {
+        bottom: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        font-size: 0.7rem;
+    }
+
+    .watermark img { width: 22px; height: 22px; }
+}
+
+/* TABLET (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+    .action-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        padding: 0 3%;
+    }
+
+    .updates-grid,
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .requests-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

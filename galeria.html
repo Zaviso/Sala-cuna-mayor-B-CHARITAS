@@ -24,8 +24,14 @@
             <nav class="desktop-nav desktop-nav-right">
                 <a href="index.html"><i class="fas fa-arrow-left"></i> Inicio</a>
             </nav>
+            <button class="hamburger-public" onclick="openMobileNav()"><i class="fas fa-bars"></i></button>
         </div>
     </header>
+    <div id="mobile-nav-overlay" class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+    <div id="mobile-nav" class="mobile-nav">
+        <button class="mobile-nav-close" onclick="closeMobileNav()"><i class="fas fa-times"></i></button>
+        <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+    </div>
 
     <main class="page-wrapper">
         <div class="container main-content-area" style="padding-top: 40px; padding-bottom: 60px;">
@@ -49,6 +55,16 @@
         Hecho por <span class="z-brand">Zaviso</span>
     </div>
 
+    <script>
+        function openMobileNav() {
+            document.getElementById('mobile-nav').classList.add('open');
+            document.getElementById('mobile-nav-overlay').classList.add('open');
+        }
+        function closeMobileNav() {
+            document.getElementById('mobile-nav').classList.remove('open');
+            document.getElementById('mobile-nav-overlay').classList.remove('open');
+        }
+    </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script src="app.js"></script>
