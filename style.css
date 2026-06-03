@@ -33,7 +33,7 @@ body.portal-body {
     background-color: white;
     background-image: url('fondo%20niños.png');
     background-repeat: no-repeat;
-    background-position: top center;
+    background-position: center 70px;
     background-size: 100% auto;
     background-attachment: scroll;
     padding-top: 70px;
