@@ -183,12 +183,15 @@ function renderExpenses() {
     if (isAdmin) {
         gallery.innerHTML = state.expenses.map(exp => {
             const imgs = exp.images || (exp.image ? [exp.image] : []);
-            const thumbs = imgs.map(src => `
-                <img src="${src}" class="admin-thumb" style="cursor:pointer;" onclick="openPreview('${src}')">
-            `).join('');
+            const thumbs = imgs.length > 0
+                ? imgs.map(src => `
+                    <img src="${src}" onclick="openPreview('${src}')"
+                        style="width:44px; height:44px; object-fit:cover; border-radius:6px; cursor:pointer; border:1px solid #e2e8f0;">
+                  `).join('')
+                : `<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#ccc; font-size:0.85rem;"></i></div>`;
             return `
             <div class="admin-mini-card">
-                <div style="display:flex; gap:4px; flex-wrap:wrap;">${thumbs || '<div class="admin-thumb" style="background:#f1f5f9;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#ccc;"></i></div>'}</div>
+                <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">${thumbs}</div>
                 <div class="admin-card-info">
                     <p>${exp.desc}</p>
                     <span>$${Number(exp.amount).toLocaleString('es-CL')} | ${exp.date}</span>
@@ -201,19 +204,27 @@ function renderExpenses() {
     } else {
         gallery.innerHTML = state.expenses.map(exp => {
             const imgs = exp.images || (exp.image ? [exp.image] : []);
+            const noImg = `<div style="height:140px;background:#f8fafc;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:#ccc;border:1px dashed #ddd;"><i class="fas fa-receipt fa-2x"></i></div>`;
             const fotos = imgs.length > 0
                 ? imgs.map(src => `
-                    <img src="${src}" onclick="openPreview('${src}')"
-                        style="width:100%; border-radius:10px; margin-bottom:8px; cursor:pointer; transition:opacity 0.2s;"
-                        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'"
-                        title="Toca para ver en grande">`).join('')
-                : `<div style="height:120px;background:#f1f5f9;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;color:#ccc;"><i class="fas fa-image fa-2x"></i></div>`;
+                    <div class="gallery-img-container" style="margin-bottom:8px;">
+                        <img src="${src}" loading="lazy" style="width:100%; height:160px; object-fit:cover; border-radius:10px; cursor:pointer;" onclick="openPreview('${src}')">
+                    </div>
+                    <div class="gallery-actions" style="margin-bottom:8px;">
+                        <a href="${src}" download="boleta_gasto.jpg" class="gallery-btn btn-download" title="Descargar boleta">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <button onclick="openPreview('${src}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>`).join('')
+                : noImg;
             return `
-            <div class="card" style="cursor:default;">
+            <div class="card" style="padding:15px;">
                 ${fotos}
-                <h4>${exp.desc}</h4>
-                <p style="color:var(--p-red); font-weight:bold; margin-top:5px;">$${Number(exp.amount).toLocaleString('es-CL')}</p>
-                <p style="color:#aaa; font-size:0.8rem;">${exp.date || ''}</p>
+                <h4 style="margin-bottom:4px;">${exp.desc}</h4>
+                <p style="color:var(--p-red); font-weight:bold;">$${Number(exp.amount).toLocaleString('es-CL')}</p>
+                <p style="color:#aaa; font-size:0.78rem;">${exp.date || ''}</p>
             </div>`;
         }).join('');
     }
