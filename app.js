@@ -155,18 +155,17 @@ function render() {
 }
 
 function renderBalance() {
-    const MONTO_POR_PAGO = 1092;
+    const SALDO_INICIAL = 1092;
+    const MONTO_CURSO = 5000;
 
-    let total = 0;
+    let totalCurso = 0;
     state.students.forEach(s => {
-        const curso = (state.cursoHistory || {})[s.id] || {};
-        const mensual = (state.monthlyHistory || {})[s.id] || {};
-        total += Object.values(curso).filter(Boolean).length * MONTO_POR_PAGO;
-        total += Object.values(mensual).filter(Boolean).length * MONTO_POR_PAGO;
+        const pagos = (state.cursoHistory || {})[s.id] || {};
+        totalCurso += Object.values(pagos).filter(Boolean).length * MONTO_CURSO;
     });
 
     const totalExpenses = (state.expenses || []).reduce((acc, e) => acc + Number(e.amount), 0);
-    state.balance = total - totalExpenses;
+    state.balance = SALDO_INICIAL + totalCurso - totalExpenses;
 
     const el = document.getElementById('current-balance');
     if (el) el.textContent = `$${state.balance.toLocaleString('es-CL')}`;
