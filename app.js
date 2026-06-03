@@ -143,6 +143,8 @@ function render() {
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
+    if (document.getElementById('cuota-curso-table')) renderCuotaCurso();
+    if (document.getElementById('cuota-mensual-table')) renderCuotaMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
     if (document.getElementById('announcements-container')) renderAnnouncements();
     if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
@@ -347,6 +349,32 @@ function renderPublicPayments() {
             <td>${s.name}</td>
             <td><span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">${s.paidCentro ? 'PAGADO' : 'PEND.'}</span></td>
             <td><span class="status-badge ${s.paidMonthly ? 'status-paid' : 'status-pending'}">${s.paidMonthly ? 'PAGADO' : 'PEND.'}</span></td>
+        </tr>
+    `).join('');
+}
+
+function renderCuotaCurso() {
+    const tableBody = document.getElementById('cuota-curso-table');
+    if (!tableBody) return;
+    tableBody.innerHTML = state.students.map(s => `
+        <tr>
+            <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${s.name}</td>
+            <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; text-align:center;">
+                <span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">${s.paidCentro ? 'PAGADO' : 'PENDIENTE'}</span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderCuotaMensual() {
+    const tableBody = document.getElementById('cuota-mensual-table');
+    if (!tableBody) return;
+    tableBody.innerHTML = state.students.map(s => `
+        <tr>
+            <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">${s.name}</td>
+            <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; text-align:center;">
+                <span class="status-badge ${s.paidMonthly ? 'status-paid' : 'status-pending'}">${s.paidMonthly ? 'PAGADO' : 'PENDIENTE'}</span>
+            </td>
         </tr>
     `).join('');
 }
