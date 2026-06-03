@@ -36,10 +36,9 @@
         <!-- HERO BANNER - SALDO RECAUDADO -->
         <section class="new-hero">
             <div class="hero-content container">
-                <h1 style="font-size: 2rem; margin-bottom: 15px;">BIENVENIDO</h1>
-                <div style="background: rgba(255,255,255,0.95); padding: 30px; border-radius: 15px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <p style="color: #666; margin-bottom: 10px; font-size: 0.95rem;">Saldo Actual Recaudado</p>
-                    <h2 id="current-balance" style="color: var(--p-green); margin: 0; font-size: 2.5rem; font-weight: 900;">$0</h2>
+                <div style="text-align: center;">
+                    <p style="color: white; font-size: 1.1rem; margin-bottom: 10px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Saldo Actual Recaudado</p>
+                    <h1 id="current-balance" style="color: white; margin: 0; font-size: 3.5rem; font-weight: 900; text-shadow: 0 3px 8px rgba(0,0,0,0.3);">$0</h1>
                 </div>
             </div>
         </section>
@@ -84,20 +83,20 @@
                 <h2 class="section-title">COMUNICADOS DIRECTIVA</h2>
                 <div id="announcements-container" class="updates-grid"></div>
 
-                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-orange); font-size: 1.5rem; text-align: center;">Próximos Eventos</h3>
+                <h3 style="margin-top:50px; margin-bottom: 25px; color: var(--p-orange); font-size: 1.5rem; text-align: center; font-weight: 700;">📅 Próximos Eventos</h3>
                 <div id="events-list" class="updates-grid"></div>
 
-                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-blue); font-size: 1.5rem; text-align: center;">Gastos Registrados</h3>
+                <h3 style="margin-top:50px; margin-bottom: 25px; color: var(--p-blue); font-size: 1.5rem; text-align: center; font-weight: 700;">📊 Gastos Registrados</h3>
                 <div id="expenses-gallery" class="gallery-grid"></div>
 
-                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-orange); font-size: 1.5rem; text-align: center;">Reseñas</h3>
+                <h3 style="margin-top:50px; margin-bottom: 25px; color: var(--p-orange); font-size: 1.5rem; text-align: center; font-weight: 700;">⭐ Reseñas</h3>
                 <div id="reviews-container" class="updates-grid">
                     <p class="empty-msg">No hay reseñas aún.</p>
                 </div>
             </section>
 
             <!-- CUOTA CURSO -->
-            <section id="finanzas" style="margin-top: 50px;">
+            <section id="finanzas" style="margin-top: 50px; margin-bottom: 80px;">
                 <h2 class="section-title">CUOTA CURSO</h2>
                 <div class="card" style="padding:20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -117,8 +116,8 @@
                 </div>
             </section>
 
-            <!-- GALERIA -->
-            <section id="galeria" style="margin-top: 50px; margin-bottom: 50px;">
+            <!-- GALERIA - OCULTA POR DEFECTO -->
+            <section id="galeria" style="margin-top: 50px; margin-bottom: 50px; display: none;">
                 <h2 class="section-title">GALERÍA DE MOMENTOS</h2>
                 <div id="moments-gallery" class="gallery-grid"></div>
             </section>

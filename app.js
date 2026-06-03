@@ -570,6 +570,21 @@ window.deleteUserAccount = (index) => {
     }
 };
 
+// Manejo de Galería en el navbar
+document.addEventListener('DOMContentLoaded', () => {
+    const galeryLink = document.querySelector('a[href="#galeria"]');
+    if (galeryLink) {
+        galeryLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const galerySection = document.getElementById('galeria');
+            if (galerySection) {
+                galerySection.style.display = 'block';
+                galerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+});
+
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
     const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
