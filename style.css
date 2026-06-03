@@ -694,10 +694,10 @@ body.portal-body {
 /* --- Nuevo Dashboard de Administrador (Sin Espacios Blancos) --- */
 .admin-dashboard-wrapper {
     display: grid;
-    grid-template-columns: minmax(600px, 1fr) 350px; /* Equilibrio: Tabla amplia, Sidebar fija */
+    grid-template-columns: 1fr 340px;
     gap: 30px;
     margin-bottom: 30px;
-    align-items: stretch;
+    align-items: start;
 }
 
 .admin-main-card {
@@ -1353,6 +1353,25 @@ input:focus, textarea:focus {
 img {
     max-width: 100%;
     height: auto;
+}
+
+/* --- Tabs --- */
+.tab-btn {
+    padding: 8px 20px;
+    border-radius: 50px;
+    border: 2px solid #ddd;
+    background: white;
+    color: #888;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.tab-btn-active {
+    background: var(--p-blue);
+    color: white;
+    border-color: var(--p-blue);
 }
 
 /* --- Botón hamburguesa y menú móvil --- */

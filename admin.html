@@ -95,6 +95,15 @@
                     <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
                     <button class="btn btn-mini" onclick="document.getElementById('add-student-form').style.display = document.getElementById('add-student-form').style.display === 'none' ? 'flex' : 'none'" style="background:var(--p-green); color:white;">+ Alumno</button>
                 </div>
+                <!-- Tabs selector -->
+                <div style="display:flex; gap:8px; margin-bottom:15px;">
+                    <button id="admin-tab-curso" onclick="adminSwitchTab('curso')" class="tab-btn tab-btn-active">
+                        <i class="fas fa-graduation-cap"></i> Cuota Curso
+                    </button>
+                    <button id="admin-tab-mensual" onclick="adminSwitchTab('mensual')" class="tab-btn">
+                        <i class="fas fa-calendar-alt"></i> Centro de Padres
+                    </button>
+                </div>
                 <div id="add-student-form" style="display:none; gap:10px; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
                     <input type="text" id="new-student-name" placeholder="Nombre completo del alumno" style="flex:1; min-width:200px; padding:8px 12px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
                     <button onclick="addStudent()" class="btn btn-mini" style="background:var(--p-green); color:white;">Agregar</button>

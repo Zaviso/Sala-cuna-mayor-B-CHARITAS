@@ -322,6 +322,7 @@ window.openPreview = (url) => {
 function renderAdminStudents() {
     const tableBody = document.querySelector('#students-table tbody');
     if (!tableBody) return;
+    const activeTab = document.getElementById('admin-tab-curso')?.classList.contains('tab-btn-active') ? 'curso' : 'mensual';
     tableBody.innerHTML = state.students.map(s => {
         const pagos = (state.monthlyHistory || {})[s.id] || {};
         const mesesBtn = MESES_MENSUAL.map(mes => {
@@ -354,6 +355,7 @@ function renderAdminStudents() {
             </td>
         </tr>`;
     }).join('');
+    setTimeout(() => adminSwitchTab(activeTab), 0);
 }
 
 function renderPublicPayments() {
@@ -370,6 +372,30 @@ function renderPublicPayments() {
 
 const MESES_CURSO = ['Dic'];
 const MESES_MENSUAL = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+window.adminSwitchTab = (tab) => {
+    const isCurso = tab === 'curso';
+    document.getElementById('admin-tab-curso')?.classList.toggle('tab-btn-active', isCurso);
+    document.getElementById('admin-tab-mensual')?.classList.toggle('tab-btn-active', !isCurso);
+    // Mostrar/ocultar columnas: Cuota Curso = solo col 1, Mensual = cols 2-11
+    const table = document.querySelector('#students-table');
+    if (!table) return;
+    const headers = table.querySelectorAll('thead th');
+    const rows = table.querySelectorAll('tbody tr');
+    headers.forEach((th, i) => {
+        if (i === 0 || i === headers.length - 1) return; // Alumno y botón eliminar siempre visibles
+        if (isCurso) th.style.display = i === 1 ? '' : 'none';
+        else th.style.display = i === 1 ? 'none' : '';
+    });
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach((td, i) => {
+            if (i === 0 || i === cells.length - 1) return;
+            if (isCurso) td.style.display = i === 1 ? '' : 'none';
+            else td.style.display = i === 1 ? 'none' : '';
+        });
+    });
+};
 
 window.addStudent = () => {
     const input = document.getElementById('new-student-name');

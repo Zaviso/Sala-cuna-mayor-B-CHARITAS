@@ -35,7 +35,20 @@
 
     <main class="page-wrapper">
         <div class="container main-content-area" style="padding-top: 40px;">
-            <section id="cuota-curso" style="margin-bottom: 60px;">
+            <!-- TABS para elegir vista -->
+            <div style="display:flex; gap:10px; margin-bottom:30px; margin-top:30px;">
+                <button id="tab-curso" onclick="switchTab('curso')"
+                    class="tab-btn tab-btn-active">
+                    Cuota Curso
+                </button>
+                <button id="tab-mensual" onclick="switchTab('mensual')"
+                    class="tab-btn">
+                    Cuota Mensual
+                </button>
+            </div>
+
+            <!-- Vista Cuota Curso (Diciembre) -->
+            <section id="vista-curso" style="margin-bottom: 60px;">
                 <h2 class="section-title">CUOTA CURSO</h2>
                 <div class="card" style="padding:20px; background:white; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
                     <p style="text-align:center; color:var(--p-text-light); margin-bottom:20px; font-size:0.9rem;">
@@ -54,6 +67,36 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Vista Cuota Mensual (Mar-Dic) -->
+            <section id="vista-mensual" style="margin-bottom: 60px; display:none;">
+                <h2 class="section-title">CUOTA MENSUAL</h2>
+                <div class="card" style="padding:20px; background:white; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+                    <p style="text-align:center; color:var(--p-text-light); margin-bottom:20px; font-size:0.9rem;">
+                        Estado de pagos mensuales — Marzo a Diciembre
+                    </p>
+                    <div class="table-responsive">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+                            <thead>
+                                <tr style="background:#f1f5f9; text-align:center;">
+                                    <th style="padding:10px 8px; border-bottom:2px solid #ddd; text-align:left;">Alumno</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Mar</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Abr</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">May</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Jun</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Jul</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Ago</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Sep</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Oct</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Nov</th>
+                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Dic</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-mensual-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -65,6 +108,12 @@
     <script>
         function openMobileNav() { document.getElementById('mobile-nav').classList.add('open'); document.getElementById('mobile-nav-overlay').classList.add('open'); }
         function closeMobileNav() { document.getElementById('mobile-nav').classList.remove('open'); document.getElementById('mobile-nav-overlay').classList.remove('open'); }
+        function switchTab(tab) {
+            document.getElementById('vista-curso').style.display = tab === 'curso' ? 'block' : 'none';
+            document.getElementById('vista-mensual').style.display = tab === 'mensual' ? 'block' : 'none';
+            document.getElementById('tab-curso').classList.toggle('tab-btn-active', tab === 'curso');
+            document.getElementById('tab-mensual').classList.toggle('tab-btn-active', tab === 'mensual');
+        }
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
