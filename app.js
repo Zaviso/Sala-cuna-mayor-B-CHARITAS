@@ -148,8 +148,6 @@ function render() {
     if (document.getElementById('cuota-mensual-table')) renderCuotaMensual();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
-    if (document.getElementById('admin-historial-curso-body')) renderAdminHistorialCurso();
-    if (document.getElementById('admin-historial-mensual-body')) renderAdminHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
     if (document.getElementById('announcements-container')) renderAnnouncements();
     if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
@@ -326,24 +324,34 @@ window.openPreview = (url) => {
 function renderAdminStudents() {
     const tableBody = document.querySelector('#students-table tbody');
     if (!tableBody) return;
-    tableBody.innerHTML = state.students.map(s => `
+    tableBody.innerHTML = state.students.map(s => {
+        const pagos = (state.monthlyHistory || {})[s.id] || {};
+        const mesesBtn = MESES_MENSUAL.map(mes => {
+            const paid = pagos[mes];
+            return `<td style="text-align:center; padding:6px 2px;">
+                <button onclick="toggleMonthlyPayment(${s.id}, '${mes}')"
+                    title="${mes}"
+                    style="width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; font-size:0.7rem; font-weight:700;
+                    background:${paid ? 'var(--p-green)' : '#eee'};
+                    color:${paid ? 'white' : '#aaa'}; transition:all 0.2s;">
+                    ${paid ? '✓' : mes[0]}
+                </button>
+            </td>`;
+        }).join('');
+        return `
         <tr>
-            <td>${s.name}</td>
-            <td>
-                <div class="proof-container-admin">
-                    <input type="checkbox" ${s.paidCentro ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidCentro')">
-                    ${s.proofCentro ? `<div class="thumb-wrapper"><img src="${s.proofCentro}" onclick="window.open('${s.proofCentro}')"><button class="btn-del-proof" onclick="deleteProof(${s.id}, 'proofCentro')">×</button></div>` : `<i class="fas fa-camera proof-btn" onclick="openProofModal(${s.id}, 'proofCentro')"></i>`}
-                </div>
+            <td style="white-space:nowrap; padding:8px 6px; font-size:0.8rem;">${s.name}</td>
+            <td style="text-align:center; padding:6px 4px;">
+                <button onclick="toggleCursoPayment(${s.id})"
+                    style="padding:5px 10px; border-radius:20px; border:none; cursor:pointer; font-weight:700; font-size:0.75rem;
+                    background:${s.paidCentro ? 'var(--p-green)' : '#eee'};
+                    color:${s.paidCentro ? 'white' : '#aaa'};">
+                    ${s.paidCentro ? '✓' : '—'}
+                </button>
             </td>
-            <td>
-                <div class="proof-container-admin">
-                    <input type="checkbox" ${s.paidMonthly ? 'checked' : ''} onchange="togglePayment(${s.id}, 'paidMonthly')">
-                    ${s.proofMonthly ? `<div class="thumb-wrapper"><img src="${s.proofMonthly}" onclick="window.open('${s.proofMonthly}')"><button class="btn-del-proof" onclick="deleteProof(${s.id}, 'proofMonthly')">×</button></div>` : `<i class="fas fa-camera proof-btn" onclick="openProofModal(${s.id}, 'proofMonthly')"></i>`}
-                </div>
-            </td>
-            <td style="font-size:0.75rem;">${(s.proofCentro || s.proofMonthly) ? '<span style="color:var(--p-green)">OK</span>' : '...'}</td>
-        </tr>
-    `).join('');
+            ${mesesBtn}
+        </tr>`;
+    }).join('');
 }
 
 function renderPublicPayments() {
