@@ -71,7 +71,8 @@ let state = {
     reviews: [],
     users: [],
     balance: 0,
-    paymentHistory: []
+    paymentHistory: [],
+    cursoHistory: {}
 };
 
 // --- Sync Logic with Firebase ---
@@ -324,11 +325,13 @@ function renderAdminStudents() {
     if (!tableBody) return;
     const activeTab = document.getElementById('admin-tab-curso')?.classList.contains('tab-btn-active') ? 'curso' : 'mensual';
     tableBody.innerHTML = state.students.map(s => {
-        const pagos = (state.monthlyHistory || {})[s.id] || {};
-        const mesesBtn = MESES_MENSUAL.map(mes => {
-            const paid = pagos[mes];
-            return `<td style="text-align:center; padding:6px 2px;">
-                <button onclick="toggleMonthlyPayment(${s.id}, '${mes}')"
+        const pagosMensual = (state.monthlyHistory || {})[s.id] || {};
+        const pagosCurso = (state.cursoHistory || {})[s.id] || {};
+
+        const mesesCursoBtn = MESES_CURSO.map(mes => {
+            const paid = pagosCurso[mes];
+            return `<td class="col-curso" style="text-align:center; padding:6px 2px;">
+                <button onclick="toggleCursoPayment(${s.id}, '${mes}')"
                     title="${mes}"
                     style="width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; font-size:0.7rem; font-weight:700;
                     background:${paid ? 'var(--p-green)' : '#eee'};
@@ -337,18 +340,25 @@ function renderAdminStudents() {
                 </button>
             </td>`;
         }).join('');
+
+        const mesesMensualBtn = MESES_MENSUAL.map(mes => {
+            const paid = pagosMensual[mes];
+            return `<td class="col-mensual" style="text-align:center; padding:6px 2px;">
+                <button onclick="toggleMonthlyPayment(${s.id}, '${mes}')"
+                    title="${mes}"
+                    style="width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; font-size:0.7rem; font-weight:700;
+                    background:${paid ? 'var(--p-blue)' : '#eee'};
+                    color:${paid ? 'white' : '#aaa'}; transition:all 0.2s;">
+                    ${paid ? '✓' : mes[0]}
+                </button>
+            </td>`;
+        }).join('');
+
         return `
         <tr>
             <td style="white-space:nowrap; padding:8px 6px; font-size:0.8rem;">${s.name}</td>
-            <td style="text-align:center; padding:6px 4px;">
-                <button onclick="toggleCursoPayment(${s.id})"
-                    style="padding:5px 10px; border-radius:20px; border:none; cursor:pointer; font-weight:700; font-size:0.75rem;
-                    background:${s.paidCentro ? 'var(--p-green)' : '#eee'};
-                    color:${s.paidCentro ? 'white' : '#aaa'};">
-                    ${s.paidCentro ? '✓' : '—'}
-                </button>
-            </td>
-            ${mesesBtn}
+            ${mesesCursoBtn}
+            ${mesesMensualBtn}
             <td style="padding:6px 4px; text-align:center;">
                 <button onclick="removeStudent(${s.id})" title="Eliminar alumno"
                     style="width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; background:#fee; color:var(--p-red); font-size:0.85rem; font-weight:700;">✕</button>
@@ -370,31 +380,17 @@ function renderPublicPayments() {
     `).join('');
 }
 
-const MESES_CURSO = ['Dic'];
+const MESES_CURSO = ['May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const MESES_MENSUAL = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 window.adminSwitchTab = (tab) => {
     const isCurso = tab === 'curso';
     document.getElementById('admin-tab-curso')?.classList.toggle('tab-btn-active', isCurso);
     document.getElementById('admin-tab-mensual')?.classList.toggle('tab-btn-active', !isCurso);
-    // Mostrar/ocultar columnas: Cuota Curso = solo col 1, Mensual = cols 2-11
-    const table = document.querySelector('#students-table');
-    if (!table) return;
-    const headers = table.querySelectorAll('thead th');
-    const rows = table.querySelectorAll('tbody tr');
-    headers.forEach((th, i) => {
-        if (i === 0 || i === headers.length - 1) return; // Alumno y botón eliminar siempre visibles
-        if (isCurso) th.style.display = i === 1 ? '' : 'none';
-        else th.style.display = i === 1 ? 'none' : '';
-    });
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        cells.forEach((td, i) => {
-            if (i === 0 || i === cells.length - 1) return;
-            if (isCurso) td.style.display = i === 1 ? '' : 'none';
-            else td.style.display = i === 1 ? 'none' : '';
-        });
-    });
+    document.querySelectorAll('.col-curso').forEach(el => el.style.display = isCurso ? '' : 'none');
+    document.querySelectorAll('.col-mensual').forEach(el => el.style.display = isCurso ? 'none' : '');
+    document.querySelectorAll('.th-curso').forEach(el => el.style.display = isCurso ? '' : 'none');
+    document.querySelectorAll('.th-mensual').forEach(el => el.style.display = isCurso ? 'none' : '');
 };
 
 window.addStudent = () => {
@@ -422,22 +418,34 @@ window.toggleMonthlyPayment = (studentId, mes) => {
     saveState();
 };
 
-window.toggleCursoPayment = (studentId) => {
-    const s = state.students.find(x => x.id === studentId);
-    if (s) { s.paidCentro = !s.paidCentro; saveState(); }
+window.toggleCursoPayment = (studentId, mes) => {
+    if (!state.cursoHistory) state.cursoHistory = {};
+    if (!state.cursoHistory[studentId]) state.cursoHistory[studentId] = {};
+    state.cursoHistory[studentId][mes] = !state.cursoHistory[studentId][mes];
+    saveState();
 };
 
 function renderHistorialCurso() {
     const tbody = document.getElementById('historial-curso-table');
     if (!tbody) return;
-    tbody.innerHTML = state.students.map(s => `
+    tbody.innerHTML = state.students.map(s => {
+        const pagos = (state.cursoHistory || {})[s.id] || {};
+        return `
         <tr style="border-bottom:1px solid #f1f5f9;">
-            <td style="padding:10px 8px;">${s.name}</td>
-            <td style="padding:10px 8px; text-align:center;">
-                <span class="status-badge ${s.paidCentro ? 'status-paid' : 'status-pending'}">${s.paidCentro ? 'PAGADO' : 'PENDIENTE'}</span>
-            </td>
-        </tr>
-    `).join('');
+            <td style="padding:10px 8px; white-space:nowrap;">${s.name}</td>
+            ${MESES_CURSO.map(mes => {
+                const paid = pagos[mes];
+                return `<td style="padding:10px 4px; text-align:center;">
+                    <span style="display:inline-block; width:28px; height:28px; border-radius:50%;
+                        background:${paid ? 'var(--p-green)' : '#f1f5f9'};
+                        color:${paid ? 'white' : '#aaa'};
+                        font-size:0.7rem; line-height:28px; font-weight:700;">
+                        ${paid ? '✓' : '—'}
+                    </span>
+                </td>`;
+            }).join('')}
+        </tr>`;
+    }).join('');
 }
 
 function renderHistorialMensual() {
