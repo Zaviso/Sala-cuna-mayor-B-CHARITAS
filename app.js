@@ -598,20 +598,6 @@ window.deleteUserAccount = (index) => {
     }
 };
 
-// Manejo de Galería en el navbar
-document.addEventListener('DOMContentLoaded', () => {
-    const galeriaLink = document.getElementById('galeria-link') || document.querySelector('a[href="#galeria"]');
-    if (galeriaLink) {
-        galeriaLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            const galeriaSection = document.getElementById('galeria');
-            if (galeriaSection) {
-                galeriaSection.style.display = 'block';
-                setTimeout(() => galeriaSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-            }
-        });
-    }
-});
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
