@@ -146,6 +146,7 @@ function render() {
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
+    if (document.getElementById('donations-list')) renderDonations();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
@@ -448,6 +449,25 @@ window.toggleCursoPayment = (studentId, mes) => {
     state.cursoHistory[studentId][mes] = !state.cursoHistory[studentId][mes];
     saveState();
 };
+
+function renderDonations() {
+    const container = document.getElementById('donations-list');
+    if (!container) return;
+    if (!state.donations || state.donations.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No hay donaciones registradas.</p>';
+        return;
+    }
+    container.innerHTML = state.donations.map(d => `
+        <div class="card" style="border-left: 5px solid var(--p-green); background:white; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:800; color:var(--p-green); font-size:0.85rem;">DONACIÓN</span>
+                <span style="color:#aaa; font-size:0.8rem;">${d.date}</span>
+            </div>
+            <p style="font-weight:700; margin-bottom:4px;">${d.type}</p>
+            <p style="color:#666; font-size:0.9rem;">${d.desc || ''}</p>
+        </div>
+    `).join('');
+}
 
 function renderHistorialCurso() {
     const tbody = document.getElementById('historial-curso-table');
