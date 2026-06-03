@@ -180,9 +180,14 @@ function renderExpenses() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        gallery.innerHTML = state.expenses.map(exp => `
+        gallery.innerHTML = state.expenses.map(exp => {
+            const imgs = exp.images || (exp.image ? [exp.image] : []);
+            const thumbs = imgs.map(src => `
+                <img src="${src}" class="admin-thumb" style="cursor:pointer;" onclick="openPreview('${src}')">
+            `).join('');
+            return `
             <div class="admin-mini-card">
-                <img src="${exp.image || 'https://via.placeholder.com/100?text=S/I'}" class="admin-thumb">
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">${thumbs || '<div class="admin-thumb" style="background:#f1f5f9;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#ccc;"></i></div>'}</div>
                 <div class="admin-card-info">
                     <p>${exp.desc}</p>
                     <span>$${Number(exp.amount).toLocaleString('es-CL')} | ${exp.date}</span>
@@ -190,16 +195,26 @@ function renderExpenses() {
                 <div class="admin-actions">
                     <button class="btn-mini btn-mini-delete" onclick="deleteExpense(${exp.id})"><i class="fas fa-trash"></i></button>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     } else {
-        gallery.innerHTML = state.expenses.map(exp => `
-            <div class="card">
-                <img src="${exp.image || 'https://via.placeholder.com/300x200?text=Comprobante'}" style="width:100%; border-radius:10px; margin-bottom:10px;">
+        gallery.innerHTML = state.expenses.map(exp => {
+            const imgs = exp.images || (exp.image ? [exp.image] : []);
+            const fotos = imgs.length > 0
+                ? imgs.map(src => `
+                    <img src="${src}" onclick="openPreview('${src}')"
+                        style="width:100%; border-radius:10px; margin-bottom:8px; cursor:pointer; transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'"
+                        title="Toca para ver en grande">`).join('')
+                : `<div style="height:120px;background:#f1f5f9;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;color:#ccc;"><i class="fas fa-image fa-2x"></i></div>`;
+            return `
+            <div class="card" style="cursor:default;">
+                ${fotos}
                 <h4>${exp.desc}</h4>
-                <p style="color: var(--p-red); font-weight: bold;">Monto: $${Number(exp.amount).toLocaleString('es-CL')}</p>
-            </div>
-        `).join('');
+                <p style="color:var(--p-red); font-weight:bold; margin-top:5px;">$${Number(exp.amount).toLocaleString('es-CL')}</p>
+                <p style="color:#aaa; font-size:0.8rem;">${exp.date || ''}</p>
+            </div>`;
+        }).join('');
     }
 }
 
@@ -532,12 +547,26 @@ document.getElementById('expense-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('exp-desc').value;
     const amount = document.getElementById('exp-amount').value;
-    const file = document.getElementById('exp-image').files[0];
-    const save = (img) => {
-        state.expenses.push({ id: Date.now(), desc, amount, image: img, date: new Date().toLocaleDateString() });
-        saveState(); e.target.reset();
-    };
-    if (file) compressImage(file, save); else save(null);
+    const files = Array.from(document.getElementById('exp-image').files);
+    const date = new Date().toLocaleDateString();
+
+    if (files.length === 0) {
+        state.expenses.push({ id: Date.now(), desc, amount, images: [], date });
+        saveState(); e.target.reset(); return;
+    }
+
+    const compressed = [];
+    let done = 0;
+    files.forEach((file, i) => {
+        compressImage(file, (b64) => {
+            compressed[i] = b64;
+            done++;
+            if (done === files.length) {
+                state.expenses.push({ id: Date.now(), desc, amount, images: compressed, date });
+                saveState(); e.target.reset();
+            }
+        });
+    });
 });
 
 document.getElementById('request-form')?.addEventListener('submit', (e) => {

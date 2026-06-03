@@ -73,14 +73,6 @@
         </section>
 
         <div class="container main-content-area">
-            <!-- SECCIÓN: REQUERIMIENTOS -->
-            <section class="teacher-requests" id="requerimientos">
-                <h2 class="section-title">REQUERIMIENTOS / SOLICITUD</h2>
-                <div id="requests-list" class="requests-grid">
-                    <div class="empty-msg">Cargando requerimientos...</div>
-                </div>
-            </section>
-
             <!-- SECCIÓN PRINCIPAL -->
             <section id="centro" style="margin-top: 50px;">
                 <h2 class="section-title">COMUNICADOS DIRECTIVA</h2>
@@ -95,27 +87,6 @@
                 <h3 style="margin-top:50px; margin-bottom: 25px; color: var(--p-orange); font-size: 1.5rem; text-align: center; font-weight: 700;">⭐ Reseñas</h3>
                 <div id="reviews-container" class="updates-grid">
                     <p class="empty-msg">No hay reseñas aún.</p>
-                </div>
-            </section>
-
-            <!-- CUOTA CURSO -->
-            <section id="finanzas" style="margin-top: 50px; margin-bottom: 80px;">
-                <h2 class="section-title">CUOTA CURSO</h2>
-                <div class="card" style="padding:20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f1f5f9; text-align: left;">
-                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Alumno</th>
-                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Cuota Centro ($10k)</th>
-                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Mensual ($2k)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="public-payments-table">
-                                <!-- Dinámico -->
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </section>
 
@@ -143,6 +114,12 @@
     </main>
 
     <!-- Modal para ver imágenes en grande -->
+    <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="preview-img" src="">
+        <div class="close-modal">&times;</div>
+    </div>
+
+    <!-- Modal imagen gasto -->
     <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
         <img id="preview-img" src="">
         <div class="close-modal">&times;</div>
