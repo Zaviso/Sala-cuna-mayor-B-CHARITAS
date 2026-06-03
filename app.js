@@ -602,17 +602,18 @@ window.deleteUserAccount = (index) => {
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
     const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
-    const isLoginPage = window.location.href.includes('login.html');
-    const isIndexPage = window.location.href.includes('index.html') || window.location.pathname.endsWith('/');
+    const path = window.location.pathname;
+    const publicPages = ['index.html', 'galeria.html', 'requerimientos.html', 'cuota-curso.html', 'centro-padres.html', 'login.html'];
+    const isPublicPage = publicPages.some(p => path.includes(p)) || path.endsWith('/');
 
-    if (!isAdmin && !isLoginPage && !isIndexPage) {
+    if (!isAdmin && !isPublicPage) {
         window.location.href = 'login.html';
         return;
     }
 
     render();
     if (isAdmin) {
-        setTimeout(checkPermissions, 100); // Pequeño delay para asegurar que el DOM está listo
+        setTimeout(checkPermissions, 100);
     }
 });
 
