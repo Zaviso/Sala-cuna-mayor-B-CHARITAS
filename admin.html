@@ -47,6 +47,13 @@
             color: white;
             border-color: var(--p-green);
         }
+        
+        /* Ocultar el menú hamburguesa en versión web (desktop) */
+        @media (min-width: 901px) {
+            .hamburger-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -54,19 +61,19 @@
     <header class="admin-nav">
         <div class="container header-content">
             <div class="logo">
-            <div class="header-left">
-                <h1>Jardín CHARITAS</h1>
-                <p>Panel Administrativo Privado</p>
+                <i class="fas fa-user-shield"></i>
+                Panel Administrativo
+                <span>Privado</span>
             </div>
-            <div class="header-right" style="display: flex; gap: 10px; align-items: center;">
-                <button id="mobile-menu-btn" class="mobile-only-btn" onclick="toggleMobileMenu()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <a href="index.html" class="btn btn-secondary">
-                    <i class="fas fa-eye"></i> <span class="desktop-only">Vista Padres</span>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-mini" title="Vista Padres">
+                    <i class="fas fa-eye"></i>
                 </a>
-                <button onclick="logout()" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span class="desktop-only">Salir</span>
+                <button onclick="logout()" class="btn btn-mini btn-logout" title="Salir">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
                 </button>
             </div>
         </div>
@@ -87,8 +94,8 @@
                 <div class="admin-card-title">
                     <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
                 </div>
-                <div class="table-responsive">
-                    <table id="students-table">
+                <div class="table-responsive" style="margin-top: 15px;">
+                    <table id="students-table" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th>Alumno</th>
@@ -106,34 +113,44 @@
 
             <!-- Derecha: Acciones Rápidas -->
             <div class="admin-quick-actions">
-                <div class="card action-card">
+                <div class="card action-card" id="expense-section">
                     <h3><i class="fas fa-cart-plus"></i> Registrar Gasto</h3>
                     <form id="expense-form">
                         <div class="form-group">
-                            <input type="text" id="expense-desc" placeholder="¿En qué se gastó?" required>
-                            <input type="number" id="expense-amount" placeholder="Monto $" required style="margin-top:10px;">
+                            <label>¿En qué se gastó?</label>
+                            <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto ($)</label>
+                            <input type="number" id="exp-amount" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Foto de Boleta</label>
+                            <input type="file" id="exp-image" accept="image/*">
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Gasto</button>
                     </form>
                 </div>
 
-                <div class="card action-card">
-                    <h3><i class="fas fa-clipboard-list"></i> Requerimiento Tías</h3>
+                <div class="card action-card" id="request-section">
+                    <h3><i class="fas fa-bullhorn"></i> Requerimiento de las Tías</h3>
                     <form id="request-form">
                         <div class="form-group">
+                            <label>Artículo necesario</label>
                             <input type="text" id="req-item" placeholder="Ej: Resmas de papel" required>
                         </div>
                         <div class="form-group">
+                            <label>Nota / Detalle</label>
                             <textarea id="req-note" placeholder="Más detalles..." style="height: 60px;"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar</button>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
                     </form>
                 </div>
 
                 <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
-                <div class="card action-card" id="user-management-section" style="display: none; border-top: 5px solid var(--p-red); background: #fff5f5;">
+                <div class="card action-card" id="team-section" style="border-top: 5px solid var(--p-red); background: #fff5f5;">
                     <div class="admin-card-title">
-                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Equipo</h3>
+                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
                         <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
                     </div>
                     <div id="users-list-container" style="margin-top: 10px;">
@@ -145,21 +162,23 @@
 
         <!-- SECCIÓN INFERIOR: CONTENIDO Y EVENTOS -->
         <div class="admin-grid-bottom" id="admin-bottom-tools">
-            <div class="card tool-card">
+            <div class="card tool-card" id="gallery-section">
                 <h3><i class="fas fa-images"></i> 📸 Galería</h3>
                 <form id="gallery-form">
                     <div class="form-group">
+                        <label>Título del momento</label>
                         <input type="text" id="photo-desc" placeholder="Título" required>
                         <input type="file" id="photo-file" accept="image/*" required style="margin-top:10px;">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir</button>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Foto</button>
                 </form>
             </div>
 
-            <div class="card tool-card" id="event-creation-section">
+            <div class="card tool-card" id="event-section">
                 <h3><i class="fas fa-star"></i> ✨ Evento</h3>
                 <form id="event-form">
                     <div class="form-group">
+                        <label>Nombre del evento</label>
                         <input type="text" id="event-name" placeholder="Evento" required>
                         <input type="date" id="event-date" required style="margin-top:10px;">
                     </div>
@@ -167,19 +186,39 @@
                 </form>
             </div>
 
-            <div class="card tool-card">
-                <h3><i class="fas fa-bullhorn"></i> Rincón Directiva</h3>
+            <div class="card tool-card" id="announcement-section">
+                <h3><i class="fas fa-bullhorn"></i> Comunicados Directiva</h3>
                 <form id="announcement-form">
                     <div class="form-group">
                         <select id="ann-type" style="margin-bottom: 10px;">
-                            <option value="Aviso">📢 Aviso</option>
-                            <option value="Consejo">💡 Consejo</option>
-                            <option value="Reclamo">⚠️ Nota</option>
+                            <option value="Aviso">📢 Aviso Importante</option>
+                            <option value="Consejo">💡 Consejo / Tip</option>
+                            <option value="Nota">📝 Nota</option>
                         </select>
-                        <textarea id="ann-text" placeholder="Palabras..." required style="height: 60px;"></textarea>
+                        <textarea id="ann-text" placeholder="Palabras para los papás..." required style="height: 80px;"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Publicar</button>
                 </form>
+            </div>
+
+            <div class="card tool-card" id="donation-section">
+                <h3><i class="fas fa-gift"></i> Donaciones</h3>
+                <form id="donation-form">
+                    <div class="form-group">
+                        <label>Tipo de donación</label>
+                        <input type="text" id="donation-type" placeholder="Ej: Materiales, Recursos" required>
+                        <label style="margin-top: 10px;">Descripción</label>
+                        <textarea id="donation-desc" placeholder="Detalles de la donación..." style="height: 60px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Registrar Donación</button>
+                </form>
+            </div>
+
+            <div class="card tool-card" id="reviews-section">
+                <h3><i class="fas fa-star"></i> Reseñas</h3>
+                <div id="reviews-list" style="display: flex; flex-direction: column; gap: 10px;">
+                    <p style="font-size:0.8rem; color:#999; text-align:center;">Contenido informativo</p>
+                </div>
             </div>
         </div>
 
@@ -223,8 +262,12 @@
                             <span>Galería de Fotos</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-events" style="width: 18px; height: 18px; cursor: pointer;"> 
+                            <input type="checkbox" id="p-events" style="width: 18px; height: 18px; cursor: pointer;">
                             <span>Programar Eventos</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
+                            <input type="checkbox" id="p-donations" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>Registrar Donaciones</span>
                         </label>
                         <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
                         <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; color: var(--p-red);">
@@ -265,6 +308,10 @@
                     <h3 style="margin-bottom: 15px; color: var(--p-blue);">Comunicados Activos</h3>
                     <div id="announcements-list" class="feed-container" style="display: grid; gap: 15px;"></div>
                 </div>
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--p-green);">Reseñas</h3>
+                    <div id="reviews-list" class="feed-container" style="display: grid; gap: 15px;"></div>
+                </div>
             </div>
         </div>
 
@@ -297,81 +344,74 @@
     </div>
 
     <script src="app.js"></script>
-    <!-- Fondo para el menú móvil -->
+    
+    <!-- Elementos para el Menú Móvil -->
     <div id="menu-backdrop" class="menu-backdrop" onclick="toggleMobileMenu()"></div>
+    <div id="admin-sidebar" class="admin-sidebar-mobile">
+        <div class="sidebar-header">
+            <h3>Menú Gestión</h3>
+            <button onclick="toggleMobileMenu()" class="close-menu">&times;</button>
+        </div>
+        <div class="help-msg">
+            <i class="fas fa-info-circle"></i> Selecciona una herramienta
+        </div>
+        <div class="mobile-tools-container">
+            <!-- Herramientas se mueven aquí -->
+        </div>
+    </div>
 
     <script>
         function toggleMobileMenu() {
             const sidebar = document.getElementById('admin-sidebar');
             const backdrop = document.getElementById('menu-backdrop');
-            if (sidebar && backdrop) {
-                sidebar.classList.toggle('active');
-                backdrop.classList.toggle('active');
-            }
+            sidebar.classList.toggle('active');
+            backdrop.classList.toggle('active');
         }
 
-        // --- Lógica de Swipe (Deslizar para cerrar) ---
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        const sidebar = document.getElementById('admin-sidebar');
-        
-        sidebar.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, {passive: true});
-
-        sidebar.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, {passive: true});
-
-        function handleSwipe() {
-            // Si el deslizamiento es de izquierda a derecha (más de 100px)
-            if (touchEndX - touchStartX > 100) {
-                if (sidebar.classList.contains('active')) {
-                    toggleMobileMenu();
-                }
-            }
-        }
-
-        // Función para mover las herramientas según el tamaño de pantalla
         function adjustLayout() {
             const isMobile = window.innerWidth <= 900;
-            const bottomTools = document.getElementById('admin-bottom-tools');
-            const sidebarActions = document.querySelector('.admin-quick-actions');
-            const toolCards = document.querySelectorAll('.tool-card');
-            const teamSection = document.getElementById('user-management-section');
+            const mobileContainer = document.querySelector('.mobile-tools-container');
+            const desktopQuickActions = document.querySelector('.admin-quick-actions');
+            const desktopBottomTools = document.getElementById('admin-bottom-tools');
+            const teamSection = document.getElementById('team-section');
+            
+            const tools = [
+                document.getElementById('expense-section'),
+                document.getElementById('request-section'),
+                document.getElementById('gallery-section'),
+                document.getElementById('event-section'),
+                document.getElementById('announcement-section'),
+                teamSection
+            ].filter(t => t !== null);
 
-            toolCards.forEach(card => {
+            tools.forEach(card => {
                 if (isMobile) {
-                    if (card.parentElement !== sidebarActions) {
-                        sidebarActions.appendChild(card);
-                    }
+                    if (card.parentElement !== mobileContainer) mobileContainer.appendChild(card);
                 } else {
-                    if (card.parentElement !== bottomTools) {
-                        bottomTools.appendChild(card);
+                    if (card.id === 'expense-section' || card.id === 'request-section' || card.id === 'team-section') {
+                        if (card.parentElement !== desktopQuickActions) desktopQuickActions.appendChild(card);
+                    } else {
+                        if (card.parentElement !== desktopBottomTools) desktopBottomTools.appendChild(card);
                     }
                 }
             });
-
-            // Mover gestión de equipo al final solo en móvil
-            if (isMobile && teamSection) {
-                sidebarActions.appendChild(teamSection);
-            } else if (!isMobile && teamSection) {
-                // En escritorio lo devolvemos a su sitio (antes del primer tool-card si es necesario, 
-                // pero ya está estático en el HTML del sidebar)
-                const reqCard = document.querySelector('.action-card:last-child');
-                if (reqCard) reqCard.after(teamSection);
-            }
         }
+
+        // Lógica de Swipe
+        let touchStartX = 0;
+        const sidebar = document.getElementById('admin-sidebar');
+        sidebar.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+        sidebar.addEventListener('touchend', e => {
+            if (e.changedTouches[0].screenX - touchStartX > 80) {
+                if (sidebar.classList.contains('active')) toggleMobileMenu();
+            }
+        }, {passive: true});
 
         window.addEventListener('resize', adjustLayout);
         window.addEventListener('load', adjustLayout);
+        adjustLayout(); // Ejecutar de inmediato
 
-        // Lógica específica de la página de admin
-        if (typeof renderAdminStudents === 'function') {
-            renderAdminStudents();
-        }
+        if (typeof renderAdminStudents === 'function') renderAdminStudents();
     </script>
 </body>
 </html>

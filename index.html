@@ -8,164 +8,165 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="portal-body">
 
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <i class="fas fa-child-reaching" style="font-size: 2.2rem;"></i>
-                Centro de Padres
-                <span>Jardín CHARITAS</span>
+    <header class="main-header">
+        <div class="container header-inner">
+            <div class="logo-area">
+                <div class="logo-imgs">
+                    <img src="https://api.iconify.design/noto:children-crossing.svg" alt="kids" style="height: 40px; margin-right: 5px;">
+                    <img src="https://api.iconify.design/noto:building-construction.svg" alt="blocks" style="height: 35px;">
+                </div>
+                <div class="logo-text">
+                    SALA CUNA <span>MAYOR B</span>
+                </div>
             </div>
-            <nav>
-                <!-- Acceso administrativo privado -->
+            <nav class="desktop-nav">
+                <a href="#galeria" class="active">Galería</a>
             </nav>
+            <div class="header-right">
+                <a href="login.html" class="link-login">
+                    <i class="fas fa-user"></i> Inicia Sesión
+                </a>
+            </div>
         </div>
     </header>
 
-    <main id="public-view">
-        <section class="hero">
-            <div class="container">
-                <h1>¡Hola, familias! 👋</h1>
-                <p>Bienvenidas al portal informativo del Centro de Padres Jardín CHARITAS. Nuestra intención es ser una fuente de información transparente para el bienestar de nuestros niños.</p>
+    <main class="page-wrapper">
+        <!-- HERO BANNER - SALDO RECAUDADO -->
+        <section class="new-hero">
+            <div class="hero-content container">
+                <h1 style="font-size: 2rem; margin-bottom: 15px;">BIENVENIDO</h1>
+                <div style="background: rgba(255,255,255,0.95); padding: 30px; border-radius: 15px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <p style="color: #666; margin-bottom: 10px; font-size: 0.95rem;">Saldo Actual Recaudado</p>
+                    <h2 id="current-balance" style="color: var(--p-green); margin: 0; font-size: 2.5rem; font-weight: 900;">$0</h2>
+                </div>
             </div>
         </section>
 
-        <div class="container" style="margin-top: -40px; position: relative; z-index: 10;">
-            <div class="card reflection-card">
-                <p>"El amor y la dedicación que ponemos hoy en el jardín, es la semilla del futuro de nuestros pequeños."</p>
+        <!-- ACTION CARDS -->
+        <section class="container action-grid-wrapper">
+            <div class="action-grid">
+                <a href="#requerimientos" class="action-btn-card btn-blue">
+                    <div class="card-icon">
+                        <img src="https://api.iconify.design/flat-color-icons:document.svg" style="height: 60px;">
+                        <img src="https://api.iconify.design/noto:paperclip.svg" style="height: 30px; position:absolute; top:10px; right: 20px;">
+                    </div>
+                    <span>REQUERIMIENTOS</span>
+                </a>
+                <a href="#donaciones" class="action-btn-card btn-green">
+                    <div class="card-icon">
+                        <img src="https://api.iconify.design/noto:red-heart.svg" style="height: 50px;">
+                        <img src="https://api.iconify.design/noto:coin.svg" style="height: 30px; position:absolute; bottom:0; right: 20px;">
+                    </div>
+                    <span>DONACIONES</span>
+                </a>
+                <a href="#finanzas" class="action-btn-card btn-orange">
+                    <div class="card-icon">
+                        <img src="https://api.iconify.design/noto:handshake.svg" style="height: 60px;">
+                    </div>
+                    <span>CENTRO DE PADRES</span>
+                </a>
             </div>
-        </div>
-
-        <div class="main-content">
-            <!-- BLOQUE 1: FINANZAS (PAGOS Y SALDOS) -->
-            <section class="finance-grid">
-                <div class="column-table">
-                    <div class="card public-table-card">
-                        <h2><i class="fas fa-list-ol"></i> Pagos por Familia</h2>
-                        <div class="table-responsive">
-                            <table id="public-payments-table">
-                                <thead>
-                                    <tr>
-                                        <th>Alumno</th>
-                                        <th>Cuota Centro</th>
-                                        <th>Cuota Mensual</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Se carga dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column-stats">
-                    <div class="card stat-card accent-green">
-                        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
-                        <div class="stat-info">
-                            <h3>Saldo Actual</h3>
-                            <p id="current-balance" class="stat-value">$0</p>
-                            <span>Recaudado</span>
-                        </div>
-                    </div>
-
-                    <div class="card stat-card accent-blue">
-                        <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                        <div class="stat-info">
-                            <h3>Cuota Mensual</h3>
-                            <p class="stat-value">$2.000</p>
-                            <span>(Voluntaria)</span>
-                        </div>
-                    </div>
-
-                    <div class="card stat-card accent-red">
-                        <div class="stat-icon"><i class="fas fa-users-cog"></i></div>
-                        <div class="stat-info">
-                            <h3>Cuota Centro</h3>
-                            <p class="stat-value">$10.000</p>
-                            <span>Anual</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECCIÓN: RINCÓN DE LA DIRECTIVA (COMUNICADOS) -->
-            <section class="container" style="margin-top: 30px;">
-                <div class="card" style="border-top: 5px solid var(--p-blue); background: linear-gradient(to right, #ffffff, #f0f7ff);">
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <div style="width: 50px; height: 50px; background: var(--p-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
-                            <i class="fas fa-comment-dots"></i>
-                        </div>
-                        <div>
-                            <h2 style="margin: 0; color: var(--p-blue);">Rincón de la Directiva</h2>
-                            <p style="margin: 0; font-size: 0.9rem; color: var(--p-text-light);">Palabras y avisos de nuestra administradora</p>
-                        </div>
-                    </div>
-                    <div id="announcements-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        <!-- Se carga dinámicamente -->
-                        <p class="empty-msg">No hay comunicados recientes.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- BLOQUE 2: NOVEDADES Y ACTIVIDADES -->
-            <section class="updates-grid">
-                <div class="feed-section">
-                    <h2><i class="fas fa-receipt"></i> Gastos Recientes</h2>
-                    <div id="expenses-gallery" class="feed-container">
-                        <p class="empty-msg">Cargando...</p>
-                    </div>
-                </div>
-
-                <div class="feed-section">
-                    <h2><i class="fas fa-bullhorn"></i> Requerimientos de las Tias</h2>
-                    <div id="requests-list" class="feed-container">
-                        <p class="empty-msg">Cargando...</p>
-                    </div>
-                </div>
-
-                <div class="feed-section">
-                    <h2><i class="fas fa-calendar-star"></i> Eventos</h2>
-                    <div id="events-list" class="feed-container">
-                        <p class="empty-msg">Cargando...</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- BLOQUE 3: GALERÍA DE FOTOS -->
-            <section class="full-width-gallery">
-                <div class="gallery-header">
-                    <h2><i class="fas fa-camera-retro"></i> 🌈 Fotos de los PEQUES</h2>
-                    <p>Momentos capturados con amor en el jardín</p>
-                </div>
-                <div id="moments-gallery" class="gallery-grid">
-                    <p class="empty-msg">Cargando momentos...</p>
-                </div>
-            </section>
-        </div>
-
-        <section class="container" style="padding: 40px 0; text-align: center; border-top: 1px solid #eee;">
-            <p style="color: #95a5a6; font-size: 0.9rem;">Portal Centro de Padres &copy; 2026</p>
-            <a href="login.html" style="color: #636e72; text-decoration: none; font-size: 0.7rem; opacity: 0.5;">Acceso Administrativo</a>
         </section>
+
+        <div class="container main-content-area">
+            <!-- SECCIÓN: REQUERIMIENTOS -->
+            <section class="teacher-requests" id="requerimientos">
+                <h2 class="section-title">REQUERIMIENTOS / SOLICITUD</h2>
+                <div id="requests-list" class="requests-grid">
+                    <div class="empty-msg">Cargando requerimientos...</div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN PRINCIPAL -->
+            <section id="centro" style="margin-top: 50px;">
+                <h2 class="section-title">COMUNICADOS DIRECTIVA</h2>
+                <div id="announcements-container" class="updates-grid"></div>
+
+                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-orange); font-size: 1.5rem; text-align: center;">Próximos Eventos</h3>
+                <div id="events-list" class="updates-grid"></div>
+
+                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-blue); font-size: 1.5rem; text-align: center;">Gastos Registrados</h3>
+                <div id="expenses-gallery" class="gallery-grid"></div>
+
+                <h3 style="margin-top:40px; margin-bottom: 20px; color: var(--p-orange); font-size: 1.5rem; text-align: center;">Reseñas</h3>
+                <div id="reviews-container" class="updates-grid">
+                    <p class="empty-msg">No hay reseñas aún.</p>
+                </div>
+            </section>
+
+            <!-- CUOTA CURSO -->
+            <section id="finanzas" style="margin-top: 50px;">
+                <h2 class="section-title">CUOTA CURSO</h2>
+                <div class="card" style="padding:20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f5f9; text-align: left;">
+                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Alumno</th>
+                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Cuota Centro ($10k)</th>
+                                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Mensual ($2k)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="public-payments-table">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GALERIA -->
+            <section id="galeria" style="margin-top: 50px; margin-bottom: 50px;">
+                <h2 class="section-title">GALERÍA DE MOMENTOS</h2>
+                <div id="moments-gallery" class="gallery-grid"></div>
+            </section>
+        </div>
+
+        <footer id="contacto" class="new-footer">
+            <div class="container footer-grid">
+                <div class="footer-col">
+                    <h3>Contact Info</h3>
+                    <p><i class="fas fa-phone"></i> +12 452 6780</p>
+                    <p><i class="fas fa-envelope"></i> info@jardinpeques.com</p>
+                    <p><i class="fas fa-globe"></i> www.jardininfantil.com</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Links</h3>
+                    <a href="#">Calendario</a>
+                    <a href="#">Galería</a>
+                    <a href="#">Contacto</a>
+                </div>
+                <div class="footer-col copyright">
+                    <p>&copy; 2026 Jardín Infantil Peques</p>
+                </div>
+            </div>
+        </footer>
     </main>
 
-    <!-- Firebase SDK (Compat version para fácil integración) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    
     <!-- Modal para ver imágenes en grande -->
-    <div id="modal-preview" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; cursor: zoom-out;" onclick="this.style.display='none'">
-        <img id="preview-img" src="" style="max-width: 95%; max-height: 95%; border-radius: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 3px solid white;">
-        <div style="position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer;">&times;</div>
+    <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="preview-img" src="">
+        <div class="close-modal">&times;</div>
     </div>
 
     <div class="watermark">
-        <img src="zaviso-brand-mark.jpg" alt="Logo Zaviso" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
-        Hecho por <span class="z-brand" style="margin-left: 5px;">Zaviso</span>
+        <img src="zaviso-brand-mark.jpg" alt="Logo Zaviso">
+        Hecho por <span class="z-brand">Zaviso</span>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const backdrop = document.getElementById('menu-backdrop');
+            menu.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+    </script>
     <script src="app.js"></script>
 </body>
 </html>

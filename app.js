@@ -66,7 +66,9 @@ let state = {
     requests: [],
     events: [],
     gallery: [],
-    announcements: [], // Nuevo: Comunicados de la directiva
+    announcements: [],
+    donations: [],
+    reviews: [],
     users: [],
     balance: 0
 };
@@ -96,7 +98,7 @@ function checkPermissions() {
     const user = JSON.parse(userDataStr);
 
     // 1. Mostrar Gestión de Equipo solo a la Dueña (Owner)
-    const userMgmt = document.getElementById('user-management-section');
+    const userMgmt = document.getElementById('team-section');
     if (userMgmt) {
         userMgmt.style.display = (user.role === 'Owner') ? 'block' : 'none';
     }
@@ -106,27 +108,29 @@ function checkPermissions() {
 
     // 3. Ocultar secciones según permisos individuales
     const perms = user.permissions || {};
-    
+
     // Secciones de creación (Formularios)
-    if (document.querySelector('.admin-main-card')) 
+    if (document.querySelector('.admin-main-card'))
         document.querySelector('.admin-main-card').style.display = perms.payments ? 'block' : 'none';
-    
+
     const actionCards = document.querySelectorAll('.action-card');
     if (actionCards[0]) actionCards[0].style.display = perms.expenses ? 'block' : 'none';
     if (actionCards[1]) actionCards[1].style.display = perms.requests ? 'block' : 'none';
-    
+
     const bottomCards = document.querySelectorAll('.admin-grid-bottom .card');
     if (bottomCards[0]) bottomCards[0].style.display = perms.gallery ? 'block' : 'none';
     if (bottomCards[2]) bottomCards[2].style.display = perms.events ? 'block' : 'none';
+    if (document.getElementById('donation-section'))
+        document.getElementById('donation-section').style.display = perms.donations ? 'block' : 'none';
 
     // Secciones de gestión de contenido (Abajo)
-    if (document.getElementById('manage-expenses-container')) 
+    if (document.getElementById('manage-expenses-container'))
         document.getElementById('manage-expenses-container').style.display = perms.expenses ? 'block' : 'none';
-    if (document.getElementById('manage-requests-container')) 
+    if (document.getElementById('manage-requests-container'))
         document.getElementById('manage-requests-container').style.display = perms.requests ? 'block' : 'none';
-    if (document.getElementById('manage-events-container')) 
+    if (document.getElementById('manage-events-container'))
         document.getElementById('manage-events-container').style.display = perms.events ? 'block' : 'none';
-    if (document.getElementById('manage-moments-container')) 
+    if (document.getElementById('manage-moments-container'))
         document.getElementById('manage-moments-container').style.display = perms.gallery ? 'block' : 'none';
 }
 
@@ -142,6 +146,7 @@ function render() {
     if (document.getElementById('users-list-container')) renderUsersList();
     if (document.getElementById('announcements-container')) renderAnnouncements();
     if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
+    if (document.getElementById('reviews-list')) renderReviews();
 }
 
 function renderBalance() {
@@ -204,12 +209,38 @@ function renderRequests() {
             </div>
         `).join('');
     } else {
-        list.innerHTML = state.requests.map(req => `
-            <div class="card" style="border-top: 5px solid var(--p-yellow)">
-                <h3>${req.item}</h3>
-                <p>${req.note || ''}</p>
-            </div>
-        `).join('');
+        const colors = ['blue', 'green', 'orange'];
+        list.innerHTML = (state.requests || []).map((req, index) => {
+            const color = colors[index % 3];
+            return `
+                <div class="teacher-card">
+                    <div class="teacher-header card-${color}">
+                        <img src="https://i.pravatar.cc/150?img=${(index + 10)}" class="teacher-img">
+                        <div class="teacher-label">
+                            Prof. ${req.teacher || 'Laura Barcia'} - Sala ${req.room || 'Jirafa'}
+                        </div>
+                    </div>
+                    <div class="teacher-content">
+                        <div class="teacher-content-inner">
+                            <div class="teacher-text">
+                                <h4>${req.item}</h4>
+                                <ul style="padding-left: 15px; font-size: 0.9rem; color: #555; margin-bottom: 15px;">
+                                    <li>Materiales</li>
+                                    <li>Varios</li>
+                                </ul>
+                                <p style="font-size: 0.8rem; color: #888; margin-bottom: 15px; line-height: 1.2;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
+                            </div>
+                            <div class="teacher-ill">
+                                <i class="fas fa-cubes fa-3x" style="color: #e67e22; opacity: 0.8;"></i>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <button class="btn-support btn-support-${color}" onclick="alert('¡Gracias por tu interés en apoyar!')">APOYAR SOLICITUD</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 }
 
@@ -383,7 +414,7 @@ function renderAnnouncements() {
         return;
     }
     container.innerHTML = state.announcements.map(ann => `
-        <div class="card" style="border-left: 5px solid ${ann.type === 'Reclamo' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: white; padding: 20px;">
+        <div class="card" style="border-left: 5px solid ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: white; padding: 20px;">
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <span style="font-weight: 800; color: var(--p-text-light); font-size: 0.75rem;">${ann.type.toUpperCase()}</span>
                 <span style="color: #999; font-size: 0.75rem;">${ann.date}</span>
@@ -402,7 +433,7 @@ function renderAnnouncementsAdmin() {
     }
     list.innerHTML = state.announcements.map((ann, index) => `
         <div class="admin-mini-card">
-            <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background: ${ann.type === 'Reclamo' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'};">
+            <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background: ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'};">
                 <i class="fas fa-comment" style="color:white;"></i>
             </div>
             <div class="admin-card-info">
@@ -441,6 +472,43 @@ document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
         saveState(); e.target.reset();
     });
 });
+
+document.getElementById('donation-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const type = document.getElementById('donation-type').value;
+    const desc = document.getElementById('donation-desc').value;
+    if (!state.donations) state.donations = [];
+    state.donations.push({ id: Date.now(), type, desc, date: new Date().toLocaleDateString() });
+    saveState(); e.target.reset();
+    alert("Donación registrada con éxito.");
+});
+
+function renderReviews() {
+    const list = document.getElementById('reviews-list');
+    if (!list) return;
+    if (!state.reviews || state.reviews.length === 0) {
+        list.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center;">No hay reseñas registradas.</p>';
+        return;
+    }
+    list.innerHTML = state.reviews.map((review, index) => `
+        <div class="admin-mini-card">
+            <div class="admin-card-info">
+                <p>${review.text.substring(0, 50)}...</p>
+                <span>${review.date}</span>
+            </div>
+            <div class="admin-actions">
+                <button class="btn-mini btn-mini-delete" onclick="deleteReview(${index})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.deleteReview = (index) => {
+    if (confirm("¿Borrar esta reseña?")) {
+        state.reviews.splice(index, 1);
+        saveState();
+    }
+};
 // --- User Management Logic (SuperAdmin Only) ---
 function renderUsersList() {
     const container = document.getElementById('users-list-container');
@@ -483,6 +551,7 @@ document.getElementById('user-form')?.addEventListener('submit', (e) => {
             requests: document.getElementById('p-requests').checked,
             gallery: document.getElementById('p-gallery').checked,
             events: document.getElementById('p-events').checked,
+            donations: document.getElementById('p-donations').checked,
             full: document.getElementById('p-full').checked
         }
     };
