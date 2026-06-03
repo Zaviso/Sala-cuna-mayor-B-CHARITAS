@@ -38,10 +38,14 @@
     <main class="page-wrapper">
         <!-- HERO BANNER - SALDO RECAUDADO -->
         <section class="new-hero">
-            <div class="hero-content container">
+            <div class="hero-content container" style="flex-direction:column; gap:16px;">
                 <div class="saldo-card">
                     <p class="saldo-label">Saldo Actual Recaudado</p>
                     <h1 id="current-balance" class="saldo-amount">$0</h1>
+                </div>
+                <div id="hero-slogan" class="hero-slogan">
+                    Portal oficial del Centro de Padres · Sala Cuna Mayor B<br>
+                    <span>Información transparente, directa y siempre actualizada para cada familia.</span>
                 </div>
             </div>
         </section>
@@ -97,14 +101,7 @@
                 <div class="footer-col">
                     <h3>Contact Info</h3>
                     <p><i class="fas fa-phone"></i> +12 452 6780</p>
-                    <p><i class="fas fa-envelope"></i> info@jardinpeques.com</p>
-                    <p><i class="fas fa-globe"></i> www.jardininfantil.com</p>
-                </div>
-                <div class="footer-col">
-                    <h3>Links</h3>
-                    <a href="#">Calendario</a>
-                    <a href="#">Galería</a>
-                    <a href="#">Contacto</a>
+                    <p><i class="fas fa-envelope"></i> NÚMERO DE CUENTA: </p>
                 </div>
                 <div class="footer-col copyright">
                     <p>&copy; 2026 Jardín Infantil Peques</p>
@@ -113,13 +110,7 @@
         </footer>
     </main>
 
-    <!-- Modal para ver imágenes en grande -->
-    <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
-        <img id="preview-img" src="">
-        <div class="close-modal">&times;</div>
-    </div>
-
-    <!-- Modal imagen gasto -->
+    <!-- Modal imagen -->
     <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
         <img id="preview-img" src="">
         <div class="close-modal">&times;</div>
