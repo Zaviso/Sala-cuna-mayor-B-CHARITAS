@@ -148,6 +148,8 @@ function render() {
     if (document.getElementById('cuota-mensual-table')) renderCuotaMensual();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
+    if (document.getElementById('admin-historial-curso-body')) renderAdminHistorialCurso();
+    if (document.getElementById('admin-historial-mensual-body')) renderAdminHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
     if (document.getElementById('announcements-container')) renderAnnouncements();
     if (document.getElementById('announcements-list')) renderAnnouncementsAdmin();
@@ -358,6 +360,60 @@ function renderPublicPayments() {
 
 const MESES_CURSO = ['Dic'];
 const MESES_MENSUAL = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+window.toggleMonthlyPayment = (studentId, mes) => {
+    if (!state.monthlyHistory) state.monthlyHistory = {};
+    if (!state.monthlyHistory[studentId]) state.monthlyHistory[studentId] = {};
+    state.monthlyHistory[studentId][mes] = !state.monthlyHistory[studentId][mes];
+    saveState();
+};
+
+window.toggleCursoPayment = (studentId) => {
+    const s = state.students.find(x => x.id === studentId);
+    if (s) { s.paidCentro = !s.paidCentro; saveState(); }
+};
+
+function renderAdminHistorialCurso() {
+    const tbody = document.getElementById('admin-historial-curso-body');
+    if (!tbody) return;
+    tbody.innerHTML = state.students.map(s => `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px 8px;">${s.name}</td>
+            <td style="padding:10px 8px; text-align:center;">
+                <button onclick="toggleCursoPayment(${s.id})"
+                    style="padding:6px 16px; border-radius:20px; border:none; cursor:pointer; font-weight:700; font-size:0.8rem;
+                    background:${s.paidCentro ? 'var(--p-green)' : '#f1f5f9'};
+                    color:${s.paidCentro ? 'white' : '#aaa'};">
+                    ${s.paidCentro ? '✓ PAGADO' : 'PENDIENTE'}
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderAdminHistorialMensual() {
+    const tbody = document.getElementById('admin-historial-mensual-body');
+    if (!tbody) return;
+    tbody.innerHTML = state.students.map(s => {
+        const pagos = (state.monthlyHistory || {})[s.id] || {};
+        return `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:10px 8px; white-space:nowrap; font-size:0.8rem;">${s.name}</td>
+                ${MESES_MENSUAL.map(mes => {
+                    const paid = pagos[mes];
+                    return `<td style="padding:6px 4px; text-align:center;">
+                        <button onclick="toggleMonthlyPayment(${s.id}, '${mes}')"
+                            style="width:34px; height:34px; border-radius:50%; border:none; cursor:pointer; font-weight:700; font-size:0.75rem;
+                            background:${paid ? 'var(--p-green)' : '#f1f5f9'};
+                            color:${paid ? 'white' : '#bbb'}; transition: all 0.2s;">
+                            ${paid ? '✓' : mes[0]}
+                        </button>
+                    </td>`;
+                }).join('')}
+            </tr>
+        `;
+    }).join('');
+}
 
 function renderHistorialCurso() {
     const tbody = document.getElementById('historial-curso-table');
