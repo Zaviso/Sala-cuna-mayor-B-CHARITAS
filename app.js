@@ -155,32 +155,21 @@ function render() {
 }
 
 function renderBalance() {
-    const montoCurso = Number((state.montos || {}).curso) || 0;
-    const montoMensual = Number((state.montos || {}).mensual) || 0;
+    const MONTO_POR_PAGO = 1092;
 
-    let totalCurso = 0;
+    let total = 0;
     state.students.forEach(s => {
-        const pagos = (state.cursoHistory || {})[s.id] || {};
-        totalCurso += Object.values(pagos).filter(Boolean).length * montoCurso;
-    });
-
-    let totalMensual = 0;
-    state.students.forEach(s => {
-        const pagos = (state.monthlyHistory || {})[s.id] || {};
-        totalMensual += Object.values(pagos).filter(Boolean).length * montoMensual;
+        const curso = (state.cursoHistory || {})[s.id] || {};
+        const mensual = (state.monthlyHistory || {})[s.id] || {};
+        total += Object.values(curso).filter(Boolean).length * MONTO_POR_PAGO;
+        total += Object.values(mensual).filter(Boolean).length * MONTO_POR_PAGO;
     });
 
     const totalExpenses = (state.expenses || []).reduce((acc, e) => acc + Number(e.amount), 0);
-    state.balance = totalCurso + totalMensual - totalExpenses;
+    state.balance = total - totalExpenses;
 
     const el = document.getElementById('current-balance');
     if (el) el.textContent = `$${state.balance.toLocaleString('es-CL')}`;
-
-    // Actualizar campos de monto en admin si existen
-    const inCurso = document.getElementById('monto-curso');
-    const inMensual = document.getElementById('monto-mensual');
-    if (inCurso && !inCurso.matches(':focus')) inCurso.value = montoCurso;
-    if (inMensual && !inMensual.matches(':focus')) inMensual.value = montoMensual;
 }
 
 function renderExpenses() {
@@ -412,16 +401,6 @@ window.adminSwitchTab = (tab) => {
     document.querySelectorAll('.col-mensual').forEach(el => el.style.display = isCurso ? 'none' : '');
     document.querySelectorAll('.th-curso').forEach(el => el.style.display = isCurso ? '' : 'none');
     document.querySelectorAll('.th-mensual').forEach(el => el.style.display = isCurso ? 'none' : '');
-};
-
-window.guardarMontos = () => {
-    const curso = Number(document.getElementById('monto-curso')?.value) || 0;
-    const mensual = Number(document.getElementById('monto-mensual')?.value) || 0;
-    if (!state.montos) state.montos = {};
-    state.montos.curso = curso;
-    state.montos.mensual = mensual;
-    saveState();
-    alert(`Montos guardados: Cuota Curso $${curso.toLocaleString('es-CL')} / Cuota Mensual $${mensual.toLocaleString('es-CL')}`);
 };
 
 window.addStudent = () => {
