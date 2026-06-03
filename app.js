@@ -572,14 +572,14 @@ window.deleteUserAccount = (index) => {
 
 // Manejo de Galería en el navbar
 document.addEventListener('DOMContentLoaded', () => {
-    const galeryLink = document.querySelector('a[href="#galeria"]');
-    if (galeryLink) {
-        galeryLink.addEventListener('click', (e) => {
+    const galeriaLink = document.getElementById('galeria-link') || document.querySelector('a[href="#galeria"]');
+    if (galeriaLink) {
+        galeriaLink.addEventListener('click', (e) => {
             e.preventDefault();
-            const galerySection = document.getElementById('galeria');
-            if (galerySection) {
-                galerySection.style.display = 'block';
-                galerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const galeriaSection = document.getElementById('galeria');
+            if (galeriaSection) {
+                galeriaSection.style.display = 'block';
+                setTimeout(() => galeriaSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
             }
         });
     }
