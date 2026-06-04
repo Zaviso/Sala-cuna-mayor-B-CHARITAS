@@ -35,20 +35,8 @@
 
     <main class="page-wrapper">
         <div class="container main-content-area" style="padding-top: 40px;">
-            <!-- TABS para elegir vista -->
-            <div style="display:flex; gap:10px; margin-bottom:30px; margin-top:30px;">
-                <button id="tab-curso" onclick="switchTab('curso')"
-                    class="tab-btn tab-btn-active">
-                    Cuota Curso
-                </button>
-                <button id="tab-mensual" onclick="switchTab('mensual')"
-                    class="tab-btn">
-                    Cuota Mensual
-                </button>
-            </div>
-
             <!-- Vista Cuota Curso (Mayo–Diciembre) -->
-            <section id="vista-curso" style="margin-bottom: 60px;">
+            <section id="vista-curso" style="margin-bottom: 60px; margin-top: 30px;">
                 <h2 class="section-title">CUOTA CURSO</h2>
                 <div class="card" style="padding:20px; background:white; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
                     <p style="text-align:center; color:var(--p-text-light); margin-bottom:20px; font-size:0.9rem;">
@@ -75,35 +63,6 @@
                 </div>
             </section>
 
-            <!-- Vista Cuota Mensual (Mar-Dic) -->
-            <section id="vista-mensual" style="margin-bottom: 60px; display:none;">
-                <h2 class="section-title">CUOTA MENSUAL</h2>
-                <div class="card" style="padding:20px; background:white; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
-                    <p style="text-align:center; color:var(--p-text-light); margin-bottom:20px; font-size:0.9rem;">
-                        Estado de pagos mensuales — Marzo a Diciembre
-                    </p>
-                    <div class="table-responsive">
-                        <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
-                            <thead>
-                                <tr style="background:#f1f5f9; text-align:center;">
-                                    <th style="padding:10px 8px; border-bottom:2px solid #ddd; text-align:left;">Alumno</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Mar</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Abr</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">May</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Jun</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Jul</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Ago</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Sep</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Oct</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Nov</th>
-                                    <th style="padding:10px 4px; border-bottom:2px solid #ddd;">Dic</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historial-mensual-table"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
 
