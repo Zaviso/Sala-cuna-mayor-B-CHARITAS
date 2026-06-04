@@ -181,24 +181,45 @@ function renderExpenses() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        gallery.innerHTML = state.expenses.map(exp => {
-            const imgs = exp.images || (exp.image ? [exp.image] : []);
-            const thumbs = imgs.length > 0
-                ? imgs.map(src => `
-                    <img src="${src}" onclick="openPreview('${src}')"
-                        style="width:44px; height:44px; object-fit:cover; border-radius:6px; cursor:pointer; border:1px solid #e2e8f0;">
-                  `).join('')
-                : `<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#ccc; font-size:0.85rem;"></i></div>`;
+        // Agrupar por fecha, más recientes primero
+        const byDate = {};
+        state.expenses.forEach(exp => {
+            const key = exp.date || 'Sin fecha';
+            if (!byDate[key]) byDate[key] = [];
+            byDate[key].push(exp);
+        });
+        const sortedDates = Object.keys(byDate).sort((a, b) => {
+            const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
+            return parse(b) - parse(a);
+        });
+
+        gallery.innerHTML = sortedDates.map(fecha => {
+            const exps = byDate[fecha];
+            const total = exps.reduce((s, e) => s + Number(e.amount), 0);
+            const items = exps.map(exp => {
+                const imgs = exp.images || (exp.image ? [exp.image] : []);
+                const thumb = imgs.length > 0
+                    ? `<img src="${imgs[0]}" onclick="openPreview('${imgs[0]}')"
+                        style="width:40px;height:40px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:1px solid #e2e8f0;">`
+                    : `<div style="width:40px;height:40px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-receipt" style="color:#ccc;font-size:0.8rem;"></i></div>`;
+                return `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f1f5f9;">
+                    ${thumb}
+                    <div style="flex:1;min-width:0;">
+                        <p style="margin:0;font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${exp.desc}</p>
+                        <span style="font-size:0.75rem;color:var(--p-red);font-weight:700;">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
+                    </div>
+                    <button class="btn-mini btn-mini-delete" onclick="deleteExpense(${exp.id})" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>
+                </div>`;
+            }).join('');
+
             return `
-            <div class="admin-mini-card">
-                <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">${thumbs}</div>
-                <div class="admin-card-info">
-                    <p>${exp.desc}</p>
-                    <span>$${Number(exp.amount).toLocaleString('es-CL')} | ${exp.date}</span>
+            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
+                    <span style="font-size:0.75rem;background:var(--p-red);color:white;padding:2px 8px;border-radius:20px;font-weight:700;">-$${total.toLocaleString('es-CL')}</span>
                 </div>
-                <div class="admin-actions">
-                    <button class="btn-mini btn-mini-delete" onclick="deleteExpense(${exp.id})"><i class="fas fa-trash"></i></button>
-                </div>
+                ${items}
             </div>`;
         }).join('');
     } else {
