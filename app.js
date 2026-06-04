@@ -137,6 +137,31 @@ function checkPermissions() {
         document.getElementById('manage-moments-container').style.display = perms.gallery ? 'block' : 'none';
 }
 
+// --- Tarjeta compacta unificada para admin ---
+function adminCard({ icon, iconBg, imgSrc, title, subtitle, onDelete }) {
+    const visual = imgSrc
+        ? `<div style="position:relative;flex-shrink:0;">
+               <img src="${imgSrc}" onclick="openPreview('${imgSrc}')"
+                   style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
+               <span onclick="openPreview('${imgSrc}')"
+                   style="position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--p-blue);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                   <i class="fas fa-expand" style="color:white;font-size:0.45rem;"></i>
+               </span>
+           </div>`
+        : `<div style="width:48px;height:48px;border-radius:8px;background:${iconBg || '#e2e8f0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+               <i class="${icon || 'fas fa-file'}" style="color:white;font-size:1rem;"></i>
+           </div>`;
+    return `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:6px;">
+        ${visual}
+        <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);">${title}</p>
+            <span style="font-size:0.73rem;color:#999;">${subtitle || ''}</span>
+        </div>
+        <button class="btn-mini btn-mini-delete" onclick="${onDelete}" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>
+    </div>`;
+}
+
 // --- Rendering Functions ---
 function render() {
     if (document.getElementById('current-balance')) renderBalance();
@@ -198,19 +223,13 @@ function renderExpenses() {
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const items = exps.map(exp => {
                 const imgs = exp.images || (exp.image ? [exp.image] : []);
-                const thumb = imgs.length > 0
-                    ? `<img src="${imgs[0]}" onclick="openPreview('${imgs[0]}')"
-                        style="width:40px;height:40px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:1px solid #e2e8f0;">`
-                    : `<div style="width:40px;height:40px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-receipt" style="color:#ccc;font-size:0.8rem;"></i></div>`;
-                return `
-                <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f1f5f9;">
-                    ${thumb}
-                    <div style="flex:1;min-width:0;">
-                        <p style="margin:0;font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${exp.desc}</p>
-                        <span style="font-size:0.75rem;color:var(--p-red);font-weight:700;">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
-                    </div>
-                    <button class="btn-mini btn-mini-delete" onclick="deleteExpense(${exp.id})" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>
-                </div>`;
+                return adminCard({
+                    imgSrc: imgs.length > 0 ? imgs[0] : null,
+                    icon: 'fas fa-receipt', iconBg: '#f1f5f9',
+                    title: exp.desc,
+                    subtitle: `-$${Number(exp.amount).toLocaleString('es-CL')}`,
+                    onDelete: `deleteExpense(${exp.id})`
+                });
             }).join('');
 
             return `
@@ -288,15 +307,9 @@ function renderRequests() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        list.innerHTML = state.requests.map(req => `
-            <div class="admin-mini-card">
-                <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background:var(--p-yellow);"><i class="fas fa-bullhorn" style="color:white;"></i></div>
-                <div class="admin-card-info"><p>${req.item}</p><span>${req.status}</span></div>
-                <div class="admin-actions">
-                    <button class="btn-mini btn-mini-delete" onclick="deleteRequest(${req.id})"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-        `).join('');
+        list.innerHTML = state.requests.map(req =>
+            adminCard({ icon:'fas fa-bullhorn', iconBg:'var(--p-orange)', title: req.item, subtitle: req.status, onDelete:`deleteRequest(${req.id})` })
+        ).join('');
     } else {
         const colors = ['blue', 'green', 'orange'];
         list.innerHTML = (state.requests || []).map((req, index) => {
@@ -342,15 +355,9 @@ function renderEvents() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        list.innerHTML = state.events.map(ev => `
-            <div class="admin-mini-card">
-                <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background:var(--p-blue);"><i class="fas fa-calendar" style="color:white;"></i></div>
-                <div class="admin-card-info"><p>${ev.name}</p><span>${ev.date}</span></div>
-                <div class="admin-actions">
-                    <button class="btn-mini btn-mini-delete" onclick="deleteEvent(${ev.id})"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-        `).join('');
+        list.innerHTML = state.events.map(ev =>
+            adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})` })
+        ).join('');
     } else {
         list.innerHTML = state.events.map(ev => `
             <div class="card" style="border-left: 5px solid var(--p-blue);">
@@ -370,12 +377,9 @@ function renderMomentsGallery() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        gal.innerHTML = state.gallery.map(img => `
-            <div class="admin-moment-card">
-                <img src="${img.url}">
-                <button class="btn-mini btn-mini-delete" onclick="deletePhoto(${img.id})" style="width:100%"><i class="fas fa-trash"></i> Eliminar</button>
-            </div>
-        `).join('');
+        gal.innerHTML = state.gallery.map(img =>
+            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: '', onDelete:`deletePhoto(${img.id})` })
+        ).join('');
     } else {
         gal.innerHTML = state.gallery.map(img => `
             <div class="gallery-item">
@@ -711,20 +715,10 @@ function renderAnnouncementsAdmin() {
         list.innerHTML = '<p class="empty-msg">No hay comunicados activos.</p>';
         return;
     }
-    list.innerHTML = state.announcements.map((ann, index) => `
-        <div class="admin-mini-card">
-            <div class="admin-thumb" style="display:flex; align-items:center; justify-content:center; background: ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'};">
-                <i class="fas fa-comment" style="color:white;"></i>
-            </div>
-            <div class="admin-card-info">
-                <p>${ann.text.substring(0, 30)}...</p>
-                <span>${ann.type} - ${ann.date}</span>
-            </div>
-            <div class="admin-actions">
-                <button class="btn-mini btn-mini-delete" onclick="deleteAnnouncement(${index})"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>
-    `).join('');
+    list.innerHTML = state.announcements.map((ann, index) => {
+        const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
+        return adminCard({ icon:'fas fa-comment', iconBg: bg, title: ann.text.substring(0,40) + (ann.text.length>40?'…':''), subtitle:`${ann.type} · ${ann.date}`, onDelete:`deleteAnnouncement(${index})` });
+    }).join('');
 }
 
 document.getElementById('announcement-form')?.addEventListener('submit', (e) => {
