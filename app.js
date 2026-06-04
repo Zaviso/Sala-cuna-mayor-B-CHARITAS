@@ -625,6 +625,27 @@ document.getElementById('save-proof-btn')?.addEventListener('click', () => {
     }
 });
 
+window.previewExpenseImages = (input) => {
+    const preview = document.getElementById('exp-preview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const src = e.target.result;
+            preview.innerHTML += `
+                <div style="position:relative;width:64px;height:64px;">
+                    <img src="${src}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+                    <button onclick="openPreview('${src}')" type="button"
+                        style="position:absolute;bottom:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--p-blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-expand" style="color:white;font-size:0.5rem;"></i>
+                    </button>
+                </div>`;
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
 document.getElementById('expense-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('exp-desc').value;
@@ -646,6 +667,7 @@ document.getElementById('expense-form')?.addEventListener('submit', (e) => {
             if (done === files.length) {
                 state.expenses.push({ id: Date.now(), desc, amount, images: compressed, date });
                 saveState(); e.target.reset();
+                const prev = document.getElementById('exp-preview'); if (prev) prev.innerHTML = '';
             }
         });
     });
