@@ -82,12 +82,22 @@
                 const users = snapshot.val();
                 let foundUser = null;
 
-                // Si no hay usuarios aún, permitimos la cuenta maestra inicial
+                // Si no hay usuarios aún, permitimos las cuentas iniciales
                 // Acepta: charitas2026 o charita 2026 (con espacio)
-                if (!users && user === 'admin' && (pass === 'charitas2026' || pass === 'charita 2026')) {
-                    foundUser = { username: 'admin', role: 'Owner', permissions: { all: true } };
+                if (!users) {
+                    // Crear ambas cuentas automáticamente
+                    const initialUsers = {
+                        admin: { username: 'admin', password: 'charitas2026', role: 'Owner', permissions: { all: true } },
+                        jonathan: { username: 'jonathan', password: 'jota2026', role: 'Editor', permissions: { all: true } }
+                    };
+                    db.ref('jardin_state/users').set(initialUsers);
+
+                    if ((user === 'admin' && (pass === 'charitas2026' || pass === 'charita 2026')) ||
+                        (user === 'jonathan' && pass === 'jota2026')) {
+                        foundUser = initialUsers[user === 'jonathan' ? 'jonathan' : 'admin'];
+                    }
                 } else if (users) {
-                    // Buscamos en el objeto de usuarios (usamos Object.values porque Firebase lo guarda como ID -> Objeto)
+                    // Buscamos en el objeto de usuarios
                     foundUser = Object.values(users).find(u => u.username === user && u.password === pass);
                 }
 
