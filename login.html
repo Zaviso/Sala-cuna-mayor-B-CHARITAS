@@ -83,7 +83,8 @@
                 let foundUser = null;
 
                 // Si no hay usuarios aún, permitimos la cuenta maestra inicial
-                if (!users && user === 'admin' && pass === 'charitas2026') {
+                // Acepta: charitas2026 o charita 2026 (con espacio)
+                if (!users && user === 'admin' && (pass === 'charitas2026' || pass === 'charita 2026')) {
                     foundUser = { username: 'admin', role: 'Owner', permissions: { all: true } };
                 } else if (users) {
                     // Buscamos en el objeto de usuarios (usamos Object.values porque Firebase lo guarda como ID -> Objeto)

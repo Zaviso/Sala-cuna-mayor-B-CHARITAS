@@ -308,16 +308,17 @@ function renderRequests() {
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
         list.innerHTML = state.requests.map(req =>
-            adminCard({ icon:'fas fa-bullhorn', iconBg:'var(--p-orange)', title: req.item, subtitle: req.status, onDelete:`deleteRequest(${req.id})` })
+            adminCard({ imgSrc: req.image, icon:'fas fa-bullhorn', iconBg:'var(--p-orange)', title: req.item, subtitle: `${req.teacher || '—'} (${req.room || '—'})`, onDelete:`deleteRequest(${req.id})` })
         ).join('');
     } else {
         const colors = ['blue', 'green', 'orange'];
         list.innerHTML = (state.requests || []).map((req, index) => {
             const color = colors[index % 3];
+            const profileImg = req.image || `https://i.pravatar.cc/150?img=${(index + 10)}`;
             return `
                 <div class="teacher-card">
                     <div class="teacher-header card-${color}">
-                        <img src="https://i.pravatar.cc/150?img=${(index + 10)}" class="teacher-img">
+                        <img src="${profileImg}" class="teacher-img" style="object-fit: cover;">
                         <div class="teacher-label">
                             Prof. ${req.teacher || 'Laura Barcia'} - Sala ${req.room || 'Jirafa'}
                         </div>
@@ -326,14 +327,7 @@ function renderRequests() {
                         <div class="teacher-content-inner">
                             <div class="teacher-text">
                                 <h4>${req.item}</h4>
-                                <ul style="padding-left: 15px; font-size: 0.9rem; color: #555; margin-bottom: 15px;">
-                                    <li>Materiales</li>
-                                    <li>Varios</li>
-                                </ul>
-                                <p style="font-size: 0.8rem; color: #888; margin-bottom: 15px; line-height: 1.2;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p>
-                            </div>
-                            <div class="teacher-ill">
-                                <i class="fas fa-cubes fa-3x" style="color: #e67e22; opacity: 0.8;"></i>
+                                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; line-height: 1.4;">${req.note || 'Se necesita tu apoyo para este requerimiento.'}</p>
                             </div>
                         </div>
                         <div style="text-align: center;">
@@ -677,10 +671,47 @@ document.getElementById('expense-form')?.addEventListener('submit', (e) => {
     });
 });
 
+window.previewRequestImage = (input) => {
+    const preview = document.getElementById('req-preview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+};
+
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    state.requests.push({ id: Date.now(), item: document.getElementById('req-item').value, note: document.getElementById('req-note').value, status: 'Pendiente' });
-    saveState(); e.target.reset();
+    const file = document.getElementById('req-image').files[0];
+    const item = document.getElementById('req-item').value;
+    const teacher = document.getElementById('req-teacher').value;
+    const room = document.getElementById('req-room').value;
+    const note = document.getElementById('req-note').value;
+
+    const saveRequest = (imageData) => {
+        state.requests.push({
+            id: Date.now(),
+            item,
+            teacher,
+            room,
+            note,
+            image: imageData || null,
+            status: 'Pendiente'
+        });
+        saveState();
+        e.target.reset();
+        document.getElementById('req-preview').innerHTML = '';
+    };
+
+    if (file) {
+        compressImage(file, saveRequest);
+    } else {
+        saveRequest(null);
+    }
 });
 
 document.getElementById('event-form')?.addEventListener('submit', (e) => {

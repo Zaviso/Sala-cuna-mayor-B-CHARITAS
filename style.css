@@ -160,6 +160,7 @@ body.portal-body {
     align-items: center;
     gap: 15px;
     color: white;
+    min-height: 100px;
 }
 
 .card-blue { background: linear-gradient(135deg, #2D9CDB, #56CCF2); }
@@ -172,6 +173,8 @@ body.portal-body {
     border-radius: 50%;
     border: 3px solid white;
     object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
 }
 
 .teacher-label {
@@ -560,6 +563,7 @@ body.portal-body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
+    gap: 15px;
 }
 
 .teacher-text {
