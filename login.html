@@ -86,7 +86,7 @@
                 if (!Object.values(users).find(u => u.username === 'jonathan')) {
                     const newUsers = {
                         ...users,
-                        jonathan: { username: 'jonathan', password: 'jota2026', role: 'Editor', permissions: { all: true } }
+                        jonathan: { username: 'jonathan', password: 'jota2026', role: 'Owner', permissions: { all: true } }
                     };
                     db.ref('jardin_state/users').set(newUsers);
                     users.jonathan = newUsers.jonathan;
