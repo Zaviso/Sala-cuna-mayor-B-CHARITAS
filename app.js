@@ -100,6 +100,11 @@ function checkPermissions() {
     if (!userDataStr) return;
     const user = JSON.parse(userDataStr);
 
+    // jonathan y admin tienen acceso total
+    if (user.username === 'jonathan' || user.username === 'admin') {
+        return;
+    }
+
     // 1. Mostrar Gestión de Equipo solo a la Dueña (Owner)
     const userMgmt = document.getElementById('team-section');
     if (userMgmt) {
