@@ -79,26 +79,25 @@
             const errorMsg = document.getElementById('login-error');
 
             db.ref('jardin_state/users').once('value', (snapshot) => {
-                const users = snapshot.val();
+                const users = snapshot.val() || {};
                 let foundUser = null;
 
-                // Si no hay usuarios aún, permitimos las cuentas iniciales
-                // Acepta: charitas2026 o charita 2026 (con espacio)
-                if (!users) {
-                    // Crear ambas cuentas automáticamente
-                    const initialUsers = {
-                        admin: { username: 'admin', password: 'charitas2026', role: 'Owner', permissions: { all: true } },
+                // Crear cuenta jonathan si no existe
+                if (!Object.values(users).find(u => u.username === 'jonathan')) {
+                    const newUsers = {
+                        ...users,
                         jonathan: { username: 'jonathan', password: 'jota2026', role: 'Editor', permissions: { all: true } }
                     };
-                    db.ref('jardin_state/users').set(initialUsers);
+                    db.ref('jardin_state/users').set(newUsers);
+                    users.jonathan = newUsers.jonathan;
+                }
 
-                    if ((user === 'admin' && (pass === 'charitas2026' || pass === 'charita 2026')) ||
-                        (user === 'jonathan' && pass === 'jota2026')) {
-                        foundUser = initialUsers[user === 'jonathan' ? 'jonathan' : 'admin'];
-                    }
-                } else if (users) {
-                    // Buscamos en el objeto de usuarios
-                    foundUser = Object.values(users).find(u => u.username === user && u.password === pass);
+                // Buscar usuario
+                foundUser = Object.values(users).find(u => u.username === user && u.password === pass);
+
+                // Aceptar también "charita 2026" con espacio para admin
+                if (!foundUser && user === 'admin' && pass === 'charita 2026') {
+                    foundUser = Object.values(users).find(u => u.username === 'admin' && u.password === 'charitas2026');
                 }
 
                 if (foundUser) {
