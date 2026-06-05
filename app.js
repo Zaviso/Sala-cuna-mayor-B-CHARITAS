@@ -516,23 +516,46 @@ window.toggleCursoPayment = (studentId, mes) => {
 };
 
 function renderDonations() {
+    const isAdmin = !!document.getElementById('students-table');
+
+    // Panel público
     const container = document.getElementById('donations-list');
-    if (!container) return;
-    if (!state.donations || state.donations.length === 0) {
-        container.innerHTML = '<p class="empty-msg">No hay donaciones registradas.</p>';
-        return;
-    }
-    container.innerHTML = state.donations.map(d => `
-        <div class="card" style="border-left: 5px solid var(--p-green); background:white; padding:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-weight:800; color:var(--p-green); font-size:0.85rem;">DONACIÓN</span>
-                <span style="color:#aaa; font-size:0.8rem;">${d.date}</span>
+    if (container) {
+        if (!state.donations || state.donations.length === 0) {
+            container.innerHTML = '<p class="empty-msg">No hay donaciones registradas.</p>';
+            return;
+        }
+        container.innerHTML = state.donations.map(d => `
+            <div class="card" style="border-left: 5px solid var(--p-green); background:white; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-weight:800; color:var(--p-green); font-size:0.85rem;">DONACIÓN</span>
+                    <span style="color:#aaa; font-size:0.8rem;">${d.date}</span>
+                </div>
+                <p style="font-weight:700; margin-bottom:4px;">${d.type}</p>
+                <p style="color:#666; font-size:0.9rem;">${d.desc || ''}</p>
             </div>
-            <p style="font-weight:700; margin-bottom:4px;">${d.type}</p>
-            <p style="color:#666; font-size:0.9rem;">${d.desc || ''}</p>
-        </div>
-    `).join('');
+        `).join('');
+    }
+
+    // Panel admin
+    const adminContainer = document.getElementById('donations-list-admin');
+    if (adminContainer) {
+        if (!state.donations || state.donations.length === 0) {
+            adminContainer.innerHTML = '<p class="empty-msg">No hay donaciones registradas.</p>';
+            return;
+        }
+        adminContainer.innerHTML = state.donations.map(d =>
+            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation(${d.id})` })
+        ).join('');
+    }
 }
+
+window.deleteDonation = (id) => {
+    if (confirm("¿Borrar esta donación?")) {
+        state.donations = state.donations.filter(d => d.id !== id);
+        saveState();
+    }
+};
 
 function renderHistorialCurso() {
     const tbody = document.getElementById('historial-curso-table');
