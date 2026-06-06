@@ -175,7 +175,6 @@ function render() {
     if (document.getElementById('expenses-gallery')) renderExpenses();
     if (document.getElementById('requests-list')) renderRequests();
     if (document.getElementById('events-list')) renderEvents();
-    if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('gallery-public')) renderGalleryPublic();
     renderRelevantInfo();
