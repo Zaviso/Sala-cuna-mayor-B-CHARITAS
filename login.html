@@ -108,7 +108,9 @@
                 }
 
                 if (foundUser) {
-                    sessionStorage.setItem('isAdmin', 'true');
+                    // Solo es admin si es jonathan, admin, o tiene acceso total
+                    const isRealAdmin = foundUser.username === 'jonathan' || foundUser.username === 'admin' || foundUser.permissions?.full === true;
+                    sessionStorage.setItem('isAdmin', isRealAdmin ? 'true' : 'false');
                     sessionStorage.setItem('userData', JSON.stringify(foundUser));
                     window.location.href = 'admin.html';
                 } else {
