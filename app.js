@@ -1130,7 +1130,7 @@ function renderParticipations() {
                             </select>
                         </div>
                     </div>
-                    <button class="btn-mini btn-mini-delete" onclick="deleteParticipation(${p.id})" title="Eliminar participación"><i class="fas fa-trash"></i></button>
+                    ${hasPermission('participations') ? `<button class="btn-mini btn-mini-delete" onclick="deleteParticipation(${p.id})" title="Eliminar participación"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `;
         }).join('');
@@ -1194,7 +1194,7 @@ function renderRelevantInfo() {
                         <p style="margin:0;font-size:0.8rem;color:#666;white-space:pre-wrap;">${info.desc || '—'}</p>
                         <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${info.date}</p>
                     </div>
-                    <button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo(${info.id})" title="Eliminar información"><i class="fas fa-trash"></i></button>
+                    ${hasPermission('relevantInfo') ? `<button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo(${info.id})" title="Eliminar información"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `;
         }).join('');
