@@ -1417,14 +1417,20 @@ window.handleCreateUser = (e) => {
             return;
         }
 
-        // Verificar que el username no exista ya
-        if (state.users && state.users.some(u => u.username === username)) {
+        // Verificar que el username no exista ya (solo en usuarios válidos)
+        const existingUsers = state.users.filter(u => u && u.username);
+        if (existingUsers.some(u => u.username === username)) {
+            console.warn("Usuario duplicado detectado:", username);
             alert("Este nombre de usuario ya existe. Elige uno diferente.");
             return;
         }
 
         // Verificar que no sea un usuario eliminado (lista negra)
-        if (state.deletedUsernames && state.deletedUsernames.includes(username)) {
+        const deletedList = Array.isArray(state.deletedUsernames)
+            ? state.deletedUsernames
+            : (state.deletedUsernames ? Object.values(state.deletedUsernames) : []);
+
+        if (deletedList.some(u => u === username || (u && u.username === username))) {
             alert("Este nombre de usuario ya fue utilizado anteriormente y fue eliminado. No puede ser reutilizado por razones de seguridad.\n\nPor favor elige un nombre de usuario diferente.");
             return;
         }
