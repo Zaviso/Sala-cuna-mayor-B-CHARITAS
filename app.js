@@ -1056,8 +1056,6 @@ function renderRelevantInfo() {
     // Panel admin
     const adminContainer = document.getElementById('relevant-info-list-admin');
     if (adminContainer) {
-            return;
-        }
         adminContainer.innerHTML = state.relevantInfo.map(info => {
             const imgHTML = info.image ? `<img src="${info.image}" onclick="openPreview('${info.image}')" style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;flex-shrink:0;">` : '';
             return `
