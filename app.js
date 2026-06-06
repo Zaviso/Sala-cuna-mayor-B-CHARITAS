@@ -176,6 +176,7 @@ function render() {
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('gallery-public')) renderGalleryPublic();
+    if (document.getElementById('relevant-info-list') || document.getElementById('relevant-info-list-admin')) renderRelevantInfo();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
@@ -841,6 +842,19 @@ window.previewParticipationImage = (input) => {
     }
 };
 
+window.previewRelevantInfoImage = (input) => {
+    const preview = document.getElementById('info-preview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+};
+
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const files = Array.from(document.getElementById('req-image').files);
@@ -1008,6 +1022,60 @@ window.deleteParticipation = (id) => {
     }
 };
 
+function renderRelevantInfo() {
+    const isAdmin = !!document.getElementById('students-table');
+
+    // Panel público
+    const container = document.getElementById('relevant-info-list');
+    if (container) {
+        if (!state.relevantInfo || state.relevantInfo.length === 0) {
+            container.innerHTML = '<p class="empty-msg">No hay información relevante registrada.</p>';
+            return;
+        }
+        container.innerHTML = state.relevantInfo.map(info => {
+            const imgHTML = info.image ? `<img src="${info.image}" onclick="openPreview('${info.image}')" style="width:100%;max-width:300px;object-fit:cover;border-radius:10px;cursor:pointer;margin-bottom:12px;">` : '';
+            return `
+                <div class="card" style="border-left: 5px solid #9C27B0; background:white; padding:20px;">
+                    ${imgHTML}
+                    <h3 style="margin:0 0 10px 0; color:var(--p-text);">${info.title}</h3>
+                    <p style="color:#666; font-size:0.9rem; white-space: pre-wrap; margin-bottom:8px;">${info.desc || ''}</p>
+                    <span style="font-size:0.75rem;color:#aaa;">${info.date}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Panel admin
+    const adminContainer = document.getElementById('relevant-info-list-admin');
+    if (adminContainer) {
+        if (!state.relevantInfo || state.relevantInfo.length === 0) {
+            adminContainer.innerHTML = '<p class="empty-msg">No hay información relevante registrada.</p>';
+            return;
+        }
+        adminContainer.innerHTML = state.relevantInfo.map(info => {
+            const imgHTML = info.image ? `<img src="${info.image}" onclick="openPreview('${info.image}')" style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;flex-shrink:0;">` : '';
+            return `
+                <div style="display:flex;align-items:center;gap:10px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;">
+                    ${imgHTML}
+                    <div style="flex:1; min-width:0;">
+                        <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${info.title}</p>
+                        <p style="margin:0;font-size:0.8rem;color:#666;white-space:pre-wrap;">${info.desc || '—'}</p>
+                        <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${info.date}</p>
+                    </div>
+                    <button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo(${info.id})" title="Eliminar información"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+window.deleteRelevantInfo = (id) => {
+    if (confirm("¿Borrar esta información?")) {
+        state.relevantInfo = state.relevantInfo.filter(i => i.id !== id);
+        saveState();
+    }
+};
+
 document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = document.getElementById('photo-file').files[0];
@@ -1025,6 +1093,34 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
     state.donations.push({ id: Date.now(), type, desc, date: new Date().toLocaleDateString() });
     saveState(); e.target.reset();
     alert("Donación registrada con éxito.");
+});
+
+document.getElementById('relevant-info-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const file = document.getElementById('info-image').files[0];
+    const title = document.getElementById('info-title').value;
+    const desc = document.getElementById('info-desc').value;
+
+    const saveRelevantInfo = (imageData) => {
+        if (!state.relevantInfo) state.relevantInfo = [];
+        state.relevantInfo.push({
+            id: Date.now(),
+            title,
+            desc,
+            image: imageData || null,
+            date: new Date().toLocaleDateString()
+        });
+        saveState();
+        e.target.reset();
+        document.getElementById('info-preview').innerHTML = '';
+        alert("Información publicada con éxito.");
+    };
+
+    if (file) {
+        compressImage(file, saveRelevantInfo);
+    } else {
+        saveRelevantInfo(null);
+    }
 });
 
 document.getElementById('participation-form')?.addEventListener('submit', (e) => {

@@ -261,6 +261,27 @@
                 </form>
             </div>
 
+            <div class="card tool-card" id="relevant-info-section">
+                <h3><i class="fas fa-lightbulb"></i> Información Relevante</h3>
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Planificación de Minuta y Calendarización de Aula</p>
+                <form id="relevant-info-form">
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="info-title" placeholder="Ej: Minuta de Comida, Horarios, Calendario" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="info-desc" placeholder="Detalles de la información..." style="height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Foto (opcional)</label>
+                        <input type="file" id="info-image" accept="image/*" onchange="previewRelevantInfoImage(this)">
+                        <div id="info-preview" style="display:flex;gap:8px;margin-top:8px;align-items:center;"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background: #9C27B0; width: 100%;">Publicar Información</button>
+                </form>
+            </div>
+
             <div class="card tool-card" id="participation-section">
                 <h3><i class="fas fa-handshake"></i> Participación</h3>
                 <form id="participation-form">
@@ -305,6 +326,16 @@
                 <h3><i class="fas fa-handshake"></i> Participaciones Registradas</h3>
             </div>
             <div id="participations-list-admin" style="margin-top: 15px;">
+                <!-- Generado por JS -->
+            </div>
+        </div>
+
+        <!-- SECCIÓN: Información Relevante Registrada -->
+        <div class="card" id="manage-relevant-info-container" style="margin-top: 30px;">
+            <div class="admin-card-title">
+                <h3><i class="fas fa-lightbulb"></i> Información Relevante</h3>
+            </div>
+            <div id="relevant-info-list-admin" style="margin-top: 15px;">
                 <!-- Generado por JS -->
             </div>
         </div>
