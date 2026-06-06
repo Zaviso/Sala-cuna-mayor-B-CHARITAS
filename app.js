@@ -1040,20 +1040,14 @@ function renderRelevantInfo() {
     };
 
     if (!state.relevantInfo || state.relevantInfo.length === 0) {
-        const container1 = document.getElementById('relevant-info-list');
-        if (container1) container1.innerHTML = emptyHTML;
-        const container2 = document.getElementById('relevant-info-list-public');
-        if (container2) container2.innerHTML = emptyHTML;
+        const containerPublic = document.getElementById('relevant-info-list-public');
+        if (containerPublic) containerPublic.innerHTML = emptyHTML;
+        const adminContainer = document.getElementById('relevant-info-list-admin');
+        if (adminContainer) adminContainer.innerHTML = emptyHTML;
         return;
     }
 
-    // Panel público - requerimientos.html
-    const container = document.getElementById('relevant-info-list');
-    if (container) {
-        container.innerHTML = state.relevantInfo.map(renderCard).join('');
-    }
-
-    // Panel público - index.html
+    // Página principal - index.html
     const containerPublic = document.getElementById('relevant-info-list-public');
     if (containerPublic) {
         containerPublic.innerHTML = state.relevantInfo.map(renderCard).join('');
@@ -1062,8 +1056,6 @@ function renderRelevantInfo() {
     // Panel admin
     const adminContainer = document.getElementById('relevant-info-list-admin');
     if (adminContainer) {
-        if (!state.relevantInfo || state.relevantInfo.length === 0) {
-            adminContainer.innerHTML = '<p class="empty-msg">No hay información relevante registrada.</p>';
             return;
         }
         adminContainer.innerHTML = state.relevantInfo.map(info => {
