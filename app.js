@@ -160,10 +160,11 @@ function checkPermissions() {
         return;
     }
 
-    // 1. Mostrar Gestión de Equipo solo a la Dueña (Owner)
+    // 1. Mostrar Gestión de Equipo solo a la Dueña (Owner) o con permiso
     const userMgmt = document.getElementById('team-section');
     if (userMgmt) {
-        userMgmt.style.display = (user.role === 'Owner') ? 'block' : 'none';
+        const canManageTeam = user.role === 'Owner' || user.permissions?.team;
+        userMgmt.style.display = canManageTeam ? 'block' : 'none';
     }
 
     // 2. Si es Owner o tiene Acceso Total, no ocultamos nada
@@ -1003,6 +1004,11 @@ function renderAnnouncementsAdmin() {
 }
 
 document.getElementById('announcement-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('announcements')) {
+        alert("No tienes permiso para crear comunicados.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const text = document.getElementById('ann-text').value;
     const type = document.getElementById('ann-type').value;
@@ -1172,12 +1178,8 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
 });
 
 document.getElementById('relevant-info-form')?.addEventListener('submit', (e) => {
-    const userData = sessionStorage.getItem('userData');
-    const user = userData ? JSON.parse(userData) : null;
-    const isOwner = user && (user.username === 'jonathan' || user.username === 'admin' || user.role === 'Owner');
-
-    if (!isOwner) {
-        alert("Solo el administrador puede crear información relevante.");
+    if (!hasPermission('relevantInfo')) {
+        alert("No tienes permiso para crear información relevante.");
         e.preventDefault();
         return;
     }
@@ -1502,6 +1504,9 @@ window.handleCreateUser = (e) => {
                 gallery: document.getElementById('p-gallery')?.checked || false,
                 events: document.getElementById('p-events')?.checked || false,
                 donations: document.getElementById('p-donations')?.checked || false,
+                announcements: document.getElementById('p-announcements')?.checked || false,
+                relevantInfo: document.getElementById('p-relevantinfo')?.checked || false,
+                team: document.getElementById('p-team')?.checked || false,
                 full: document.getElementById('p-full')?.checked || false
             }
         };
