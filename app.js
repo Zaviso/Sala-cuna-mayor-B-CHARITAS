@@ -1329,12 +1329,12 @@ window.closeUserModal = () => {
     document.getElementById('user-form').reset();
 };
 
-document.getElementById('user-form')?.addEventListener('submit', (e) => {
+window.handleCreateUser = (e) => {
     e.preventDefault();
 
-    const realname = document.getElementById('new-user-realname')?.value?.trim();
-    const username = document.getElementById('new-username')?.value?.toLowerCase().trim();
-    const password = document.getElementById('new-password')?.value?.trim();
+    const realname = (document.getElementById('new-user-realname')?.value || '').trim();
+    const username = (document.getElementById('new-username')?.value || '').toLowerCase().trim();
+    const password = (document.getElementById('new-password')?.value || '').trim();
 
     if (!realname || !username || !password) {
         alert("Por favor completa todos los campos requeridos.");
@@ -1388,7 +1388,24 @@ document.getElementById('user-form')?.addEventListener('submit', (e) => {
     renderUsersList();
     window.closeUserModal();
     alert("¡Acceso creado con éxito!\n\nUsuario: " + username + "\nYa puedes entregarle estos datos a la persona.");
-});
+};
+
+// Registrar el event listener cuando el DOM está listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('user-form');
+        if (form) {
+            form.removeEventListener('submit', window.handleCreateUser);
+            form.addEventListener('submit', window.handleCreateUser);
+        }
+    });
+} else {
+    const form = document.getElementById('user-form');
+    if (form) {
+        form.removeEventListener('submit', window.handleCreateUser);
+        form.addEventListener('submit', window.handleCreateUser);
+    }
+}
 
 window.deleteUserAccount = (index) => {
     const user = state.users[index];

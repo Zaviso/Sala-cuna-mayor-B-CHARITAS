@@ -354,7 +354,7 @@
     <div id="modal-user" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
         <div class="card" style="max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
             <h3 id="user-modal-title">Crear Nuevo Acceso</h3>
-            <form id="user-form" style="margin-top: 20px;">
+            <form id="user-form" style="margin-top: 20px;" onsubmit="window.handleCreateUser(event)">
                 <div class="form-group">
                     <label>Nombre de la Persona</label>
                     <input type="text" id="new-user-realname" placeholder="Ej: Tía María" required>
