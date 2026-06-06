@@ -155,7 +155,7 @@ body.portal-body {
 }
 
 .teacher-header {
-    padding: 20px;
+    padding: 25px 20px 20px 20px;
     display: flex;
     align-items: center;
     gap: 15px;
