@@ -178,7 +178,7 @@ function render() {
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('gallery-public')) renderGalleryPublic();
-    if (document.getElementById('relevant-info-list') || document.getElementById('relevant-info-list-admin')) renderRelevantInfo();
+    renderRelevantInfo();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
