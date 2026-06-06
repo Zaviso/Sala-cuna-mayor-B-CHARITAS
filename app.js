@@ -724,6 +724,7 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = document.getElementById('req-image').files[0];
     const item = document.getElementById('req-item').value;
+    const date = document.getElementById('req-date').value;
     const teacher = document.getElementById('req-teacher').value;
     const room = document.getElementById('req-room').value;
     const note = document.getElementById('req-note').value;
@@ -732,6 +733,7 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
         state.requests.push({
             id: Date.now(),
             item,
+            date,
             teacher,
             room,
             note,
