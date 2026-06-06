@@ -175,6 +175,7 @@ function render() {
     if (document.getElementById('events-list')) renderEvents();
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
+    if (document.getElementById('gallery-public')) renderGalleryPublic();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
@@ -462,6 +463,54 @@ function renderGalleryAdmin() {
                     <span style="font-size:0.75rem;color:#666;">${imgs.length} ${imgs.length === 1 ? 'foto' : 'fotos'}</span>
                 </div>
                 ${items}
+            </div>`;
+    }).join('');
+}
+
+function renderGalleryPublic() {
+    const container = document.getElementById('gallery-public');
+    if (!container) return;
+    if (!state.gallery || state.gallery.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No hay fotos registradas.</p>';
+        return;
+    }
+
+    // Agrupar por fecha
+    const byDate = {};
+    state.gallery.forEach(img => {
+        const key = img.date || 'Sin fecha';
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push(img);
+    });
+
+    // Ordenar fechas más recientes primero
+    const sortedDates = Object.keys(byDate).sort((a, b) => {
+        const parse = d => {
+            const parts = d.split('/');
+            if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
+            return new Date(0);
+        };
+        return parse(b) - parse(a);
+    });
+
+    container.innerHTML = sortedDates.map(fecha => {
+        const imgs = byDate[fecha];
+        const thumbs = imgs.map(img => `
+            <div style="position:relative;">
+                <img src="${img.url}" onclick="openPreview('${img.url}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
+                <p style="font-size:0.75rem;color:#666;margin-top:4px;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.desc || 'Foto'}</p>
+            </div>
+        `).join('');
+
+        return `
+            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:15px;overflow:hidden;">
+                <div style="padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                    <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
+                    <span style="font-size:0.8rem;color:#666;margin-left:10px;">${imgs.length} ${imgs.length === 1 ? 'foto' : 'fotos'}</span>
+                </div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;padding:14px;">
+                    ${thumbs}
+                </div>
             </div>`;
     }).join('');
 }
