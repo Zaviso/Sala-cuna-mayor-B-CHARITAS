@@ -1376,6 +1376,14 @@ window.handleCreateUser = (e) => {
         e.preventDefault();
         console.log("Formulario enviado");
 
+        // Asegurar que state.users sea un array
+        if (!Array.isArray(state.users)) {
+            state.users = state.users ? Object.values(state.users) : [];
+        }
+        if (!Array.isArray(state.deletedUsernames)) {
+            state.deletedUsernames = state.deletedUsernames ? Object.values(state.deletedUsernames) : [];
+        }
+
         const realname = (document.getElementById('new-user-realname')?.value || '').trim();
         const username = (document.getElementById('new-username')?.value || '').toLowerCase().trim();
         const password = (document.getElementById('new-password')?.value || '').trim();
