@@ -1330,64 +1330,85 @@ window.closeUserModal = () => {
 };
 
 window.handleCreateUser = (e) => {
-    e.preventDefault();
+    try {
+        e.preventDefault();
+        console.log("Formulario enviado");
 
-    const realname = (document.getElementById('new-user-realname')?.value || '').trim();
-    const username = (document.getElementById('new-username')?.value || '').toLowerCase().trim();
-    const password = (document.getElementById('new-password')?.value || '').trim();
+        const realname = (document.getElementById('new-user-realname')?.value || '').trim();
+        const username = (document.getElementById('new-username')?.value || '').toLowerCase().trim();
+        const password = (document.getElementById('new-password')?.value || '').trim();
 
-    if (!realname || !username || !password) {
-        alert("Por favor completa todos los campos requeridos.");
-        return;
-    }
+        console.log("Datos:", { realname, username, password });
 
-    if (username.length < 3) {
-        alert("El nombre de usuario debe tener al menos 3 caracteres.");
-        return;
-    }
-
-    if (password.length < 4) {
-        alert("La contraseña debe tener al menos 4 caracteres.");
-        return;
-    }
-
-    // Verificar que el username no exista ya
-    if (state.users && state.users.some(u => u.username === username)) {
-        alert("Este nombre de usuario ya existe. Elige uno diferente.");
-        return;
-    }
-
-    // Verificar que no sea un usuario eliminado (lista negra)
-    if (state.deletedUsernames && state.deletedUsernames.includes(username)) {
-        alert("Este nombre de usuario ya fue utilizado anteriormente y fue eliminado. No puede ser reutilizado por razones de seguridad.\n\nPor favor elige un nombre de usuario diferente.");
-        return;
-    }
-
-    const newUser = {
-        id: Date.now(),
-        realname,
-        username,
-        password,
-        role: 'Collaborator',
-        createdAt: new Date().toLocaleDateString('es-CL'),
-        active: true,
-        permissions: {
-            payments: document.getElementById('p-payments')?.checked || false,
-            expenses: document.getElementById('p-expenses')?.checked || false,
-            requests: document.getElementById('p-requests')?.checked || false,
-            gallery: document.getElementById('p-gallery')?.checked || false,
-            events: document.getElementById('p-events')?.checked || false,
-            donations: document.getElementById('p-donations')?.checked || false,
-            full: document.getElementById('p-full')?.checked || false
+        if (!realname || !username || !password) {
+            alert("Por favor completa todos los campos requeridos.");
+            console.log("Campos vacíos detectados");
+            return;
         }
-    };
 
-    if (!state.users) state.users = [];
-    state.users.push(newUser);
-    saveState();
-    renderUsersList();
-    window.closeUserModal();
-    alert("¡Acceso creado con éxito!\n\nUsuario: " + username + "\nYa puedes entregarle estos datos a la persona.");
+        if (username.length < 3) {
+            alert("El nombre de usuario debe tener al menos 3 caracteres.");
+            return;
+        }
+
+        if (password.length < 4) {
+            alert("La contraseña debe tener al menos 4 caracteres.");
+            return;
+        }
+
+        // Verificar que el username no exista ya
+        if (state.users && state.users.some(u => u.username === username)) {
+            alert("Este nombre de usuario ya existe. Elige uno diferente.");
+            return;
+        }
+
+        // Verificar que no sea un usuario eliminado (lista negra)
+        if (state.deletedUsernames && state.deletedUsernames.includes(username)) {
+            alert("Este nombre de usuario ya fue utilizado anteriormente y fue eliminado. No puede ser reutilizado por razones de seguridad.\n\nPor favor elige un nombre de usuario diferente.");
+            return;
+        }
+
+        console.log("Validaciones pasadas, creando usuario...");
+
+        const newUser = {
+            id: Date.now(),
+            realname,
+            username,
+            password,
+            role: 'Collaborator',
+            createdAt: new Date().toLocaleDateString('es-CL'),
+            active: true,
+            permissions: {
+                payments: document.getElementById('p-payments')?.checked || false,
+                expenses: document.getElementById('p-expenses')?.checked || false,
+                requests: document.getElementById('p-requests')?.checked || false,
+                gallery: document.getElementById('p-gallery')?.checked || false,
+                events: document.getElementById('p-events')?.checked || false,
+                donations: document.getElementById('p-donations')?.checked || false,
+                full: document.getElementById('p-full')?.checked || false
+            }
+        };
+
+        console.log("Nuevo usuario:", newUser);
+
+        if (!state.users) state.users = [];
+        state.users.push(newUser);
+
+        console.log("Usuario añadido, guardando estado...");
+        saveState();
+
+        console.log("Estado guardado, renderizando lista...");
+        renderUsersList();
+
+        console.log("Lista renderizada, cerrando modal...");
+        window.closeUserModal();
+
+        alert("¡Acceso creado con éxito!\n\nUsuario: " + username + "\nYa puedes entregarle estos datos a la persona.");
+        console.log("Proceso completado");
+    } catch (error) {
+        console.error("Error al crear usuario:", error);
+        alert("Error al crear el acceso: " + error.message);
+    }
 };
 
 // Registrar el event listener cuando el DOM está listo
