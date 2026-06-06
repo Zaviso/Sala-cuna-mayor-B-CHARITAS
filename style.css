@@ -170,12 +170,15 @@ body.portal-body {
 .teacher-img {
     width: 70px;
     height: 70px;
+    min-width: 70px;
+    min-height: 70px;
     border-radius: 50%;
     border: 4px solid white;
     object-fit: cover;
-    object-position: center;
+    object-position: center 30%;
     flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    background: white;
 }
 
 .teacher-label {

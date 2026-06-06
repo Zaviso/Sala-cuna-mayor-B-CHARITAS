@@ -312,9 +312,18 @@ function renderRequests() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        list.innerHTML = state.requests.map(req =>
-            adminCard({ imgSrc: req.image, icon:'fas fa-bullhorn', iconBg:'var(--p-orange)', title: req.item, subtitle: `${req.teacher || '—'} (${req.room || '—'})`, onDelete:`deleteRequest(${req.id})` })
-        ).join('');
+        list.innerHTML = state.requests.map(req => {
+            const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
+            const supportText = supports.length > 0 ? `${supports.length} familia(s) apoyando` : 'Sin apoyos aún';
+            return adminCard({
+                imgSrc: req.image,
+                icon:'fas fa-bullhorn',
+                iconBg:'var(--p-orange)',
+                title: req.item,
+                subtitle: `${req.teacher || '—'} • ${supportText}`,
+                onDelete:`deleteRequest(${req.id})`
+            });
+        }).join('');
     } else {
         const colors = ['blue', 'green', 'orange'];
         list.innerHTML = (state.requests || []).map((req, index) => {
@@ -338,7 +347,7 @@ function renderRequests() {
                             </div>
                         </div>
                         <div style="text-align: center;">
-                            <button class="btn-support btn-support-${color}" onclick="alert('¡Gracias por tu interés en apoyar!')">APOYAR SOLICITUD</button>
+                            <button class="btn-support btn-support-${color}" onclick="openSupportModal(${req.id})">APOYAR SOLICITUD</button>
                         </div>
                     </div>
                 </div>
@@ -843,6 +852,52 @@ window.deleteReview = (index) => {
         state.reviews.splice(index, 1);
         saveState();
     }
+};
+
+// --- Support System Logic ---
+let currentSupportRequest = null;
+
+window.openSupportModal = (requestId) => {
+    currentSupportRequest = requestId;
+    const modal = document.getElementById('modal-support');
+    const list = document.getElementById('students-support-list');
+
+    if (!modal || !list) return;
+
+    list.innerHTML = state.students.map(student => `
+        <button onclick="registerSupport(${student.id}, '${student.name}')"
+            style="padding:15px; border:1px solid #ddd; border-radius:10px; background:white; cursor:pointer; text-align:left; transition:all 0.2s;"
+            onmouseover="this.style.background='#f0f0f0'"
+            onmouseout="this.style.background='white'">
+            <strong>${student.name}</strong>
+        </button>
+    `).join('');
+
+    modal.style.display = 'flex';
+};
+
+window.registerSupport = (studentId, studentName) => {
+    if (!currentSupportRequest) return;
+
+    if (!state.requestSupports) state.requestSupports = {};
+    if (!state.requestSupports[currentSupportRequest]) state.requestSupports[currentSupportRequest] = [];
+
+    // Verificar si ya apoyó
+    const alreadySupported = state.requestSupports[currentSupportRequest].some(s => s.studentId === studentId);
+    if (alreadySupported) {
+        alert('Este niño ya está registrado como apoyo para este requerimiento.');
+        return;
+    }
+
+    state.requestSupports[currentSupportRequest].push({
+        studentId,
+        studentName,
+        date: new Date().toLocaleDateString()
+    });
+
+    saveState();
+    document.getElementById('modal-support').style.display = 'none';
+    alert(`¡Gracias! ${studentName} ha registrado su apoyo a este requerimiento.`);
 };
 // --- User Management Logic (SuperAdmin Only) ---
 function renderUsersList() {
