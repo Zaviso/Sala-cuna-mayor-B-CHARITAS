@@ -858,7 +858,7 @@ function renderParticipations() {
                         <span style="font-weight:800; color:${statusColor}; font-size:0.85rem;">${p.type.toUpperCase()}</span>
                         <span style="color:#aaa; font-size:0.8rem;">${p.date}</span>
                     </div>
-                    <p style="color:#666; font-size:0.9rem; margin-bottom:8px;">${p.desc || ''}</p>
+                    <p style="color:#666; font-size:0.9rem; margin-bottom:8px; white-space: pre-wrap;">${p.desc || ''}</p>
                     <span style="display:inline-block; padding:4px 10px; border-radius:20px; background:${statusColor}; color:white; font-size:0.75rem; font-weight:700;">${p.status}</span>
                 </div>
             `;
@@ -880,7 +880,7 @@ function renderParticipations() {
                     ${imgHTML}
                     <div style="flex:1; min-width:0;">
                         <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${p.type}</p>
-                        <p style="margin:0;font-size:0.8rem;color:#666;">${p.desc || '—'}</p>
+                        <p style="margin:0;font-size:0.8rem;color:#666;white-space:pre-wrap;">${p.desc || '—'}</p>
                         <div style="margin-top:6px;">
                             <select onchange="updateParticipationStatus(${p.id}, this.value)" style="padding:4px 8px; border:1px solid #ddd; border-radius:6px; font-size:0.8rem;">
                                 <option value="Pendiente" ${p.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
