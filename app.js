@@ -91,40 +91,40 @@ db.ref('jardin_state').on('value', (snapshot) => {
     if (data) {
         state = { ...state, ...data };
 
-        // Asegurar que los arrays sean arrays (Firebase puede devolverlos como objetos)
-        if (!Array.isArray(state.users)) {
-            state.users = state.users ? Object.values(state.users) : [];
-        }
-        if (!Array.isArray(state.students)) {
-            state.students = state.students ? Object.values(state.students) : [];
-        }
-        if (!Array.isArray(state.expenses)) {
-            state.expenses = state.expenses ? Object.values(state.expenses) : [];
-        }
-        if (!Array.isArray(state.requests)) {
-            state.requests = state.requests ? Object.values(state.requests) : [];
-        }
-        if (!Array.isArray(state.events)) {
-            state.events = state.events ? Object.values(state.events) : [];
-        }
-        if (!Array.isArray(state.gallery)) {
-            state.gallery = state.gallery ? Object.values(state.gallery) : [];
-        }
-        if (!Array.isArray(state.announcements)) {
-            state.announcements = state.announcements ? Object.values(state.announcements) : [];
-        }
-        if (!Array.isArray(state.donations)) {
-            state.donations = state.donations ? Object.values(state.donations) : [];
-        }
-        if (!Array.isArray(state.participations)) {
-            state.participations = state.participations ? Object.values(state.participations) : [];
-        }
-        if (!Array.isArray(state.relevantInfo)) {
-            state.relevantInfo = state.relevantInfo ? Object.values(state.relevantInfo) : [];
-        }
-        if (!Array.isArray(state.deletedUsernames)) {
-            state.deletedUsernames = state.deletedUsernames ? Object.values(state.deletedUsernames) : [];
-        }
+        // Asegurar que los arrays sean arrays (Firebase puede devolverlos como objetos con nulls)
+        state.users = Array.isArray(state.users)
+            ? state.users.filter(u => u != null)
+            : (state.users ? Object.values(state.users).filter(u => u != null) : []);
+        state.students = Array.isArray(state.students)
+            ? state.students.filter(u => u != null)
+            : (state.students ? Object.values(state.students).filter(u => u != null) : []);
+        state.expenses = Array.isArray(state.expenses)
+            ? state.expenses.filter(u => u != null)
+            : (state.expenses ? Object.values(state.expenses).filter(u => u != null) : []);
+        state.requests = Array.isArray(state.requests)
+            ? state.requests.filter(u => u != null)
+            : (state.requests ? Object.values(state.requests).filter(u => u != null) : []);
+        state.events = Array.isArray(state.events)
+            ? state.events.filter(u => u != null)
+            : (state.events ? Object.values(state.events).filter(u => u != null) : []);
+        state.gallery = Array.isArray(state.gallery)
+            ? state.gallery.filter(u => u != null)
+            : (state.gallery ? Object.values(state.gallery).filter(u => u != null) : []);
+        state.announcements = Array.isArray(state.announcements)
+            ? state.announcements.filter(u => u != null)
+            : (state.announcements ? Object.values(state.announcements).filter(u => u != null) : []);
+        state.donations = Array.isArray(state.donations)
+            ? state.donations.filter(u => u != null)
+            : (state.donations ? Object.values(state.donations).filter(u => u != null) : []);
+        state.participations = Array.isArray(state.participations)
+            ? state.participations.filter(u => u != null)
+            : (state.participations ? Object.values(state.participations).filter(u => u != null) : []);
+        state.relevantInfo = Array.isArray(state.relevantInfo)
+            ? state.relevantInfo.filter(u => u != null)
+            : (state.relevantInfo ? Object.values(state.relevantInfo).filter(u => u != null) : []);
+        state.deletedUsernames = Array.isArray(state.deletedUsernames)
+            ? state.deletedUsernames.filter(u => u != null)
+            : (state.deletedUsernames ? Object.values(state.deletedUsernames).filter(u => u != null) : []);
 
         render();
         checkPermissions(); // Verificar qué puede ver el usuario actual
@@ -1335,7 +1335,7 @@ function renderUsersList() {
     // Convertir state.users a array si es necesario y filtrar usuarios válidos
     let users = [];
     if (Array.isArray(state.users)) {
-        users = state.users;
+        users = state.users.filter(u => u != null && u.username && u.realname);
     } else if (state.users && typeof state.users === 'object') {
         users = Object.values(state.users).filter(u => u && u.username && u.realname);
     }
@@ -1355,7 +1355,7 @@ function renderUsersList() {
         const accessType = u.permissions?.full ? 'ACCESO TOTAL' : 'ACCESO LIMITADO';
         const accessColor = u.permissions?.full ? '#e74c3c' : '#3498db';
         const createdDate = u.createdAt || 'N/A';
-        const initials = (u.realname || '?').charAt(0).toUpperCase();
+        const initials = String(u.realname || '?').charAt(0).toUpperCase();
 
         return `
             <div style="display:flex;align-items:center;gap:12px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;border-left:4px solid ${accessColor};">
