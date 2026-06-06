@@ -186,9 +186,9 @@
                             <textarea id="req-note" placeholder="Más detalles..." style="height: 60px;"></textarea>
                         </div>
                         <div class="form-group">
-                            <label>Foto de la Tía (opcional)</label>
-                            <input type="file" id="req-image" accept="image/*" onchange="previewRequestImage(this)">
-                            <div id="req-preview" style="display:flex;gap:8px;margin-top:8px;align-items:center;"></div>
+                            <label>Fotos de la Tía (puedes subir varias)</label>
+                            <input type="file" id="req-image" accept="image/*" multiple onchange="previewRequestImage(this)">
+                            <div id="req-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
                         </div>
                         <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
                     </form>

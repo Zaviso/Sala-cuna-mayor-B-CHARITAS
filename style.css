@@ -97,6 +97,8 @@ body.portal-body {
     border: 1px solid #ddd;
     border-radius: 10px;
     font-family: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 .form-group input:focus, .form-group textarea:focus {
     outline: none;

@@ -329,9 +329,17 @@ function renderRequests() {
         const colors = ['blue', 'green', 'orange'];
         list.innerHTML = (state.requests || []).map((req, index) => {
             const color = colors[index % 3];
-            const profileImg = req.image || `https://i.pravatar.cc/150?img=${(index + 10)}`;
+            const images = req.images || (req.image ? [req.image] : []);
+            const profileImg = images.length > 0 ? images[0] : `https://i.pravatar.cc/150?img=${(index + 10)}`;
             const teacherName = req.teacher && req.teacher.trim() ? req.teacher : 'Profesora';
             const roomName = req.room && req.room.trim() ? req.room : 'Sala';
+
+            const thumbsHTML = images.length > 1 ? `
+                <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+                    ${images.map((img, i) => `<img src="${img}" onclick="openPreview('${img}')" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd;">`).join('')}
+                </div>
+            ` : '';
+
             return `
                 <div class="teacher-card">
                     <div class="teacher-header card-${color}">
@@ -344,7 +352,8 @@ function renderRequests() {
                         <div class="teacher-content-inner">
                             <div class="teacher-text">
                                 <h4>${req.item}</h4>
-                                <p style="font-size: 0.9rem; color: #666; margin: 12px 0; line-height: 1.5;">${req.note && req.note.trim() ? req.note : 'Se necesita tu apoyo para este requerimiento.'}</p>
+                                <p style="font-size: 0.9rem; color: #666; margin: 12px 0; line-height: 1.5; white-space: pre-wrap;">${req.note && req.note.trim() ? req.note : 'Se necesita tu apoyo para este requerimiento.'}</p>
+                                ${thumbsHTML}
                             </div>
                         </div>
                     </div>
@@ -712,13 +721,13 @@ window.previewRequestImage = (input) => {
     const preview = document.getElementById('req-preview');
     if (!preview) return;
     preview.innerHTML = '';
-    if (input.files.length > 0) {
+    Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
-            preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+            preview.innerHTML += `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;cursor:pointer;" onclick="openPreview('${e.target.result}')">`;
         };
-        reader.readAsDataURL(input.files[0]);
-    }
+        reader.readAsDataURL(file);
+    });
 };
 
 window.previewParticipationImage = (input) => {
@@ -736,20 +745,20 @@ window.previewParticipationImage = (input) => {
 
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const file = document.getElementById('req-image').files[0];
+    const files = Array.from(document.getElementById('req-image').files);
     const item = document.getElementById('req-item').value;
     const teacher = document.getElementById('req-teacher').value;
     const room = document.getElementById('req-room').value;
     const note = document.getElementById('req-note').value;
 
-    const saveRequest = (imageData) => {
+    const saveRequest = (imagesData) => {
         state.requests.push({
             id: Date.now(),
             item,
             teacher,
             room,
             note,
-            image: imageData || null,
+            images: imagesData || [],
             status: 'Pendiente'
         });
         saveState();
@@ -757,10 +766,20 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
         document.getElementById('req-preview').innerHTML = '';
     };
 
-    if (file) {
-        compressImage(file, saveRequest);
+    if (files.length > 0) {
+        const compressed = [];
+        let done = 0;
+        files.forEach((file, i) => {
+            compressImage(file, (b64) => {
+                compressed[i] = b64;
+                done++;
+                if (done === files.length) {
+                    saveRequest(compressed);
+                }
+            });
+        });
     } else {
-        saveRequest(null);
+        saveRequest([]);
     }
 });
 
