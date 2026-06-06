@@ -90,7 +90,43 @@ db.ref('jardin_state').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
         state = { ...state, ...data };
-        render(); 
+
+        // Asegurar que los arrays sean arrays (Firebase puede devolverlos como objetos)
+        if (!Array.isArray(state.users)) {
+            state.users = state.users ? Object.values(state.users) : [];
+        }
+        if (!Array.isArray(state.students)) {
+            state.students = state.students ? Object.values(state.students) : [];
+        }
+        if (!Array.isArray(state.expenses)) {
+            state.expenses = state.expenses ? Object.values(state.expenses) : [];
+        }
+        if (!Array.isArray(state.requests)) {
+            state.requests = state.requests ? Object.values(state.requests) : [];
+        }
+        if (!Array.isArray(state.events)) {
+            state.events = state.events ? Object.values(state.events) : [];
+        }
+        if (!Array.isArray(state.gallery)) {
+            state.gallery = state.gallery ? Object.values(state.gallery) : [];
+        }
+        if (!Array.isArray(state.announcements)) {
+            state.announcements = state.announcements ? Object.values(state.announcements) : [];
+        }
+        if (!Array.isArray(state.donations)) {
+            state.donations = state.donations ? Object.values(state.donations) : [];
+        }
+        if (!Array.isArray(state.participations)) {
+            state.participations = state.participations ? Object.values(state.participations) : [];
+        }
+        if (!Array.isArray(state.relevantInfo)) {
+            state.relevantInfo = state.relevantInfo ? Object.values(state.relevantInfo) : [];
+        }
+        if (!Array.isArray(state.deletedUsernames)) {
+            state.deletedUsernames = state.deletedUsernames ? Object.values(state.deletedUsernames) : [];
+        }
+
+        render();
         checkPermissions(); // Verificar qué puede ver el usuario actual
     } else {
         saveState();
@@ -1295,6 +1331,12 @@ function renderRequestSupports() {
 function renderUsersList() {
     const container = document.getElementById('users-list-container');
     if (!container) return;
+
+    // Asegurar que state.users sea un array
+    if (!Array.isArray(state.users)) {
+        state.users = state.users ? Object.values(state.users) : [];
+    }
+
     if (!state.users || state.users.length === 0) {
         container.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center; padding:20px;">No hay colaboradores invitados.</p>';
         return;
