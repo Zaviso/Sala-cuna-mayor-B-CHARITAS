@@ -1024,25 +1024,37 @@ window.deleteParticipation = (id) => {
 
 function renderRelevantInfo() {
     const isAdmin = !!document.getElementById('students-table');
+    const emptyHTML = '<p class="empty-msg">No hay información relevante registrada.</p>';
+    const renderCard = (info) => {
+        const imgHTML = info.image ? `<img src="${info.image}" onclick="openPreview('${info.image}')" style="width:100%;max-width:300px;object-fit:cover;border-radius:10px;cursor:pointer;margin-bottom:12px;">` : '';
+        return `
+            <div class="card" style="border-left: 5px solid #9C27B0; background:white; padding:20px;">
+                ${imgHTML}
+                <h3 style="margin:0 0 10px 0; color:var(--p-text);">${info.title}</h3>
+                <p style="color:#666; font-size:0.9rem; white-space: pre-wrap; margin-bottom:8px;">${info.desc || ''}</p>
+                <span style="font-size:0.75rem;color:#aaa;">${info.date}</span>
+            </div>
+        `;
+    };
 
-    // Panel público
+    if (!state.relevantInfo || state.relevantInfo.length === 0) {
+        const container1 = document.getElementById('relevant-info-list');
+        if (container1) container1.innerHTML = emptyHTML;
+        const container2 = document.getElementById('relevant-info-list-public');
+        if (container2) container2.innerHTML = emptyHTML;
+        return;
+    }
+
+    // Panel público - requerimientos.html
     const container = document.getElementById('relevant-info-list');
     if (container) {
-        if (!state.relevantInfo || state.relevantInfo.length === 0) {
-            container.innerHTML = '<p class="empty-msg">No hay información relevante registrada.</p>';
-            return;
-        }
-        container.innerHTML = state.relevantInfo.map(info => {
-            const imgHTML = info.image ? `<img src="${info.image}" onclick="openPreview('${info.image}')" style="width:100%;max-width:300px;object-fit:cover;border-radius:10px;cursor:pointer;margin-bottom:12px;">` : '';
-            return `
-                <div class="card" style="border-left: 5px solid #9C27B0; background:white; padding:20px;">
-                    ${imgHTML}
-                    <h3 style="margin:0 0 10px 0; color:var(--p-text);">${info.title}</h3>
-                    <p style="color:#666; font-size:0.9rem; white-space: pre-wrap; margin-bottom:8px;">${info.desc || ''}</p>
-                    <span style="font-size:0.75rem;color:#aaa;">${info.date}</span>
-                </div>
-            `;
-        }).join('');
+        container.innerHTML = state.relevantInfo.map(renderCard).join('');
+    }
+
+    // Panel público - index.html
+    const containerPublic = document.getElementById('relevant-info-list-public');
+    if (containerPublic) {
+        containerPublic.innerHTML = state.relevantInfo.map(renderCard).join('');
     }
 
     // Panel admin
