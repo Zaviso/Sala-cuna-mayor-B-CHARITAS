@@ -174,6 +174,7 @@ function render() {
     if (document.getElementById('requests-list')) renderRequests();
     if (document.getElementById('events-list')) renderEvents();
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
+    if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
@@ -395,7 +396,7 @@ function renderMomentsGallery() {
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
         gal.innerHTML = state.gallery.map(img =>
-            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: '', onDelete:`deletePhoto(${img.id})` })
+            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: img.date || '', onDelete:`deletePhoto(${img.id})` })
         ).join('');
     } else {
         gal.innerHTML = state.gallery.map(img => `
@@ -415,6 +416,54 @@ function renderMomentsGallery() {
             </div>
         `).join('');
     }
+}
+
+function renderGalleryAdmin() {
+    const container = document.getElementById('gallery-list-admin');
+    if (!container) return;
+    if (!state.gallery || state.gallery.length === 0) {
+        container.innerHTML = '<p class="empty-msg">No hay fotos registradas.</p>';
+        return;
+    }
+
+    // Agrupar por fecha
+    const byDate = {};
+    state.gallery.forEach(img => {
+        const key = img.date || 'Sin fecha';
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push(img);
+    });
+
+    // Ordenar fechas más recientes primero
+    const sortedDates = Object.keys(byDate).sort((a, b) => {
+        const parse = d => {
+            const parts = d.split('/');
+            if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
+            return new Date(0);
+        };
+        return parse(b) - parse(a);
+    });
+
+    container.innerHTML = sortedDates.map(fecha => {
+        const imgs = byDate[fecha];
+        const items = imgs.map(img => {
+            return adminCard({
+                imgSrc: img.url,
+                title: img.desc || 'Sin título',
+                subtitle: fecha,
+                onDelete: `deletePhoto(${img.id})`
+            });
+        }).join('');
+
+        return `
+            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
+                    <span style="font-size:0.75rem;color:#666;">${imgs.length} ${imgs.length === 1 ? 'foto' : 'fotos'}</span>
+                </div>
+                ${items}
+            </div>`;
+    }).join('');
 }
 
 window.openPreview = (url) => {
@@ -914,7 +963,7 @@ document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = document.getElementById('photo-file').files[0];
     if (file) compressImage(file, (url) => {
-        state.gallery.push({ id: Date.now(), desc: document.getElementById('photo-desc').value, url });
+        state.gallery.push({ id: Date.now(), desc: document.getElementById('photo-desc').value, url, date: new Date().toLocaleDateString() });
         saveState(); e.target.reset();
     });
 });
