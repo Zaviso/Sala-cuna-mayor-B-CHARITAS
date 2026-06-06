@@ -134,6 +134,22 @@ db.ref('jardin_state').on('value', (snapshot) => {
 });
 
 // --- Security & Permissions Logic ---
+function getUserPermissions() {
+    const userData = sessionStorage.getItem('userData');
+    if (!userData) return null;
+    const user = JSON.parse(userData);
+    if (user.username === 'jonathan' || user.username === 'admin') {
+        return { full: true };
+    }
+    return user.permissions || {};
+}
+
+function hasPermission(permissionKey) {
+    const perms = getUserPermissions();
+    if (!perms) return false;
+    return perms.full === true || perms[permissionKey] === true;
+}
+
 function checkPermissions() {
     const userDataStr = sessionStorage.getItem('userData');
     if (!userDataStr) return;
@@ -782,10 +798,10 @@ window.togglePayment = (id, field) => {
     saveState();
 };
 
-window.deleteExpense = (id) => { if (confirm("¿Borrar gasto?")) { state.expenses = state.expenses.filter(e => e.id !== id); saveState(); } };
-window.deleteRequest = (id) => { if (confirm("¿Borrar requerimiento?")) { state.requests = state.requests.filter(r => r.id !== id); saveState(); } };
-window.deleteEvent = (id) => { if (confirm("¿Borrar evento?")) { state.events = state.events.filter(ev => ev.id !== id); saveState(); } };
-window.deletePhoto = (id) => { if (confirm("¿Borrar foto?")) { state.gallery = state.gallery.filter(g => g.id !== id); saveState(); } };
+window.deleteExpense = (id) => { if (!hasPermission('expenses')) { alert("No tienes permiso para eliminar gastos."); return; } if (confirm("¿Borrar gasto?")) { state.expenses = state.expenses.filter(e => e.id !== id); saveState(); } };
+window.deleteRequest = (id) => { if (!hasPermission('requests')) { alert("No tienes permiso para eliminar requerimientos."); return; } if (confirm("¿Borrar requerimiento?")) { state.requests = state.requests.filter(r => r.id !== id); saveState(); } };
+window.deleteEvent = (id) => { if (!hasPermission('events')) { alert("No tienes permiso para eliminar eventos."); return; } if (confirm("¿Borrar evento?")) { state.events = state.events.filter(ev => ev.id !== id); saveState(); } };
+window.deletePhoto = (id) => { if (!hasPermission('gallery')) { alert("No tienes permiso para eliminar fotos."); return; } if (confirm("¿Borrar foto?")) { state.gallery = state.gallery.filter(g => g.id !== id); saveState(); } };
 window.deleteProof = (id, type) => { if (confirm("¿Borrar comprobante?")) { state.students.find(s => s.id === id)[type] = null; saveState(); } };
 
 window.openProofModal = (id, type) => {
@@ -828,6 +844,11 @@ window.previewExpenseImages = (input) => {
 };
 
 document.getElementById('expense-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('expenses')) {
+        alert("No tienes permiso para registrar gastos.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const desc = document.getElementById('exp-desc').value;
     const amount = document.getElementById('exp-amount').value;
@@ -894,6 +915,11 @@ window.previewRelevantInfoImage = (input) => {
 };
 
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('requests')) {
+        alert("No tienes permiso para registrar requerimientos.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const files = Array.from(document.getElementById('req-image').files);
     const item = document.getElementById('req-item').value;
@@ -934,6 +960,11 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
 });
 
 document.getElementById('event-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('events')) {
+        alert("No tienes permiso para programar eventos.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     state.events.push({ id: Date.now(), name: document.getElementById('event-name').value, date: document.getElementById('event-date').value });
     saveState(); e.target.reset();
@@ -1117,6 +1148,11 @@ window.deleteRelevantInfo = (id) => {
 };
 
 document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('gallery')) {
+        alert("No tienes permiso para subir fotos.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const file = document.getElementById('photo-file').files[0];
     if (file) compressImage(file, (url) => {
@@ -1136,6 +1172,15 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
 });
 
 document.getElementById('relevant-info-form')?.addEventListener('submit', (e) => {
+    const userData = sessionStorage.getItem('userData');
+    const user = userData ? JSON.parse(userData) : null;
+    const isOwner = user && (user.username === 'jonathan' || user.username === 'admin' || user.role === 'Owner');
+
+    if (!isOwner) {
+        alert("Solo el administrador puede crear información relevante.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const file = document.getElementById('info-image').files[0];
     const title = document.getElementById('info-title').value;
@@ -1164,6 +1209,11 @@ document.getElementById('relevant-info-form')?.addEventListener('submit', (e) =>
 });
 
 document.getElementById('participation-form')?.addEventListener('submit', (e) => {
+    if (!hasPermission('participations')) {
+        alert("No tienes permiso para registrar participaciones.");
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     const file = document.getElementById('part-image').files[0];
     const type = document.getElementById('part-type').value;
