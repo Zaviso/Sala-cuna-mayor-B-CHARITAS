@@ -72,6 +72,7 @@ let state = {
     relevantInfo: [],
     reviews: [],
     users: [],
+    deletedUsernames: [],
     balance: 0,
     paymentHistory: [],
     cursoHistory: {},
@@ -1295,22 +1296,31 @@ function renderUsersList() {
     const container = document.getElementById('users-list-container');
     if (!container) return;
     if (!state.users || state.users.length === 0) {
-        container.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center;">No hay colaboradores invitados.</p>';
+        container.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center; padding:20px;">No hay colaboradores invitados.</p>';
         return;
     }
-    container.innerHTML = state.users.map((u, index) => `
-        <div class="admin-mini-card" style="margin-bottom:10px;">
-            <div class="admin-card-info">
-                <p>${u.realname} (@${u.username})</p>
-                <span>${u.permissions?.full ? 'Acceso Total' : 'Acceso Limitado'}</span>
-            </div>
-            <div class="admin-actions">
-                <button class="btn-mini btn-mini-delete" onclick="deleteUserAccount(${index})" title="Eliminar Acceso">
-                    <i class="fas fa-user-times"></i>
+    container.innerHTML = state.users.map((u, index) => {
+        const accessType = u.permissions?.full ? 'ACCESO TOTAL' : 'ACCESO LIMITADO';
+        const accessColor = u.permissions?.full ? '#e74c3c' : '#3498db';
+        const createdDate = u.createdAt || 'N/A';
+
+        return `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;border-left:4px solid ${accessColor};">
+                <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${accessColor};display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:0.9rem;">
+                    ${u.realname.charAt(0).toUpperCase()}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${u.realname}</p>
+                    <p style="margin:0;font-size:0.8rem;color:#666;">@${u.username}</p>
+                    <p style="margin:2px 0 0 0;font-size:0.7rem;color:#999;">Creado: ${createdDate}</p>
+                    <span style="font-size:0.75rem;color:white;background:${accessColor};padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">${accessType}</span>
+                </div>
+                <button class="btn-mini btn-mini-delete" onclick="deleteUserAccount(${index})" title="Eliminar acceso" style="flex-shrink:0;">
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 window.openUserModal = () => document.getElementById('modal-user').style.display = 'flex';
@@ -1321,33 +1331,79 @@ window.closeUserModal = () => {
 
 document.getElementById('user-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const realname = document.getElementById('new-user-realname')?.value?.trim();
+    const username = document.getElementById('new-username')?.value?.toLowerCase().trim();
+    const password = document.getElementById('new-password')?.value?.trim();
+
+    if (!realname || !username || !password) {
+        alert("Por favor completa todos los campos requeridos.");
+        return;
+    }
+
+    if (username.length < 3) {
+        alert("El nombre de usuario debe tener al menos 3 caracteres.");
+        return;
+    }
+
+    if (password.length < 4) {
+        alert("La contraseña debe tener al menos 4 caracteres.");
+        return;
+    }
+
+    // Verificar que el username no exista ya
+    if (state.users && state.users.some(u => u.username === username)) {
+        alert("Este nombre de usuario ya existe. Elige uno diferente.");
+        return;
+    }
+
+    // Verificar que no sea un usuario eliminado (lista negra)
+    if (state.deletedUsernames && state.deletedUsernames.includes(username)) {
+        alert("Este nombre de usuario ya fue utilizado anteriormente y fue eliminado. No puede ser reutilizado por razones de seguridad.\n\nPor favor elige un nombre de usuario diferente.");
+        return;
+    }
+
     const newUser = {
-        realname: document.getElementById('new-user-realname').value,
-        username: document.getElementById('new-username').value.toLowerCase().trim(),
-        password: document.getElementById('new-password').value,
+        id: Date.now(),
+        realname,
+        username,
+        password,
         role: 'Collaborator',
+        createdAt: new Date().toLocaleDateString('es-CL'),
+        active: true,
         permissions: {
-            payments: document.getElementById('p-payments').checked,
-            expenses: document.getElementById('p-expenses').checked,
-            requests: document.getElementById('p-requests').checked,
-            gallery: document.getElementById('p-gallery').checked,
-            events: document.getElementById('p-events').checked,
-            donations: document.getElementById('p-donations').checked,
-            full: document.getElementById('p-full').checked
+            payments: document.getElementById('p-payments')?.checked || false,
+            expenses: document.getElementById('p-expenses')?.checked || false,
+            requests: document.getElementById('p-requests')?.checked || false,
+            gallery: document.getElementById('p-gallery')?.checked || false,
+            events: document.getElementById('p-events')?.checked || false,
+            donations: document.getElementById('p-donations')?.checked || false,
+            full: document.getElementById('p-full')?.checked || false
         }
     };
 
     if (!state.users) state.users = [];
     state.users.push(newUser);
     saveState();
-    closeUserModal();
-    alert("¡Acceso creado con éxito! Ya puedes entregarle el usuario y clave a la persona.");
+    renderUsersList();
+    window.closeUserModal();
+    alert("¡Acceso creado con éxito!\n\nUsuario: " + username + "\nYa puedes entregarle estos datos a la persona.");
 });
 
 window.deleteUserAccount = (index) => {
-    if (confirm("¿Seguro que deseas eliminar este acceso? La persona ya no podrá entrar.")) {
+    const user = state.users[index];
+    if (!user) return;
+
+    if (confirm(`¿Deseas eliminar el acceso de "${user.realname}"?\n\nYa no podrá entrar al sistema y el usuario "${user.username}" no podrá ser reutilizado.`)) {
         state.users.splice(index, 1);
+
+        // Agregar a lista negra para evitar reutilización
+        if (!state.deletedUsernames) state.deletedUsernames = [];
+        state.deletedUsernames.push(user.username);
+
         saveState();
+        renderUsersList();
+        alert("Acceso eliminado correctamente. Este usuario ya no podrá acceder al sistema.");
     }
 };
 
