@@ -529,9 +529,13 @@ body.portal-body {
 }
 
 .teacher-header {
-    padding: 15px;
+    padding: 20px 15px;
     text-align: center;
     position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .card-blue .teacher-header { background: #00a8ff; color: white; }
@@ -542,11 +546,12 @@ body.portal-body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 4px solid #fbc531;
-    margin: -40px auto 5px;
+    border: 4px solid white;
+    margin: 0;
     position: relative;
     z-index: 10;
     object-fit: cover;
+    object-position: center center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     background: white;
 }
