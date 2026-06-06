@@ -177,7 +177,6 @@ function render() {
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
-    if (document.getElementById('request-supports-container')) renderRequestSupports();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
@@ -346,9 +345,6 @@ function renderRequests() {
                                 <h4>${req.item}</h4>
                                 <p style="font-size: 0.9rem; color: #666; margin: 12px 0; line-height: 1.5;">${req.note && req.note.trim() ? req.note : 'Se necesita tu apoyo para este requerimiento.'}</p>
                             </div>
-                        </div>
-                        <div style="text-align: center;">
-                            <button class="btn-support btn-support-${color}" onclick="openSupportModal(${req.id})">APOYAR SOLICITUD</button>
                         </div>
                     </div>
                 </div>
