@@ -1332,24 +1332,35 @@ function renderUsersList() {
     const container = document.getElementById('users-list-container');
     if (!container) return;
 
-    // Asegurar que state.users sea un array
-    if (!Array.isArray(state.users)) {
-        state.users = state.users ? Object.values(state.users) : [];
+    // Convertir state.users a array si es necesario y filtrar usuarios válidos
+    let users = [];
+    if (Array.isArray(state.users)) {
+        users = state.users;
+    } else if (state.users && typeof state.users === 'object') {
+        users = Object.values(state.users).filter(u => u && u.username && u.realname);
     }
 
-    if (!state.users || state.users.length === 0) {
+    if (!users || users.length === 0) {
         container.innerHTML = '<p style="font-size:0.8rem; color:#999; text-align:center; padding:20px;">No hay colaboradores invitados.</p>';
         return;
     }
-    container.innerHTML = state.users.map((u, index) => {
+
+    container.innerHTML = users.map((u, index) => {
+        // Validar que el usuario tenga los datos necesarios
+        if (!u || !u.realname || !u.username) {
+            console.warn("Usuario inválido:", u);
+            return '';
+        }
+
         const accessType = u.permissions?.full ? 'ACCESO TOTAL' : 'ACCESO LIMITADO';
         const accessColor = u.permissions?.full ? '#e74c3c' : '#3498db';
         const createdDate = u.createdAt || 'N/A';
+        const initials = (u.realname || '?').charAt(0).toUpperCase();
 
         return `
             <div style="display:flex;align-items:center;gap:12px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;border-left:4px solid ${accessColor};">
                 <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${accessColor};display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:0.9rem;">
-                    ${u.realname.charAt(0).toUpperCase()}
+                    ${initials}
                 </div>
                 <div style="flex:1;min-width:0;">
                     <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${u.realname}</p>
@@ -1362,7 +1373,7 @@ function renderUsersList() {
                 </button>
             </div>
         `;
-    }).join('');
+    }).filter(html => html).join('');
 }
 
 window.openUserModal = () => document.getElementById('modal-user').style.display = 'flex';
