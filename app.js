@@ -721,6 +721,19 @@ window.previewRequestImage = (input) => {
     }
 };
 
+window.previewParticipationImage = (input) => {
+    const preview = document.getElementById('part-preview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+};
+
 document.getElementById('request-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = document.getElementById('req-image').files[0];
@@ -818,8 +831,10 @@ function renderParticipations() {
         }
         container.innerHTML = state.participations.map(p => {
             const statusColor = p.status === 'Realizado' ? 'var(--p-green)' : 'var(--p-orange)';
+            const imgHTML = p.image ? `<img src="${p.image}" onclick="openPreview('${p.image}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;margin-bottom:12px;">` : '';
             return `
                 <div class="card" style="border-left: 5px solid ${statusColor}; background:white; padding:20px;">
+                    ${imgHTML}
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span style="font-weight:800; color:${statusColor}; font-size:0.85rem;">${p.type.toUpperCase()}</span>
                         <span style="color:#aaa; font-size:0.8rem;">${p.date}</span>
@@ -840,8 +855,10 @@ function renderParticipations() {
         }
         adminContainer.innerHTML = state.participations.map(p => {
             const statusColor = p.status === 'Realizado' ? 'var(--p-green)' : 'var(--p-orange)';
+            const imgHTML = p.image ? `<img src="${p.image}" onclick="openPreview('${p.image}')" style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;flex-shrink:0;">` : '';
             return `
                 <div style="display:flex;align-items:center;gap:10px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;">
+                    ${imgHTML}
                     <div style="flex:1; min-width:0;">
                         <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${p.type}</p>
                         <p style="margin:0;font-size:0.8rem;color:#666;">${p.desc || '—'}</p>
@@ -895,13 +912,32 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
 
 document.getElementById('participation-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
+    const file = document.getElementById('part-image').files[0];
     const type = document.getElementById('part-type').value;
     const desc = document.getElementById('part-desc').value;
     const status = document.getElementById('part-status').value;
-    if (!state.participations) state.participations = [];
-    state.participations.push({ id: Date.now(), type, desc, status, date: new Date().toLocaleDateString() });
-    saveState(); e.target.reset();
-    alert("Participación registrada con éxito.");
+
+    const saveParticipation = (imageData) => {
+        if (!state.participations) state.participations = [];
+        state.participations.push({
+            id: Date.now(),
+            type,
+            desc,
+            status,
+            image: imageData || null,
+            date: new Date().toLocaleDateString()
+        });
+        saveState();
+        e.target.reset();
+        document.getElementById('part-preview').innerHTML = '';
+        alert("Participación registrada con éxito.");
+    };
+
+    if (file) {
+        compressImage(file, saveParticipation);
+    } else {
+        saveParticipation(null);
+    }
 });
 
 function renderReviews() {

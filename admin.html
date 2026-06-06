@@ -273,6 +273,11 @@
                         <textarea id="part-desc" placeholder="Detalles de la participación..." style="height: 60px;"></textarea>
                     </div>
                     <div class="form-group">
+                        <label>Foto (opcional)</label>
+                        <input type="file" id="part-image" accept="image/*" onchange="previewParticipationImage(this)">
+                        <div id="part-preview" style="display:flex;gap:8px;margin-top:8px;align-items:center;"></div>
+                    </div>
+                    <div class="form-group">
                         <label>Estado</label>
                         <select id="part-status" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
                             <option value="Pendiente">Pendiente</option>
