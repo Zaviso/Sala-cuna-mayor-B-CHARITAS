@@ -68,6 +68,8 @@ let state = {
     gallery: [],
     announcements: [],
     donations: [],
+    participations: [],
+    relevantInfo: [],
     reviews: [],
     users: [],
     balance: 0,
