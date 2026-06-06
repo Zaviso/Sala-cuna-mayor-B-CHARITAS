@@ -901,6 +901,17 @@ window.registerSupport = (studentId, studentName) => {
     alert(`¡Gracias! ${studentName} ha registrado su apoyo a este requerimiento.`);
 };
 
+window.deleteSupportFromRequest = (requestId, supportIndex) => {
+    if (confirm('¿Eliminar este apoyo?')) {
+        if (!state.requestSupports || !state.requestSupports[requestId]) return;
+        state.requestSupports[requestId].splice(supportIndex, 1);
+        if (state.requestSupports[requestId].length === 0) {
+            delete state.requestSupports[requestId];
+        }
+        saveState();
+    }
+};
+
 function renderRequestSupports() {
     const container = document.getElementById('request-supports-container');
     if (!container) return;
@@ -914,10 +925,15 @@ function renderRequestSupports() {
         const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
         if (supports.length === 0) return '';
 
-        const supportsList = supports.map(s => `
-            <div style="padding:8px 12px; background:#f9fafb; border-radius:8px; border-left:3px solid var(--p-blue);">
-                <p style="margin:0; font-weight:600; font-size:0.9rem;">${s.studentName}</p>
-                <p style="margin:0; font-size:0.8rem; color:#888;">${s.date}</p>
+        const supportsList = supports.map((s, idx) => `
+            <div style="padding:8px 12px; background:#f9fafb; border-radius:8px; border-left:3px solid var(--p-blue); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:0.9rem;">${s.studentName}</p>
+                    <p style="margin:0; font-size:0.8rem; color:#888;">${s.date}</p>
+                </div>
+                <button onclick="deleteSupportFromRequest(${req.id}, ${idx})" class="btn-mini btn-mini-delete" title="Eliminar apoyo">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         `).join('');
 
