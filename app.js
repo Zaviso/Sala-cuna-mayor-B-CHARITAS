@@ -173,29 +173,80 @@ function checkPermissions() {
     // 3. Ocultar secciones según permisos individuales
     const perms = user.permissions || {};
 
-    // Secciones de creación (Formularios)
-    if (document.querySelector('.admin-main-card'))
-        document.querySelector('.admin-main-card').style.display = perms.payments ? 'block' : 'none';
+    // SECCIONES DE CREACIÓN (Formularios)
+    // 1. Control de Pagos
+    const adminMainCard = document.querySelector('.admin-main-card');
+    if (adminMainCard) adminMainCard.style.display = perms.payments ? 'block' : 'none';
 
-    const actionCards = document.querySelectorAll('.action-card');
-    if (actionCards[0]) actionCards[0].style.display = perms.expenses ? 'block' : 'none';
-    if (actionCards[1]) actionCards[1].style.display = perms.requests ? 'block' : 'none';
+    // 2. Registrar Gasto
+    const expenseSection = document.getElementById('expense-section');
+    if (expenseSection) expenseSection.style.display = perms.expenses ? 'block' : 'none';
 
-    const bottomCards = document.querySelectorAll('.admin-grid-bottom .card');
-    if (bottomCards[0]) bottomCards[0].style.display = perms.gallery ? 'block' : 'none';
-    if (bottomCards[2]) bottomCards[2].style.display = perms.events ? 'block' : 'none';
-    if (document.getElementById('donation-section'))
-        document.getElementById('donation-section').style.display = perms.donations ? 'block' : 'none';
+    // 3. Requerimiento de las Tías
+    const requestSection = document.getElementById('request-section');
+    if (requestSection) requestSection.style.display = perms.requests ? 'block' : 'none';
 
-    // Secciones de gestión de contenido (Abajo)
-    if (document.getElementById('manage-expenses-container'))
-        document.getElementById('manage-expenses-container').style.display = perms.expenses ? 'block' : 'none';
-    if (document.getElementById('manage-requests-container'))
-        document.getElementById('manage-requests-container').style.display = perms.requests ? 'block' : 'none';
-    if (document.getElementById('manage-events-container'))
-        document.getElementById('manage-events-container').style.display = perms.events ? 'block' : 'none';
-    if (document.getElementById('manage-moments-container'))
-        document.getElementById('manage-moments-container').style.display = perms.gallery ? 'block' : 'none';
+    // 4. Gestión de Equipo
+    const teamSection = document.getElementById('team-section');
+    if (teamSection) teamSection.style.display = (user.role === 'Owner' || perms.team) ? 'block' : 'none';
+
+    // 5. Galería
+    const gallerySection = document.getElementById('gallery-section');
+    if (gallerySection) gallerySection.style.display = perms.gallery ? 'block' : 'none';
+
+    // 6. Evento
+    const eventSection = document.getElementById('event-section');
+    if (eventSection) eventSection.style.display = perms.events ? 'block' : 'none';
+
+    // 7. Comunicados Directiva
+    const announcementSection = document.getElementById('announcement-section');
+    if (announcementSection) announcementSection.style.display = perms.announcements ? 'block' : 'none';
+
+    // 8. Donaciones
+    const donationSection = document.getElementById('donation-section');
+    if (donationSection) donationSection.style.display = perms.donations ? 'block' : 'none';
+
+    // 9. Información Relevante
+    const relevantInfoSection = document.getElementById('relevant-info-section');
+    if (relevantInfoSection) relevantInfoSection.style.display = perms.relevantInfo ? 'block' : 'none';
+
+    // 10. Participación
+    const participationSection = document.getElementById('participation-section');
+    if (participationSection) participationSection.style.display = perms.participations ? 'block' : 'none';
+
+    // LISTADOS/HISTORIAL DE CONTENIDO PUBLICADO
+    // Donaciones Registradas
+    const manageDonationsContainer = document.getElementById('manage-donations-container');
+    if (manageDonationsContainer) manageDonationsContainer.style.display = perms.donations ? 'block' : 'none';
+
+    // Participaciones Registradas
+    const manageParticipationsContainer = document.getElementById('manage-participations-container');
+    if (manageParticipationsContainer) manageParticipationsContainer.style.display = perms.participations ? 'block' : 'none';
+
+    // Información Relevante Registrada
+    const manageRelevantInfoContainer = document.getElementById('manage-relevant-info-container');
+    if (manageRelevantInfoContainer) manageRelevantInfoContainer.style.display = perms.relevantInfo ? 'block' : 'none';
+
+    // Galería de Fotos
+    const manageGalleryContainer = document.getElementById('manage-gallery-container');
+    if (manageGalleryContainer) manageGalleryContainer.style.display = perms.gallery ? 'block' : 'none';
+
+    // Comunicados Activos
+    const manageAnnouncementsContainer = document.getElementById('manage-announcements-container');
+    if (manageAnnouncementsContainer) manageAnnouncementsContainer.style.display = perms.announcements ? 'block' : 'none';
+
+    // LISTADOS EN DASHBOARD GRID (Gestionar Contenido Publicado)
+    // Gastos Registrados - ocultar el div padre
+    const expensesGalleryParent = document.getElementById('expenses-gallery')?.parentElement;
+    if (expensesGalleryParent) expensesGalleryParent.style.display = perms.expenses ? 'block' : 'none';
+
+    // Requerimientos Activos - ocultar el div padre
+    const requestsListParent = document.getElementById('requests-list')?.parentElement;
+    if (requestsListParent) requestsListParent.style.display = perms.requests ? 'block' : 'none';
+
+    // Eventos Programados - ocultar el div padre
+    const eventsListParent = document.getElementById('events-list')?.parentElement;
+    if (eventsListParent) eventsListParent.style.display = perms.events ? 'block' : 'none';
 }
 
 // --- Tarjeta compacta unificada para admin ---
