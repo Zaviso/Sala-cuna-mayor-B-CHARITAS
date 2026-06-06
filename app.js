@@ -177,6 +177,7 @@ function render() {
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
+    if (document.getElementById('request-supports-container')) renderRequestSupports();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
@@ -899,6 +900,52 @@ window.registerSupport = (studentId, studentName) => {
     document.getElementById('modal-support').style.display = 'none';
     alert(`¡Gracias! ${studentName} ha registrado su apoyo a este requerimiento.`);
 };
+
+function renderRequestSupports() {
+    const container = document.getElementById('request-supports-container');
+    if (!container) return;
+
+    if (!state.requests || state.requests.length === 0 || !state.requestSupports) {
+        container.innerHTML = '<p class="empty-msg">No hay apoyos registrados.</p>';
+        return;
+    }
+
+    const html = (state.requests || []).map(req => {
+        const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
+        if (supports.length === 0) return '';
+
+        const supportsList = supports.map(s => `
+            <div style="padding:8px 12px; background:#f9fafb; border-radius:8px; border-left:3px solid var(--p-blue);">
+                <p style="margin:0; font-weight:600; font-size:0.9rem;">${s.studentName}</p>
+                <p style="margin:0; font-size:0.8rem; color:#888;">${s.date}</p>
+            </div>
+        `).join('');
+
+        return `
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:15px; margin-bottom:12px;">
+                <h4 style="margin:0 0 12px 0; color:var(--p-text);">${req.item}</h4>
+                <p style="margin:0 0 12px 0; font-size:0.85rem; color:#666;">
+                    <i class="fas fa-user"></i> ${req.teacher || 'Profesora'} - ${req.room || 'Sala'}
+                </p>
+                <div style="background:#f0f7ff; border-radius:8px; padding:12px; border-left:4px solid var(--p-blue);">
+                    <p style="margin:0 0 8px 0; font-weight:700; font-size:0.9rem; color:var(--p-blue);">
+                        <i class="fas fa-users"></i> ${supports.length} ${supports.length === 1 ? 'familia apoyando' : 'familias apoyando'}
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        ${supportsList}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (!html) {
+        container.innerHTML = '<p class="empty-msg">No hay apoyos registrados.</p>';
+        return;
+    }
+
+    container.innerHTML = html;
+}
 // --- User Management Logic (SuperAdmin Only) ---
 function renderUsersList() {
     const container = document.getElementById('users-list-container');
