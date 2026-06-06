@@ -177,6 +177,7 @@ function render() {
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
     if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
+    if (document.getElementById('participations-list') || document.getElementById('participations-list-admin')) renderParticipations();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
@@ -805,6 +806,74 @@ window.deleteAnnouncement = (index) => {
     }
 };
 
+function renderParticipations() {
+    const isAdmin = !!document.getElementById('students-table');
+
+    // Panel público
+    const container = document.getElementById('participations-list');
+    if (container) {
+        if (!state.participations || state.participations.length === 0) {
+            container.innerHTML = '<p class="empty-msg">No hay participaciones registradas.</p>';
+            return;
+        }
+        container.innerHTML = state.participations.map(p => {
+            const statusColor = p.status === 'Realizado' ? 'var(--p-green)' : 'var(--p-orange)';
+            return `
+                <div class="card" style="border-left: 5px solid ${statusColor}; background:white; padding:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-weight:800; color:${statusColor}; font-size:0.85rem;">${p.type.toUpperCase()}</span>
+                        <span style="color:#aaa; font-size:0.8rem;">${p.date}</span>
+                    </div>
+                    <p style="color:#666; font-size:0.9rem; margin-bottom:8px;">${p.desc || ''}</p>
+                    <span style="display:inline-block; padding:4px 10px; border-radius:20px; background:${statusColor}; color:white; font-size:0.75rem; font-weight:700;">${p.status}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Panel admin
+    const adminContainer = document.getElementById('participations-list-admin');
+    if (adminContainer) {
+        if (!state.participations || state.participations.length === 0) {
+            adminContainer.innerHTML = '<p class="empty-msg">No hay participaciones registradas.</p>';
+            return;
+        }
+        adminContainer.innerHTML = state.participations.map(p => {
+            const statusColor = p.status === 'Realizado' ? 'var(--p-green)' : 'var(--p-orange)';
+            return `
+                <div style="display:flex;align-items:center;gap:10px;padding:12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;">
+                    <div style="flex:1; min-width:0;">
+                        <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${p.type}</p>
+                        <p style="margin:0;font-size:0.8rem;color:#666;">${p.desc || '—'}</p>
+                        <div style="margin-top:6px;">
+                            <select onchange="updateParticipationStatus(${p.id}, this.value)" style="padding:4px 8px; border:1px solid #ddd; border-radius:6px; font-size:0.8rem;">
+                                <option value="Pendiente" ${p.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="Realizado" ${p.status === 'Realizado' ? 'selected' : ''}>Realizado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn-mini btn-mini-delete" onclick="deleteParticipation(${p.id})" title="Eliminar participación"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+window.updateParticipationStatus = (id, newStatus) => {
+    const part = state.participations.find(p => p.id === id);
+    if (part) {
+        part.status = newStatus;
+        saveState();
+    }
+};
+
+window.deleteParticipation = (id) => {
+    if (confirm("¿Borrar esta participación?")) {
+        state.participations = state.participations.filter(p => p.id !== id);
+        saveState();
+    }
+};
+
 document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = document.getElementById('photo-file').files[0];
@@ -822,6 +891,17 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
     state.donations.push({ id: Date.now(), type, desc, date: new Date().toLocaleDateString() });
     saveState(); e.target.reset();
     alert("Donación registrada con éxito.");
+});
+
+document.getElementById('participation-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const type = document.getElementById('part-type').value;
+    const desc = document.getElementById('part-desc').value;
+    const status = document.getElementById('part-status').value;
+    if (!state.participations) state.participations = [];
+    state.participations.push({ id: Date.now(), type, desc, status, date: new Date().toLocaleDateString() });
+    saveState(); e.target.reset();
+    alert("Participación registrada con éxito.");
 });
 
 function renderReviews() {

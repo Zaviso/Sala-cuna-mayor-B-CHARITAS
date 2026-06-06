@@ -260,6 +260,28 @@
                     <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Registrar Donación</button>
                 </form>
             </div>
+
+            <div class="card tool-card" id="participation-section">
+                <h3><i class="fas fa-handshake"></i> Participación</h3>
+                <form id="participation-form">
+                    <div class="form-group">
+                        <label>Tipo de Participación</label>
+                        <input type="text" id="part-type" placeholder="Ej: Limpieza, Actividad, Evento" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="part-desc" placeholder="Detalles de la participación..." style="height: 60px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="part-status" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Realizado">Realizado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Registrar Participación</button>
+                </form>
+            </div>
         </div>
 
         <!-- SECCIÓN: Gestionar Donaciones -->
@@ -270,7 +292,16 @@
             <div id="donations-list-admin" style="margin-top: 15px;">
                 <!-- Generado por JS -->
             </div>
+        </div>
 
+        <!-- SECCIÓN: Gestionar Participaciones -->
+        <div class="card" id="manage-participations-container" style="margin-top: 30px;">
+            <div class="admin-card-title">
+                <h3><i class="fas fa-handshake"></i> Participaciones Registradas</h3>
+            </div>
+            <div id="participations-list-admin" style="margin-top: 15px;">
+                <!-- Generado por JS -->
+            </div>
         </div>
 
     <!-- Modal para Crear/Editar Usuario y Permisos -->
