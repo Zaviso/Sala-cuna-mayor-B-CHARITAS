@@ -1477,16 +1477,6 @@ window.handleCreateUser = (e) => {
             return;
         }
 
-        // Verificar que no sea un usuario eliminado (lista negra)
-        const deletedList = Array.isArray(state.deletedUsernames)
-            ? state.deletedUsernames
-            : (state.deletedUsernames ? Object.values(state.deletedUsernames) : []);
-
-        if (deletedList.some(u => u === username || (u && u.username === username))) {
-            alert("Este nombre de usuario ya fue utilizado anteriormente y fue eliminado. No puede ser reutilizado por razones de seguridad.\n\nPor favor elige un nombre de usuario diferente.");
-            return;
-        }
-
         console.log("Validaciones pasadas, creando usuario...");
 
         const newUser = {
@@ -1554,13 +1544,8 @@ window.deleteUserAccount = (index) => {
     const user = state.users[index];
     if (!user) return;
 
-    if (confirm(`¿Deseas eliminar el acceso de "${user.realname}"?\n\nYa no podrá entrar al sistema y el usuario "${user.username}" no podrá ser reutilizado.`)) {
+    if (confirm(`¿Deseas eliminar el acceso de "${user.realname}"?\n\nYa no podrá entrar al sistema.`)) {
         state.users.splice(index, 1);
-
-        // Agregar a lista negra para evitar reutilización
-        if (!state.deletedUsernames) state.deletedUsernames = [];
-        state.deletedUsernames.push(user.username);
-
         saveState();
         renderUsersList();
         alert("Acceso eliminado correctamente. Este usuario ya no podrá acceder al sistema.");
