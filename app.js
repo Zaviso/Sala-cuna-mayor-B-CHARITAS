@@ -247,6 +247,10 @@ function checkPermissions() {
     // Eventos Programados - ocultar el div padre
     const eventsListParent = document.getElementById('events-list')?.parentElement;
     if (eventsListParent) eventsListParent.style.display = perms.events ? 'block' : 'none';
+
+    // SECCIÓN COMPLETA: Gestionar Contenido Publicado - SOLO para acceso total
+    const manageContentSection = document.getElementById('manage-content-section');
+    if (manageContentSection) manageContentSection.style.display = perms.full ? 'block' : 'none';
 }
 
 // --- Tarjeta compacta unificada para admin ---
