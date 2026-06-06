@@ -176,7 +176,7 @@ function render() {
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
-    if (document.getElementById('donations-list')) renderDonations();
+    if (document.getElementById('donations-list') || document.getElementById('donations-list-admin')) renderDonations();
     if (document.getElementById('historial-curso-table')) renderHistorialCurso();
     if (document.getElementById('historial-mensual-table')) renderHistorialMensual();
     if (document.getElementById('users-list-container')) renderUsersList();
@@ -320,19 +320,21 @@ function renderRequests() {
         list.innerHTML = (state.requests || []).map((req, index) => {
             const color = colors[index % 3];
             const profileImg = req.image || `https://i.pravatar.cc/150?img=${(index + 10)}`;
+            const teacherName = req.teacher && req.teacher.trim() ? req.teacher : 'Profesora';
+            const roomName = req.room && req.room.trim() ? req.room : 'Sala';
             return `
                 <div class="teacher-card">
                     <div class="teacher-header card-${color}">
-                        <img src="${profileImg}" class="teacher-img" style="object-fit: cover;">
+                        <img src="${profileImg}" class="teacher-img" alt="Foto de ${teacherName}">
                         <div class="teacher-label">
-                            Prof. ${req.teacher || 'Laura Barcia'} - Sala ${req.room || 'Jirafa'}
+                            ${teacherName} - ${roomName}
                         </div>
                     </div>
                     <div class="teacher-content">
                         <div class="teacher-content-inner">
                             <div class="teacher-text">
                                 <h4>${req.item}</h4>
-                                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; line-height: 1.4;">${req.note || 'Se necesita tu apoyo para este requerimiento.'}</p>
+                                <p style="font-size: 0.9rem; color: #666; margin: 12px 0; line-height: 1.5;">${req.note && req.note.trim() ? req.note : 'Se necesita tu apoyo para este requerimiento.'}</p>
                             </div>
                         </div>
                         <div style="text-align: center;">
