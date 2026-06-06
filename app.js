@@ -199,7 +199,7 @@ function checkPermissions() {
 }
 
 // --- Tarjeta compacta unificada para admin ---
-function adminCard({ icon, iconBg, imgSrc, title, subtitle, onDelete }) {
+function adminCard({ icon, iconBg, imgSrc, title, subtitle, onDelete, canDelete = true }) {
     const visual = imgSrc
         ? `<div style="position:relative;flex-shrink:0;">
                <img src="${imgSrc}" onclick="openPreview('${imgSrc}')"
@@ -212,6 +212,7 @@ function adminCard({ icon, iconBg, imgSrc, title, subtitle, onDelete }) {
         : `<div style="width:48px;height:48px;border-radius:8px;background:${iconBg || '#e2e8f0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                <i class="${icon || 'fas fa-file'}" style="color:white;font-size:1rem;"></i>
            </div>`;
+    const deleteBtn = canDelete ? `<button class="btn-mini btn-mini-delete" onclick="${onDelete}" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>` : '';
     return `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:6px;">
         ${visual}
@@ -219,7 +220,7 @@ function adminCard({ icon, iconBg, imgSrc, title, subtitle, onDelete }) {
             <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);">${title}</p>
             <span style="font-size:0.73rem;color:#999;">${subtitle || ''}</span>
         </div>
-        <button class="btn-mini btn-mini-delete" onclick="${onDelete}" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>
+        ${deleteBtn}
     </div>`;
 }
 
@@ -292,7 +293,8 @@ function renderExpenses() {
                     icon: 'fas fa-receipt', iconBg: '#f1f5f9',
                     title: exp.desc,
                     subtitle: `-$${Number(exp.amount).toLocaleString('es-CL')}`,
-                    onDelete: `deleteExpense(${exp.id})`
+                    onDelete: `deleteExpense(${exp.id})`,
+                    canDelete: hasPermission('expenses')
                 });
             }).join('');
 
@@ -380,7 +382,8 @@ function renderRequests() {
                 iconBg:'var(--p-orange)',
                 title: req.item,
                 subtitle: `${req.teacher || '—'} • ${supportText}`,
-                onDelete:`deleteRequest(${req.id})`
+                onDelete:`deleteRequest(${req.id})`,
+                canDelete: hasPermission('requests')
             });
         }).join('');
     } else {
@@ -431,7 +434,7 @@ function renderEvents() {
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
         list.innerHTML = state.events.map(ev =>
-            adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})` })
+            adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})`, canDelete: hasPermission('events') })
         ).join('');
     } else {
         list.innerHTML = state.events.map(ev => `
@@ -453,7 +456,7 @@ function renderMomentsGallery() {
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
         gal.innerHTML = state.gallery.map(img =>
-            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: img.date || '', onDelete:`deletePhoto(${img.id})` })
+            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: img.date || '', onDelete:`deletePhoto(${img.id})`, canDelete: hasPermission('gallery') })
         ).join('');
     } else {
         gal.innerHTML = state.gallery.map(img => `
@@ -508,7 +511,8 @@ function renderGalleryAdmin() {
                 imgSrc: img.url,
                 title: img.desc || 'Sin título',
                 subtitle: fecha,
-                onDelete: `deletePhoto(${img.id})`
+                onDelete: `deletePhoto(${img.id})`,
+                canDelete: hasPermission('gallery')
             });
         }).join('');
 
@@ -717,7 +721,7 @@ function renderDonations() {
             return;
         }
         adminContainer.innerHTML = state.donations.map(d =>
-            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation(${d.id})` })
+            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation(${d.id})`, canDelete: hasPermission('donations') })
         ).join('');
     }
 }
@@ -999,7 +1003,7 @@ function renderAnnouncementsAdmin() {
     }
     list.innerHTML = state.announcements.map((ann, index) => {
         const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
-        return adminCard({ icon:'fas fa-comment', iconBg: bg, title: ann.text.substring(0,40) + (ann.text.length>40?'…':''), subtitle:`${ann.type} · ${ann.date}`, onDelete:`deleteAnnouncement(${index})` });
+        return adminCard({ icon:'fas fa-comment', iconBg: bg, title: ann.text.substring(0,40) + (ann.text.length>40?'…':''), subtitle:`${ann.type} · ${ann.date}`, onDelete:`deleteAnnouncement(${index})`, canDelete: hasPermission('announcements') });
     }).join('');
 }
 
