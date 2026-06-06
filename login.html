@@ -82,22 +82,29 @@
                 const users = snapshot.val() || {};
                 let foundUser = null;
 
-                // Crear cuenta jonathan si no existe
+                // Crear cuentas si no existen
+                let needsUpdate = false;
+
+                if (!Object.values(users).find(u => u.username === 'admin')) {
+                    users.admin = { username: 'admin', password: 'charitas2026', role: 'Owner', permissions: { full: true } };
+                    needsUpdate = true;
+                }
+
                 if (!Object.values(users).find(u => u.username === 'jonathan')) {
-                    const newUsers = {
-                        ...users,
-                        jonathan: { username: 'jonathan', password: 'jota2026', role: 'Owner', permissions: { full: true } }
-                    };
-                    db.ref('jardin_state/users').set(newUsers);
-                    users.jonathan = newUsers.jonathan;
+                    users.jonathan = { username: 'jonathan', password: 'jota2026', role: 'Owner', permissions: { full: true } };
+                    needsUpdate = true;
+                }
+
+                if (needsUpdate) {
+                    db.ref('jardin_state/users').set(users);
                 }
 
                 // Buscar usuario
                 foundUser = Object.values(users).find(u => u.username === user && u.password === pass);
 
                 // Aceptar también "charita 2026" con espacio para admin
-                if (!foundUser && user === 'admin' && pass === 'charita 2026') {
-                    foundUser = Object.values(users).find(u => u.username === 'admin' && u.password === 'charitas2026');
+                if (!foundUser && user === 'admin' && (pass === 'charita 2026' || pass === 'charitas2026')) {
+                    foundUser = users.admin || Object.values(users).find(u => u.username === 'admin');
                 }
 
                 if (foundUser) {
