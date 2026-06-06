@@ -1471,9 +1471,11 @@ window.handleCreateUser = (e) => {
 
         // Verificar que el username no exista ya (solo en usuarios válidos)
         const existingUsers = state.users.filter(u => u && u.username);
-        if (existingUsers.some(u => u.username === username)) {
-            console.warn("Usuario duplicado detectado:", username);
-            alert("Este nombre de usuario ya existe. Elige uno diferente.");
+        const userExists = existingUsers.some(u => u.username === username);
+
+        if (userExists) {
+            const existingUser = existingUsers.find(u => u.username === username);
+            alert(`El nombre de usuario "@${username}" ya está siendo utilizado por: ${existingUser?.realname}\n\nPor favor elige otro nombre de usuario. Puedes intentar:\n• ${username}2\n• ${username}_${realname.split(' ')[0].toLowerCase()}\n• Otro nombre diferente`);
             return;
         }
 
