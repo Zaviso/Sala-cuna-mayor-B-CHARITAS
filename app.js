@@ -1479,6 +1479,9 @@ function renderUsersList() {
                     <p style="margin:2px 0 0 0;font-size:0.7rem;color:#999;">Creado: ${createdDate}</p>
                     <span style="font-size:0.75rem;color:white;background:${accessColor};padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">${accessType}</span>
                 </div>
+                <button class="btn-mini" onclick="editUserAccount(${index})" title="Editar permisos" style="flex-shrink:0;background:#3498db;color:white;">
+                    <i class="fas fa-edit"></i>
+                </button>
                 <button class="btn-mini btn-mini-delete" onclick="deleteUserAccount(${index})" title="Eliminar acceso" style="flex-shrink:0;">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -1487,10 +1490,45 @@ function renderUsersList() {
     }).filter(html => html).join('');
 }
 
-window.openUserModal = () => document.getElementById('modal-user').style.display = 'flex';
+let editingUserIndex = null;
+
+window.openUserModal = () => {
+    editingUserIndex = null;
+    document.getElementById('modal-user').style.display = 'flex';
+    document.getElementById('user-modal-title').textContent = 'Crear Nuevo Acceso';
+};
+
 window.closeUserModal = () => {
     document.getElementById('modal-user').style.display = 'none';
     document.getElementById('user-form').reset();
+    editingUserIndex = null;
+};
+
+window.editUserAccount = (index) => {
+    editingUserIndex = index;
+    const user = state.users[index];
+    if (!user) return;
+
+    document.getElementById('user-modal-title').textContent = 'Editar Permisos: ' + user.realname;
+    document.getElementById('new-user-realname').value = user.realname;
+    document.getElementById('new-user-realname').disabled = true;
+    document.getElementById('new-username').value = user.username;
+    document.getElementById('new-username').disabled = true;
+    document.getElementById('new-password').value = user.password;
+
+    document.getElementById('p-payments').checked = user.permissions?.payments || false;
+    document.getElementById('p-expenses').checked = user.permissions?.expenses || false;
+    document.getElementById('p-requests').checked = user.permissions?.requests || false;
+    document.getElementById('p-gallery').checked = user.permissions?.gallery || false;
+    document.getElementById('p-events').checked = user.permissions?.events || false;
+    document.getElementById('p-donations').checked = user.permissions?.donations || false;
+    document.getElementById('p-announcements').checked = user.permissions?.announcements || false;
+    document.getElementById('p-relevantinfo').checked = user.permissions?.relevantInfo || false;
+    document.getElementById('p-team').checked = user.permissions?.team || false;
+    document.getElementById('p-history').checked = user.permissions?.history || false;
+    document.getElementById('p-full').checked = user.permissions?.full || false;
+
+    document.getElementById('modal-user').style.display = 'flex';
 };
 
 window.handleCreateUser = (e) => {
@@ -1526,6 +1564,32 @@ window.handleCreateUser = (e) => {
         if (password.length < 4) {
             alert("La contraseña debe tener al menos 4 caracteres.");
             return;
+        }
+
+        // Si estamos editando, actualizar permisos
+        if (editingUserIndex !== null) {
+            const userToEdit = state.users[editingUserIndex];
+            if (userToEdit) {
+                userToEdit.password = password;
+                userToEdit.permissions = {
+                    payments: document.getElementById('p-payments')?.checked || false,
+                    expenses: document.getElementById('p-expenses')?.checked || false,
+                    requests: document.getElementById('p-requests')?.checked || false,
+                    gallery: document.getElementById('p-gallery')?.checked || false,
+                    events: document.getElementById('p-events')?.checked || false,
+                    donations: document.getElementById('p-donations')?.checked || false,
+                    announcements: document.getElementById('p-announcements')?.checked || false,
+                    relevantInfo: document.getElementById('p-relevantinfo')?.checked || false,
+                    team: document.getElementById('p-team')?.checked || false,
+                    history: document.getElementById('p-history')?.checked || false,
+                    full: document.getElementById('p-full')?.checked || false
+                };
+                saveState();
+                renderUsersList();
+                window.closeUserModal();
+                alert("Permisos actualizados correctamente.");
+                return;
+            }
         }
 
         // Verificar que el username no exista ya (solo en usuarios válidos)
