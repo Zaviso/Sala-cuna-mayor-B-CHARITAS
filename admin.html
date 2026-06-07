@@ -80,8 +80,8 @@
     </header>
 
     <script>
-        // Verificación de seguridad simple
-        if (sessionStorage.getItem('isAdmin') !== 'true') {
+        // Permitir acceso si hay userData (usuario autenticado)
+        if (!sessionStorage.getItem('userData')) {
             window.location.href = 'login.html';
         }
     </script>

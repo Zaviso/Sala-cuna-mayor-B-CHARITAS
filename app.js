@@ -1616,23 +1616,24 @@ window.deleteUserAccount = (index) => {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
-    const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+    const userData = sessionStorage.getItem('userData');
+    const isUserAuthenticated = !!userData;
     const path = window.location.pathname;
     const publicPages = ['index.html', 'galeria.html', 'requerimientos.html', 'cuota-curso.html', 'centro-padres.html', 'login.html'];
     const isPublicPage = publicPages.some(p => path.includes(p)) || path.endsWith('/');
 
-    if (!isAdmin && !isPublicPage) {
+    if (!isUserAuthenticated && !isPublicPage) {
         window.location.href = 'login.html';
         return;
     }
 
     render();
-    if (isAdmin) {
+    if (isUserAuthenticated) {
         setTimeout(checkPermissions, 100);
     }
 });
 
 window.logout = () => {
     sessionStorage.clear();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
 };
