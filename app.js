@@ -147,7 +147,8 @@ function getUserPermissions() {
 function hasPermission(permissionKey) {
     const perms = getUserPermissions();
     if (!perms) return false;
-    return perms.full === true || perms[permissionKey] === true;
+    // El permiso 'history' permite editar/eliminar todo contenido
+    return perms.full === true || perms[permissionKey] === true || (permissionKey !== 'full' && perms.history === true);
 }
 
 function checkPermissions() {
