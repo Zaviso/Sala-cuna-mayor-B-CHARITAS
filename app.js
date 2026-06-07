@@ -248,9 +248,9 @@ function checkPermissions() {
     const eventsListParent = document.getElementById('events-list')?.parentElement;
     if (eventsListParent) eventsListParent.style.display = perms.events ? 'block' : 'none';
 
-    // SECCIÓN COMPLETA: Gestionar Contenido Publicado - SOLO para acceso total
+    // SECCIÓN COMPLETA: Gestionar Contenido Publicado - para acceso total o con permiso de historial
     const manageContentSection = document.getElementById('manage-content-section');
-    if (manageContentSection) manageContentSection.style.display = perms.full ? 'block' : 'none';
+    if (manageContentSection) manageContentSection.style.display = (perms.full || perms.history) ? 'block' : 'none';
 }
 
 // --- Tarjeta compacta unificada para admin ---
@@ -1558,6 +1558,7 @@ window.handleCreateUser = (e) => {
                 announcements: document.getElementById('p-announcements')?.checked || false,
                 relevantInfo: document.getElementById('p-relevantinfo')?.checked || false,
                 team: document.getElementById('p-team')?.checked || false,
+                history: document.getElementById('p-history')?.checked || false,
                 full: document.getElementById('p-full')?.checked || false
             }
         };
