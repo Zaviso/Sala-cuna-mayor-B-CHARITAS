@@ -1285,6 +1285,7 @@ window.uploadPhotoToFolder = function(e) {
     if (!folder.photos) folder.photos = [];
 
     let uploadedCount = 0;
+    let failedCount = 0;
     let totalProcessed = 0;
 
     const checkIfDone = () => {
@@ -1294,7 +1295,11 @@ window.uploadPhotoToFolder = function(e) {
             e.target.reset();
             submitBtn.disabled = false;
             submitBtn.textContent = 'Subir Fotos';
-            alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
+            if (failedCount > 0) {
+                alert(`Se subieron ${uploadedCount} foto(s), pero ${failedCount} fallaron.`);
+            } else {
+                alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
+            }
             populateFolderSelect();
             render();
         }
@@ -1302,13 +1307,38 @@ window.uploadPhotoToFolder = function(e) {
 
     files.forEach((file, index) => {
         compressImage(file, (base64Url) => {
-            folder.photos.push({
-                id: Date.now() + index,
-                originalName: file.name,
-                url: base64Url
+            // Enviar a Cloud Function
+            fetch('https://us-central1-jardin-charitas.cloudfunctions.net/uploadGalleryPhoto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    originalName: file.name,
+                    base64Data: base64Url
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    folder.photos.push({
+                        id: Date.now() + index,
+                        originalName: file.name,
+                        url: data.url
+                    });
+                    uploadedCount++;
+                    console.log(`✓ Foto ${index + 1} subida: ${file.name}`);
+                } else {
+                    failedCount++;
+                    console.error(`✗ Error en foto ${index + 1}:`, data.error);
+                }
+                checkIfDone();
+            })
+            .catch(error => {
+                failedCount++;
+                console.error(`✗ Error en foto ${index + 1}:`, error);
+                checkIfDone();
             });
-            uploadedCount++;
-            checkIfDone();
         });
     });
 };
