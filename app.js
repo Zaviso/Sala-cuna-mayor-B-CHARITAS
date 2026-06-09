@@ -37,7 +37,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // Cloudinary Configuration
-const CLOUDINARY_CLOUD_NAME = 'dka3sqb2h';
+const CLOUDINARY_CLOUD_NAME = 'dka3sqbzh';
 const CLOUDINARY_UPLOAD_PRESET = 'jardin_galeria';
 
 // --- Helper: Compress Image ---
