@@ -35,6 +35,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const storage = firebase.storage();
 
 // --- Helper: Compress Image ---
 function compressImage(file, callback) {
@@ -1222,9 +1223,33 @@ document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
     }
     e.preventDefault();
     const file = document.getElementById('photo-file').files[0];
-    if (file) compressImage(file, (url) => {
-        state.gallery.push({ id: Date.now(), desc: document.getElementById('photo-desc').value, url, date: new Date().toLocaleDateString() });
-        saveState(); e.target.reset();
+    if (!file) return;
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Subiendo...';
+
+    const fileRef = storage.ref(`gallery/${Date.now()}_${file.name}`);
+    fileRef.put(file).then(snapshot => {
+        return snapshot.ref.getDownloadURL();
+    }).then(url => {
+        const photoDesc = document.getElementById('photo-desc').value;
+        state.gallery.push({
+            id: Date.now(),
+            desc: photoDesc,
+            url: url,
+            date: new Date().toLocaleDateString()
+        });
+        saveState();
+        e.target.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir Foto';
+        alert('Foto subida con éxito');
+    }).catch(error => {
+        console.error('Error al subir foto:', error);
+        alert('Error al subir la foto: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir Foto';
     });
 });
 
