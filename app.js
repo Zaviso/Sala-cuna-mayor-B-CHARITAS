@@ -288,6 +288,7 @@ function render() {
     if (document.getElementById('events-list')) renderEvents();
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('gallery-public')) renderGalleryPublic();
+    if (document.getElementById('moments-gallery')) renderMomentsGallery();
     renderRelevantInfo();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
