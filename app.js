@@ -516,25 +516,24 @@ function renderMomentsGallery() {
     gal.innerHTML = state.gallery.map(folder => `
         <div style="grid-column: 1/-1;">
             <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px;">
-                <div style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="margin: 0; color: var(--p-blue); font-size: 1.1rem;">
-                            <i class="fas fa-folder"></i> ${folder.name}
-                        </h3>
-                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #999;">
-                            ${folder.createdAt} • ${folder.photos?.length || 0} foto(s)
-                        </p>
-                    </div>
+                <div style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                    <h3 style="margin: 0; color: var(--p-blue); font-size: 1.1rem;">
+                        <i class="fas fa-folder"></i> ${folder.name}
+                    </h3>
+                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">
+                        ${folder.createdAt} • ${folder.photos?.length || 0} foto(s)
+                    </p>
+                    ${folder.desc ? `<p style="margin: 8px 0 0 0; font-size: 0.9rem; color: var(--p-text); line-height: 1.4;">${folder.desc}</p>` : ''}
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px;">
                     ${(folder.photos || []).map(photo => `
                         <div class="gallery-item">
                             <div class="gallery-img-container">
-                                <img src="${photo.url}" loading="lazy" alt="${photo.desc}">
+                                <img src="${photo.url}" loading="lazy" alt="${photo.originalName}">
                             </div>
-                            <div class="gallery-info"><p>${photo.desc || 'Sin título'}</p></div>
+                            <div class="gallery-info"><p title="${photo.originalName}">${photo.originalName}</p></div>
                             <div class="gallery-actions">
-                                <a href="${photo.url}" download="jardin_charitas_${photo.id}.jpg" class="gallery-btn btn-download" title="Descargar">
+                                <a href="${photo.url}" download="${photo.originalName}" class="gallery-btn btn-download" title="Descargar">
                                     <i class="fas fa-download"></i>
                                 </a>
                                 <button onclick="openPreview('${photo.url}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
@@ -570,7 +569,7 @@ function renderGalleryAdmin() {
                         </span>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);">${photo.desc || 'Sin título'}</p>
+                        <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);" title="${photo.originalName}">${photo.originalName || 'Foto'}</p>
                     </div>
                     ${hasPermission('gallery') ? `<button class="btn-mini btn-mini-delete" onclick="deletePhotoFromFolder(${folderIndex}, ${photoIndex})" title="Eliminar foto" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>` : ''}
                 </div>`;
@@ -582,6 +581,7 @@ function renderGalleryAdmin() {
                     <div style="flex:1;">
                         <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
                         <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${folder.createdAt}</p>
+                        ${folder.desc ? `<p style="margin:4px 0 0 0;font-size:0.8rem;color:var(--p-text);line-height:1.3;">${folder.desc}</p>` : ''}
                     </div>
                     <span style="font-size:0.75rem;color:#666;white-space:nowrap;">${folder.photos?.length || 0} fotos</span>
                     ${hasPermission('gallery') ? `
@@ -615,7 +615,7 @@ function renderGalleryPublic() {
         const thumbs = photos.map(photo => `
             <div style="position:relative;">
                 <img src="${photo.url}" onclick="openPreview('${photo.url}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
-                <p style="font-size:0.75rem;color:#666;margin-top:4px;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${photo.desc || 'Foto'}</p>
+                <p style="font-size:0.75rem;color:#666;margin-top:4px;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${photo.originalName}">${photo.originalName || 'Foto'}</p>
             </div>
         `).join('');
 
@@ -624,6 +624,7 @@ function renderGalleryPublic() {
                 <div style="padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                     <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
                     <span style="font-size:0.8rem;color:#666;margin-left:10px;">${folder.createdAt} • ${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}</span>
+                    ${folder.desc ? `<p style="margin:8px 0 0 0;font-size:0.8rem;color:var(--p-text);line-height:1.3;">${folder.desc}</p>` : ''}
                 </div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;padding:14px;">
                     ${thumbs}
@@ -1234,6 +1235,8 @@ window.createFolder = function(e) {
     }
     e.preventDefault();
     const folderName = (document.getElementById('folder-name')?.value || '').trim();
+    const folderDesc = (document.getElementById('folder-desc')?.value || '').trim();
+
     if (!folderName) {
         alert("Por favor ingresa un nombre para la carpeta");
         return;
@@ -1243,6 +1246,7 @@ window.createFolder = function(e) {
     const newFolder = {
         id: Date.now(),
         name: folderName,
+        desc: folderDesc,
         createdAt: new Date().toLocaleDateString('es-CL'),
         photos: []
     };
@@ -1266,36 +1270,49 @@ window.uploadPhotoToFolder = function(e) {
         return;
     }
 
-    const file = document.getElementById('photo-file').files[0];
-    if (!file) return;
+    const files = Array.from(document.getElementById('photo-file').files);
+    if (files.length === 0) {
+        alert("Por favor selecciona al menos una foto");
+        return;
+    }
 
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Subiendo...';
+    submitBtn.textContent = `Subiendo ${files.length} foto(s)...`;
 
-    const fileRef = storage.ref(`gallery/${Date.now()}_${file.name}`);
-    fileRef.put(file).then(snapshot => {
-        return snapshot.ref.getDownloadURL();
-    }).then(url => {
-        const photoDesc = document.getElementById('photo-desc').value;
-        const folder = state.gallery[folderIndex];
-        if (!folder.photos) folder.photos = [];
-        folder.photos.push({
-            id: Date.now(),
-            desc: photoDesc,
-            url: url
+    const folder = state.gallery[folderIndex];
+    if (!folder.photos) folder.photos = [];
+
+    let uploadedCount = 0;
+    const uploadPromises = files.map(file => {
+        return new Promise((resolve, reject) => {
+            const fileRef = storage.ref(`gallery/${Date.now()}_${Math.random().toString(36).substr(2,9)}_${file.name}`);
+            fileRef.put(file).then(snapshot => {
+                return snapshot.ref.getDownloadURL();
+            }).then(url => {
+                folder.photos.push({
+                    id: Date.now() + Math.random(),
+                    originalName: file.name,
+                    url: url
+                });
+                uploadedCount++;
+                resolve();
+            }).catch(reject);
         });
+    });
+
+    Promise.all(uploadPromises).then(() => {
         saveState();
         e.target.reset();
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Subir Foto';
-        alert('Foto subida con éxito');
+        submitBtn.textContent = 'Subir Fotos';
+        alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
         populateFolderSelect();
     }).catch(error => {
-        console.error('Error al subir foto:', error);
-        alert('Error al subir la foto: ' + error.message);
+        console.error('Error al subir fotos:', error);
+        alert('Error al subir las fotos: ' + error.message);
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Subir Foto';
+        submitBtn.textContent = 'Subir Fotos';
     });
 };
 

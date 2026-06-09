@@ -215,6 +215,7 @@
                     <div class="form-group">
                         <label>Crear Carpeta de Evento</label>
                         <input type="text" id="folder-name" placeholder="Nombre del evento (ej: Cumpleaños, Paseo)" required style="margin-bottom: 10px;">
+                        <textarea id="folder-desc" placeholder="Descripción del evento (opcional)" style="height: 60px; margin-bottom: 10px;"></textarea>
                         <button type="submit" class="btn btn-primary" style="background: var(--p-orange); width: 100%;">+ Crear Carpeta</button>
                     </div>
                 </form>
@@ -224,11 +225,11 @@
                         <select id="folder-select" required style="margin-bottom: 10px;">
                             <option value="">-- Selecciona una carpeta --</option>
                         </select>
-                        <label style="margin-top: 10px;">Descripción de la Foto</label>
-                        <input type="text" id="photo-desc" placeholder="Título de la foto" required style="margin-bottom: 10px;">
-                        <input type="file" id="photo-file" accept="image/*" required>
+                        <label style="margin-top: 10px;">Subir Fotos (puedes seleccionar múltiples)</label>
+                        <input type="file" id="photo-file" accept="image/*" multiple required>
+                        <small style="color: #999; display: block; margin-top: 5px;">Selecciona una o más fotos. Se guardarán con el nombre original.</small>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Foto</button>
+                    <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Fotos</button>
                 </form>
             </div>
 
