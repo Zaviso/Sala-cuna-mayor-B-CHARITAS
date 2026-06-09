@@ -572,22 +572,29 @@ function renderGalleryAdmin() {
                     <div style="flex:1;min-width:0;">
                         <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);">${photo.desc || 'Sin título'}</p>
                     </div>
-                    ${hasPermission('gallery') ? `<button class="btn-mini btn-mini-delete" onclick="deletePhotoFromFolder(${folderIndex}, ${photoIndex})" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>` : ''}
+                    ${hasPermission('gallery') ? `<button class="btn-mini btn-mini-delete" onclick="deletePhotoFromFolder(${folderIndex}, ${photoIndex})" title="Eliminar foto" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>` : ''}
                 </div>`;
         }).join('');
 
         return `
             <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:15px;overflow:hidden;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;gap:8px;">
                     <div style="flex:1;">
                         <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
                         <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${folder.createdAt}</p>
                     </div>
-                    <span style="font-size:0.75rem;color:#666;">${folder.photos?.length || 0} fotos</span>
-                    ${hasPermission('gallery') ? `<button class="btn-mini" onclick="openRenameFolderModal(${folderIndex})" title="Renombrar carpeta" style="background:var(--p-blue);color:white;"><i class="fas fa-edit"></i></button>` : ''}
+                    <span style="font-size:0.75rem;color:#666;white-space:nowrap;">${folder.photos?.length || 0} fotos</span>
+                    ${hasPermission('gallery') ? `
+                        <button class="btn-mini" onclick="openRenameFolderModal(${folderIndex})" title="Renombrar carpeta" style="background:var(--p-blue);color:white;flex-shrink:0;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-mini btn-mini-delete" onclick="deleteFolderWithPhotos(${folderIndex})" title="Eliminar carpeta" style="flex-shrink:0;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
                 </div>
                 <div style="padding:12px;">
-                    ${items}
+                    ${items.length > 0 ? items : '<p style="text-align:center;color:#999;font-size:0.85rem;margin:10px 0;">Esta carpeta está vacía</p>'}
                 </div>
             </div>`;
     }).join('');
@@ -1297,11 +1304,31 @@ window.deletePhotoFromFolder = function(folderIndex, photoIndex) {
         alert("No tienes permiso para eliminar fotos.");
         return;
     }
-    if (confirm("¿Borrar esta foto?")) {
+    if (confirm("¿Eliminar esta foto?")) {
         if (state.gallery[folderIndex] && state.gallery[folderIndex].photos) {
             state.gallery[folderIndex].photos.splice(photoIndex, 1);
             saveState();
         }
+    }
+};
+
+window.deleteFolderWithPhotos = function(folderIndex) {
+    if (!hasPermission('gallery')) {
+        alert("No tienes permiso para eliminar carpetas.");
+        return;
+    }
+    const folder = state.gallery[folderIndex];
+    if (!folder) return;
+
+    const photoCount = (folder.photos || []).length;
+    const message = photoCount > 0
+        ? `¿Eliminar la carpeta "${folder.name}" y sus ${photoCount} foto(s)? Esta acción no se puede deshacer.`
+        : `¿Eliminar la carpeta vacía "${folder.name}"?`;
+
+    if (confirm(message)) {
+        state.gallery.splice(folderIndex, 1);
+        saveState();
+        populateFolderSelect();
     }
 };
 
