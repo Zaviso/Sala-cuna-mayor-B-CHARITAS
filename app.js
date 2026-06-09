@@ -35,7 +35,10 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const storage = firebase.storage();
+
+// Cloudinary Configuration
+const CLOUDINARY_CLOUD_NAME = 'dka3sqb2h';
+const CLOUDINARY_UPLOAD_PRESET = 'jardin_galeria';
 
 // --- Helper: Compress Image ---
 function compressImage(file, callback) {
@@ -1279,7 +1282,7 @@ window.uploadPhotoToFolder = function(e) {
 
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = `Comprimiendo y subiendo ${files.length} foto(s)...`;
+    submitBtn.textContent = `Subiendo ${files.length} foto(s)...`;
 
     const folder = state.gallery[folderIndex];
     if (!folder.photos) folder.photos = [];
@@ -1306,39 +1309,35 @@ window.uploadPhotoToFolder = function(e) {
     };
 
     files.forEach((file, index) => {
-        compressImage(file, (base64Url) => {
-            // Enviar a Cloud Function
-            fetch('https://us-central1-jardin-charitas.cloudfunctions.net/uploadGalleryPhoto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', 'jardin-charitas/galeria');
+
+        fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.secure_url) {
+                folder.photos.push({
+                    id: Date.now() + index,
                     originalName: file.name,
-                    base64Data: base64Url
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    folder.photos.push({
-                        id: Date.now() + index,
-                        originalName: file.name,
-                        url: data.url
-                    });
-                    uploadedCount++;
-                    console.log(`✓ Foto ${index + 1} subida: ${file.name}`);
-                } else {
-                    failedCount++;
-                    console.error(`✗ Error en foto ${index + 1}:`, data.error);
-                }
-                checkIfDone();
-            })
-            .catch(error => {
+                    url: data.secure_url
+                });
+                uploadedCount++;
+                console.log(`✓ Foto ${index + 1} subida: ${file.name}`);
+            } else {
                 failedCount++;
-                console.error(`✗ Error en foto ${index + 1}:`, error);
-                checkIfDone();
-            });
+                console.error(`✗ Error en foto ${index + 1}:`, data);
+            }
+            checkIfDone();
+        })
+        .catch(error => {
+            failedCount++;
+            console.error(`✗ Error en foto ${index + 1}:`, error);
+            checkIfDone();
         });
     });
 };

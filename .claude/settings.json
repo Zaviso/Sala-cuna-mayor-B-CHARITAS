@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\silva\\\\OneDrive\\\\Escritorio\\\\web-centro-padres-jardin-CHARITAS\" -Recurse -Depth 2)",
-      "Bash(Head -30)"
+      "Bash(Head -30)",
+      "Bash(firebase --version)",
+      "Bash(Select-String -Pattern \"rules|storage\")"
     ]
   }
 }
