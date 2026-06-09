@@ -1284,35 +1284,48 @@ window.uploadPhotoToFolder = function(e) {
     if (!folder.photos) folder.photos = [];
 
     let uploadedCount = 0;
-    const uploadPromises = files.map(file => {
-        return new Promise((resolve, reject) => {
-            const fileRef = storage.ref(`gallery/${Date.now()}_${Math.random().toString(36).substr(2,9)}_${file.name}`);
-            fileRef.put(file).then(snapshot => {
-                return snapshot.ref.getDownloadURL();
-            }).then(url => {
+    let failedCount = 0;
+    let totalProcessed = 0;
+
+    const checkIfDone = () => {
+        totalProcessed++;
+        if (totalProcessed === files.length) {
+            saveState();
+            e.target.reset();
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Subir Fotos';
+            if (failedCount > 0) {
+                alert(`Se subieron ${uploadedCount} foto(s) con éxito, pero ${failedCount} foto(s) fallaron.`);
+            } else {
+                alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
+            }
+            populateFolderSelect();
+            render();
+        }
+    };
+
+    files.forEach((file, index) => {
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substr(2, 9);
+        const fileRef = storage.ref(`gallery/${timestamp}_${randomId}_${file.name}`);
+
+        fileRef.put(file)
+            .then(snapshot => snapshot.ref.getDownloadURL())
+            .then(url => {
+                console.log(`Foto ${index + 1} subida:`, file.name);
                 folder.photos.push({
-                    id: Date.now() + Math.random(),
+                    id: timestamp + index,
                     originalName: file.name,
                     url: url
                 });
                 uploadedCount++;
-                resolve();
-            }).catch(reject);
-        });
-    });
-
-    Promise.all(uploadPromises).then(() => {
-        saveState();
-        e.target.reset();
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Subir Fotos';
-        alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
-        populateFolderSelect();
-    }).catch(error => {
-        console.error('Error al subir fotos:', error);
-        alert('Error al subir las fotos: ' + error.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Subir Fotos';
+                checkIfDone();
+            })
+            .catch(error => {
+                console.error(`Error en foto ${index + 1}:`, error);
+                failedCount++;
+                checkIfDone();
+            });
     });
 };
 
