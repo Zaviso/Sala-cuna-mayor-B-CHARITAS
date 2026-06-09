@@ -1257,76 +1257,92 @@ window.createFolder = function(e) {
     alert(`Carpeta "${folderName}" creada con éxito`);
 };
 
-window.uploadPhotoToFolder = function(e) {
+window.uploadPhotoToFolder = async function(e) {
     if (!hasPermission('gallery')) {
         alert("No tienes permiso para subir fotos.");
         e.preventDefault();
         return;
     }
     e.preventDefault();
-    const folderIndex = document.getElementById('folder-select').value;
-    if (folderIndex === '') {
-        alert("Por favor selecciona una carpeta");
-        return;
-    }
 
-    const files = Array.from(document.getElementById('photo-file').files);
-    if (files.length === 0) {
-        alert("Por favor selecciona al menos una foto");
-        return;
-    }
-
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = `Subiendo ${files.length} foto(s)...`;
-
-    const folder = state.gallery[folderIndex];
-    if (!folder.photos) folder.photos = [];
-
-    let uploadedCount = 0;
-    let failedCount = 0;
-    let totalProcessed = 0;
-
-    const checkIfDone = () => {
-        totalProcessed++;
-        if (totalProcessed === files.length) {
-            saveState();
-            e.target.reset();
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Subir Fotos';
-            if (failedCount > 0) {
-                alert(`Se subieron ${uploadedCount} foto(s) con éxito, pero ${failedCount} foto(s) fallaron.`);
-            } else {
-                alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
-            }
-            populateFolderSelect();
-            render();
+    try {
+        const folderIndex = document.getElementById('folder-select').value;
+        if (folderIndex === '') {
+            alert("Por favor selecciona una carpeta");
+            return;
         }
-    };
 
-    files.forEach((file, index) => {
-        const timestamp = Date.now();
-        const randomId = Math.random().toString(36).substr(2, 9);
-        const fileRef = storage.ref(`gallery/${timestamp}_${randomId}_${file.name}`);
+        const files = Array.from(document.getElementById('photo-file').files);
+        if (files.length === 0) {
+            alert("Por favor selecciona al menos una foto");
+            return;
+        }
 
-        fileRef.put(file)
-            .then(snapshot => snapshot.ref.getDownloadURL())
-            .then(url => {
-                console.log(`Foto ${index + 1} subida:`, file.name);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = `Subiendo ${files.length} foto(s)...`;
+
+        const folder = state.gallery[folderIndex];
+        if (!folder.photos) folder.photos = [];
+
+        let uploadedCount = 0;
+        let failedCount = 0;
+
+        console.log('Iniciando subida de', files.length, 'fotos');
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            try {
+                console.log(`Subiendo foto ${i + 1}/${files.length}: ${file.name}`);
+
+                const timestamp = Date.now() + i;
+                const randomId = Math.random().toString(36).substr(2, 9);
+                const path = `gallery/${timestamp}_${randomId}_${file.name}`;
+
+                console.log('Path:', path);
+
+                const fileRef = storage.ref(path);
+                const snapshot = await fileRef.put(file);
+                const url = await snapshot.ref.getDownloadURL();
+
+                console.log(`✓ Foto ${i + 1} subida exitosamente`);
+
                 folder.photos.push({
-                    id: timestamp + index,
+                    id: timestamp,
                     originalName: file.name,
                     url: url
                 });
                 uploadedCount++;
-                checkIfDone();
-            })
-            .catch(error => {
-                console.error(`Error en foto ${index + 1}:`, error);
+            } catch (error) {
+                console.error(`✗ Error en foto ${i + 1}:`, error);
                 failedCount++;
-                checkIfDone();
-            });
-    });
+            }
+        }
+
+        console.log('Guardando estado...');
+        saveState();
+
+        console.log('Limpiando formulario...');
+        e.target.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir Fotos';
+
+        if (failedCount > 0) {
+            alert(`Se subieron ${uploadedCount} foto(s) con éxito, pero ${failedCount} foto(s) fallaron.\n\nRevisa la consola para más detalles.`);
+        } else {
+            alert(`¡${uploadedCount} foto(s) subida(s) con éxito!`);
+        }
+        populateFolderSelect();
+        render();
+    } catch (error) {
+        console.error('Error general:', error);
+        alert('Error inesperado: ' + error.message);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Subir Fotos';
+        }
+    }
 };
 
 window.deletePhotoFromFolder = function(folderIndex, photoIndex) {
