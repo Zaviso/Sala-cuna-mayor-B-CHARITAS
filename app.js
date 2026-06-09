@@ -290,6 +290,7 @@ function render() {
     if (document.getElementById('gallery-list-admin')) renderGalleryAdmin();
     if (document.getElementById('gallery-public')) renderGalleryPublic();
     if (document.getElementById('moments-gallery')) renderMomentsGallery();
+    if (document.getElementById('folder-select')) populateFolderSelect();
     renderRelevantInfo();
     if (document.getElementById('students-table')) renderAdminStudents();
     if (document.getElementById('public-payments-table')) renderPublicPayments();
@@ -511,76 +512,83 @@ function renderMomentsGallery() {
         gal.innerHTML = '<p class="empty-msg" style="grid-column: 1/-1;">Galería vacía.</p>';
         return;
     }
-    const isAdmin = !!document.getElementById('students-table');
-    if (isAdmin) {
-        gal.innerHTML = state.gallery.map(img =>
-            adminCard({ imgSrc: img.url, title: img.desc || 'Sin título', subtitle: img.date || '', onDelete:`deletePhoto(${img.id})`, canDelete: hasPermission('gallery') })
-        ).join('');
-    } else {
-        gal.innerHTML = state.gallery.map(img => `
-            <div class="gallery-item">
-                <div class="gallery-img-container">
-                    <img src="${img.url}" loading="lazy">
+
+    gal.innerHTML = state.gallery.map(folder => `
+        <div style="grid-column: 1/-1;">
+            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--p-blue); font-size: 1.1rem;">
+                            <i class="fas fa-folder"></i> ${folder.name}
+                        </h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #999;">
+                            ${folder.createdAt} • ${folder.photos?.length || 0} foto(s)
+                        </p>
+                    </div>
                 </div>
-                <div class="gallery-info"><p>${img.desc}</p></div>
-                <div class="gallery-actions">
-                    <a href="${img.url}" download="jardin_charitas_${img.id}.jpg" class="gallery-btn btn-download" title="Descargar esta foto en tu dispositivo">
-                        <i class="fas fa-download"></i>
-                    </a>
-                    <button onclick="openPreview('${img.url}')" class="gallery-btn btn-view" title="Ver foto en pantalla completa">
-                        <i class="fas fa-expand"></i>
-                    </button>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px;">
+                    ${(folder.photos || []).map(photo => `
+                        <div class="gallery-item">
+                            <div class="gallery-img-container">
+                                <img src="${photo.url}" loading="lazy" alt="${photo.desc}">
+                            </div>
+                            <div class="gallery-info"><p>${photo.desc || 'Sin título'}</p></div>
+                            <div class="gallery-actions">
+                                <a href="${photo.url}" download="jardin_charitas_${photo.id}.jpg" class="gallery-btn btn-download" title="Descargar">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button onclick="openPreview('${photo.url}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
-        `).join('');
-    }
+        </div>
+    `).join('');
 }
 
 function renderGalleryAdmin() {
     const container = document.getElementById('gallery-list-admin');
     if (!container) return;
     if (!state.gallery || state.gallery.length === 0) {
-        container.innerHTML = '<p class="empty-msg">No hay fotos registradas.</p>';
+        container.innerHTML = '<p class="empty-msg">No hay carpetas creadas.</p>';
         return;
     }
 
-    // Agrupar por fecha
-    const byDate = {};
-    state.gallery.forEach(img => {
-        const key = img.date || 'Sin fecha';
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push(img);
-    });
-
-    // Ordenar fechas más recientes primero
-    const sortedDates = Object.keys(byDate).sort((a, b) => {
-        const parse = d => {
-            const parts = d.split('/');
-            if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
-            return new Date(0);
-        };
-        return parse(b) - parse(a);
-    });
-
-    container.innerHTML = sortedDates.map(fecha => {
-        const imgs = byDate[fecha];
-        const items = imgs.map(img => {
-            return adminCard({
-                imgSrc: img.url,
-                title: img.desc || 'Sin título',
-                subtitle: fecha,
-                onDelete: `deletePhoto(${img.id})`,
-                canDelete: hasPermission('gallery')
-            });
+    container.innerHTML = state.gallery.map((folder, folderIndex) => {
+        const items = (folder.photos || []).map((photo, photoIndex) => {
+            return `
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:6px;">
+                    <div style="position:relative;flex-shrink:0;">
+                        <img src="${photo.url}" onclick="openPreview('${photo.url}')"
+                            style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
+                        <span onclick="openPreview('${photo.url}')"
+                            style="position:absolute;bottom:2px;right:2px;width:16px;height:16px;background:var(--p-blue);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                            <i class="fas fa-expand" style="color:white;font-size:0.45rem;"></i>
+                        </span>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <p style="margin:0;font-size:0.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--p-text);">${photo.desc || 'Sin título'}</p>
+                    </div>
+                    ${hasPermission('gallery') ? `<button class="btn-mini btn-mini-delete" onclick="deletePhotoFromFolder(${folderIndex}, ${photoIndex})" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>` : ''}
+                </div>`;
         }).join('');
 
         return `
-            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;overflow:hidden;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                    <span style="font-size:0.8rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
-                    <span style="font-size:0.75rem;color:#666;">${imgs.length} ${imgs.length === 1 ? 'foto' : 'fotos'}</span>
+            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:15px;overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;gap:10px;">
+                    <div style="flex:1;">
+                        <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
+                        <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${folder.createdAt}</p>
+                    </div>
+                    <span style="font-size:0.75rem;color:#666;">${folder.photos?.length || 0} fotos</span>
+                    ${hasPermission('gallery') ? `<button class="btn-mini" onclick="openRenameFolderModal(${folderIndex})" title="Renombrar carpeta" style="background:var(--p-blue);color:white;"><i class="fas fa-edit"></i></button>` : ''}
                 </div>
-                ${items}
+                <div style="padding:12px;">
+                    ${items}
+                </div>
             </div>`;
     }).join('');
 }
@@ -593,38 +601,22 @@ function renderGalleryPublic() {
         return;
     }
 
-    // Agrupar por fecha
-    const byDate = {};
-    state.gallery.forEach(img => {
-        const key = img.date || 'Sin fecha';
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push(img);
-    });
+    container.innerHTML = state.gallery.map(folder => {
+        const photos = folder.photos || [];
+        if (photos.length === 0) return '';
 
-    // Ordenar fechas más recientes primero
-    const sortedDates = Object.keys(byDate).sort((a, b) => {
-        const parse = d => {
-            const parts = d.split('/');
-            if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
-            return new Date(0);
-        };
-        return parse(b) - parse(a);
-    });
-
-    container.innerHTML = sortedDates.map(fecha => {
-        const imgs = byDate[fecha];
-        const thumbs = imgs.map(img => `
+        const thumbs = photos.map(photo => `
             <div style="position:relative;">
-                <img src="${img.url}" onclick="openPreview('${img.url}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
-                <p style="font-size:0.75rem;color:#666;margin-top:4px;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.desc || 'Foto'}</p>
+                <img src="${photo.url}" onclick="openPreview('${photo.url}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;">
+                <p style="font-size:0.75rem;color:#666;margin-top:4px;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${photo.desc || 'Foto'}</p>
             </div>
         `).join('');
 
         return `
             <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:15px;overflow:hidden;">
                 <div style="padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                    <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
-                    <span style="font-size:0.8rem;color:#666;margin-left:10px;">${imgs.length} ${imgs.length === 1 ? 'foto' : 'fotos'}</span>
+                    <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
+                    <span style="font-size:0.8rem;color:#666;margin-left:10px;">${folder.createdAt} • ${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}</span>
                 </div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;padding:14px;">
                     ${thumbs}
@@ -1215,13 +1207,58 @@ window.deleteRelevantInfo = (id) => {
     }
 };
 
-document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
+// Llenar select de carpetas cuando se carga la página o cambia la galería
+function populateFolderSelect() {
+    const select = document.getElementById('folder-select');
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">-- Selecciona una carpeta --</option>';
+    (state.gallery || []).forEach((folder, index) => {
+        select.innerHTML += `<option value="${index}">${folder.name}</option>`;
+    });
+    if (currentValue) select.value = currentValue;
+}
+
+window.createFolder = function(e) {
+    if (!hasPermission('gallery')) {
+        alert("No tienes permiso para crear carpetas.");
+        e.preventDefault();
+        return;
+    }
+    e.preventDefault();
+    const folderName = (document.getElementById('folder-name')?.value || '').trim();
+    if (!folderName) {
+        alert("Por favor ingresa un nombre para la carpeta");
+        return;
+    }
+
+    if (!state.gallery) state.gallery = [];
+    const newFolder = {
+        id: Date.now(),
+        name: folderName,
+        createdAt: new Date().toLocaleDateString('es-CL'),
+        photos: []
+    };
+    state.gallery.push(newFolder);
+    saveState();
+    document.getElementById('gallery-folder-form').reset();
+    populateFolderSelect();
+    alert(`Carpeta "${folderName}" creada con éxito`);
+};
+
+window.uploadPhotoToFolder = function(e) {
     if (!hasPermission('gallery')) {
         alert("No tienes permiso para subir fotos.");
         e.preventDefault();
         return;
     }
     e.preventDefault();
+    const folderIndex = document.getElementById('folder-select').value;
+    if (folderIndex === '') {
+        alert("Por favor selecciona una carpeta");
+        return;
+    }
+
     const file = document.getElementById('photo-file').files[0];
     if (!file) return;
 
@@ -1234,24 +1271,51 @@ document.getElementById('gallery-form')?.addEventListener('submit', (e) => {
         return snapshot.ref.getDownloadURL();
     }).then(url => {
         const photoDesc = document.getElementById('photo-desc').value;
-        state.gallery.push({
+        const folder = state.gallery[folderIndex];
+        if (!folder.photos) folder.photos = [];
+        folder.photos.push({
             id: Date.now(),
             desc: photoDesc,
-            url: url,
-            date: new Date().toLocaleDateString()
+            url: url
         });
         saveState();
         e.target.reset();
         submitBtn.disabled = false;
         submitBtn.textContent = 'Subir Foto';
         alert('Foto subida con éxito');
+        populateFolderSelect();
     }).catch(error => {
         console.error('Error al subir foto:', error);
         alert('Error al subir la foto: ' + error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Subir Foto';
     });
-});
+};
+
+window.deletePhotoFromFolder = function(folderIndex, photoIndex) {
+    if (!hasPermission('gallery')) {
+        alert("No tienes permiso para eliminar fotos.");
+        return;
+    }
+    if (confirm("¿Borrar esta foto?")) {
+        if (state.gallery[folderIndex] && state.gallery[folderIndex].photos) {
+            state.gallery[folderIndex].photos.splice(photoIndex, 1);
+            saveState();
+        }
+    }
+};
+
+window.openRenameFolderModal = function(folderIndex) {
+    const folder = state.gallery[folderIndex];
+    const newName = prompt(`Renombrar carpeta:\n\nNombre actual: "${folder.name}"`, folder.name);
+    if (newName && newName.trim()) {
+        folder.name = newName.trim();
+        saveState();
+    }
+};
+
+document.getElementById('gallery-folder-form')?.addEventListener('submit', window.createFolder);
+document.getElementById('gallery-form')?.addEventListener('submit', window.uploadPhotoToFolder);
 
 document.getElementById('donation-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
