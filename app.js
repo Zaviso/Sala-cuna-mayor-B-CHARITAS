@@ -455,19 +455,21 @@ function renderExpenses() {
                 const foto = imgs.length > 0
                     ? `<img src="${imgs[0]}" onclick="openPreview('${imgs[0]}')"
                         loading="lazy"
-                        style="width:64px;height:64px;object-fit:cover;border-radius:10px;cursor:pointer;flex-shrink:0;">`
-                    : `<div style="width:64px;height:64px;background:#f1f5f9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-receipt" style="color:#ccc;font-size:1.3rem;"></i></div>`;
+                        style="width:100%;height:90px;object-fit:cover;border-radius:8px;cursor:pointer;display:block;">`
+                    : `<div style="width:100%;height:90px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-receipt" style="color:#cbd5e1;font-size:1.5rem;"></i></div>`;
                 const masImgs = imgs.length > 1
-                    ? `<span style="font-size:0.75rem;color:var(--p-blue);cursor:pointer;" onclick="openPreview('${imgs[1]}')">(+${imgs.length - 1} foto${imgs.length > 2 ? 's' : ''})</span>`
+                    ? `<span style="display:block;font-size:0.7rem;color:var(--p-blue);cursor:pointer;margin-top:2px;" onclick="openPreview('${imgs[1]}')">(+${imgs.length - 1} foto${imgs.length > 2 ? 's' : ''})</span>`
                     : '';
                 return `
-                <div class="expense-item" style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; padding:8px; display:flex; flex-direction:column;">
                     ${foto}
-                    <div class="expense-item-info">
-                        <p class="expense-item-desc">${exp.desc}</p>
-                        ${masImgs}
+                    <div style="margin-top:8px; flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <p style="font-size:0.75rem; font-weight:600; color:#334155; margin:0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${exp.desc}</p>
+                            ${masImgs}
+                        </div>
+                        <span style="font-size:0.8rem; font-weight:700; color:var(--p-red); margin-top:6px; display:block;">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
                     </div>
-                    <span class="expense-item-amount">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
                 </div>`;
             }).join('');
 
@@ -484,7 +486,9 @@ function renderExpenses() {
                     <div class="folder-preview">${previews}</div>
                 </div>
                 <div class="folder-content" id="folder-content-${folderId}">
-                    ${items}
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        ${items}
+                    </div>
                 </div>
             </div>`;
         }).join('');

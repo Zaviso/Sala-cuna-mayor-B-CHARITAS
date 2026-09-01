@@ -2007,4 +2007,6 @@ img {
 .folder-content.is-open {
     display: block;
     animation: fadeIn 0.3s ease;
+    max-height: 450px;
+    overflow-y: auto;
 }
