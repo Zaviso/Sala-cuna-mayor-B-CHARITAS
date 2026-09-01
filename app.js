@@ -40,6 +40,35 @@ const db = firebase.database();
 const CLOUDINARY_CLOUD_NAME = 'dka3sq6zh';
 const CLOUDINARY_UPLOAD_PRESET = 'jardin_galeria';
 
+
+// --- Cloudinary Upload Helper ---
+async function uploadFileToCloudinary(file, folderName = 'general') {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'jardin-charitas/' + folderName);
+    
+    try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        return data.secure_url || null;
+    } catch (err) {
+        console.error("Cloudinary upload error:", err);
+        return null;
+    }
+}
+
+// --- Firebase Node Helpers ---
+function fbSet(path, value) {
+    return db.ref('jardin_state/' + path).set(value).catch(console.error);
+}
+function fbRemove(path) {
+    return db.ref('jardin_state/' + path).remove().catch(console.error);
+}
+
 // --- Helper: Compress Image ---
 function compressImage(file, callback) {
     const reader = new FileReader();
@@ -85,9 +114,7 @@ let state = {
 
 // --- Sync Logic with Firebase ---
 function saveState() {
-    db.ref('jardin_state').set(state).then(() => {
-        console.log("Datos sincronizados");
-    }).catch(err => console.error("Error al sincronizar:", err));
+    // Deprecated, all mutations now use fbSet/fbRemove
 }
 
 db.ref('jardin_state').on('value', (snapshot) => {
@@ -133,7 +160,7 @@ db.ref('jardin_state').on('value', (snapshot) => {
         render();
         checkPermissions(); // Verificar qué puede ver el usuario actual
     } else {
-        saveState();
+        // no-op, init done by fb update
     }
 });
 
@@ -725,31 +752,33 @@ window.addStudent = () => {
     const name = input.value.trim();
     if (!name) return;
     const newId = Date.now();
-    state.students.push({ id: newId, name, paidCentro: false, paidMonthly: false, proofCentro: null, proofMonthly: null });
-    saveState();
+    const newItem = { id: newId, name, paidCentro: false, paidMonthly: false, proofCentro: null, proofMonthly: null };
+    fbSet('students/' + state.students.length, newItem);
     input.value = '';
     document.getElementById('add-student-form').style.display = 'none';
 };
 
 window.removeStudent = (id) => {
     if (!confirm('¿Eliminar este alumno de la lista?')) return;
-    state.students = state.students.filter(s => s.id !== id);
-    if (state.monthlyHistory) delete state.monthlyHistory[id];
-    saveState();
+    const sIdx = state.students.findIndex(s => s.id === id);
+    if (sIdx !== -1) {
+        fbRemove('students/' + sIdx);
+        if (state.monthlyHistory) fbRemove('monthlyHistory/' + id);
+    }
 };
 
 window.toggleMonthlyPayment = (studentId, mes) => {
     if (!state.monthlyHistory) state.monthlyHistory = {};
     if (!state.monthlyHistory[studentId]) state.monthlyHistory[studentId] = {};
-    state.monthlyHistory[studentId][mes] = !state.monthlyHistory[studentId][mes];
-    saveState();
+    const current = !!state.monthlyHistory[studentId][mes];
+    fbSet('monthlyHistory/' + studentId + '/' + mes, !current);
 };
 
 window.toggleCursoPayment = (studentId, mes) => {
     if (!state.cursoHistory) state.cursoHistory = {};
     if (!state.cursoHistory[studentId]) state.cursoHistory[studentId] = {};
-    state.cursoHistory[studentId][mes] = !state.cursoHistory[studentId][mes];
-    saveState();
+    const current = !!state.cursoHistory[studentId][mes];
+    fbSet('cursoHistory/' + studentId + '/' + mes, !current);
 };
 
 function renderDonations() {
@@ -789,8 +818,8 @@ function renderDonations() {
 
 window.deleteDonation = (id) => {
     if (confirm("¿Borrar esta donación?")) {
-        state.donations = state.donations.filter(d => d.id !== id);
-        saveState();
+        const item = state.donations.find(d => d.id === id);
+        if (item) fbRemove('donations/' + item.id);
     }
 };
 
@@ -851,40 +880,63 @@ window.togglePayment = (id, field) => {
     const s = state.students.find(x => x.id === id);
     if (!s) return;
     s[field] = !s[field];
-    if (!state.paymentHistory) state.paymentHistory = [];
+    
     if (s[field]) {
-        state.paymentHistory.unshift({
+        const newTx = {
             id: Date.now(),
             student: s.name,
             type: field === 'paidCentro' ? 'Cuota Curso' : 'Cuota Mensual',
             amount: field === 'paidCentro' ? 10000 : 2000,
             date: new Date().toLocaleDateString('es-CL')
-        });
+        };
+        fbSet('paymentHistory/' + newTx.id, newTx);
     }
-    saveState();
+    
+    const sIdx = state.students.findIndex(x => x.id === id);
+    if (sIdx !== -1) fbSet('students/' + sIdx, s);
 };
 
-window.deleteExpense = (id) => { if (!hasPermission('expenses')) { alert("No tienes permiso para eliminar gastos."); return; } if (confirm("¿Borrar gasto?")) { state.expenses = state.expenses.filter(e => e.id !== id); saveState(); } };
-window.deleteRequest = (id) => { if (!hasPermission('requests')) { alert("No tienes permiso para eliminar requerimientos."); return; } if (confirm("¿Borrar requerimiento?")) { state.requests = state.requests.filter(r => r.id !== id); saveState(); } };
-window.deleteEvent = (id) => { if (!hasPermission('events')) { alert("No tienes permiso para eliminar eventos."); return; } if (confirm("¿Borrar evento?")) { state.events = state.events.filter(ev => ev.id !== id); saveState(); } };
-window.deletePhoto = (id) => { if (!hasPermission('gallery')) { alert("No tienes permiso para eliminar fotos."); return; } if (confirm("¿Borrar foto?")) { state.gallery = state.gallery.filter(g => g.id !== id); saveState(); } };
-window.deleteProof = (id, type) => { if (confirm("¿Borrar comprobante?")) { state.students.find(s => s.id === id)[type] = null; saveState(); } };
+window.deleteExpense = (id) => { if (!hasPermission('expenses')) { alert("No tienes permiso para eliminar gastos."); return; } if (confirm("¿Borrar gasto?")) { const item = state.expenses.find(e => e.id === id); if(item) { fbRemove('expenses/' + item.id); } } };
+window.deleteRequest = (id) => { if (!hasPermission('requests')) { alert("No tienes permiso para eliminar requerimientos."); return; } if (confirm("¿Borrar requerimiento?")) { const item = state.requests.find(e => e.id === id); if(item) { fbRemove('requests/' + item.id); } } };
+window.deleteEvent = (id) => { if (!hasPermission('events')) { alert("No tienes permiso para eliminar eventos."); return; } if (confirm("¿Borrar evento?")) { const item = state.events.find(e => e.id === id); if(item) { fbRemove('events/' + item.id); } } };
+window.deletePhoto = (id) => { if (!hasPermission('gallery')) { alert("No tienes permiso para eliminar fotos."); return; } if (confirm("¿Borrar foto?")) { const item = state.gallery.find(e => e.id === id); if(item) { fbRemove('gallery/' + item.id); } } };
+window.deleteProof = (id, type) => { if (confirm("¿Borrar comprobante?")) { 
+    const s = state.students.find(s => s.id === id); 
+    if(s) { 
+        s[type] = null; 
+        const sIdx = state.students.findIndex(x => x.id === id);
+        if(sIdx !== -1) fbSet('students/' + sIdx, s);
+    } 
+} };
 
 window.openProofModal = (id, type) => {
     currentProofTarget = { id, type };
     document.getElementById('modal-proof').style.display = 'flex';
 };
 
-document.getElementById('save-proof-btn')?.addEventListener('click', () => {
+document.getElementById('save-proof-btn')?.addEventListener('click', async () => {
     const file = document.getElementById('student-proof-file').files[0];
+    const btn = document.getElementById('save-proof-btn');
     if (file) {
-        compressImage(file, (base64) => {
+        btn.disabled = true;
+        btn.textContent = 'Subiendo...';
+        const url = await uploadFileToCloudinary(file, 'comprobantes');
+        if (url) {
             const s = state.students.find(x => x.id === currentProofTarget.id);
-            s[currentProofTarget.type] = base64;
-            s[currentProofTarget.type === 'proofCentro' ? 'paidCentro' : 'paidMonthly'] = true;
-            saveState();
-            document.getElementById('modal-proof').style.display = 'none';
-        });
+            if (s) {
+                s[currentProofTarget.type] = url;
+                s[currentProofTarget.type === 'proofCentro' ? 'paidCentro' : 'paidMonthly'] = true;
+                const studentIndex = state.students.findIndex(x => x.id === currentProofTarget.id);
+                if (studentIndex !== -1) {
+                    fbSet('students/' + studentIndex, s);
+                }
+            }
+        } else {
+            alert('Error al subir el comprobante.');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Guardar';
+        document.getElementById('modal-proof').style.display = 'none';
     }
 });
 
@@ -921,24 +973,27 @@ document.getElementById('expense-form')?.addEventListener('submit', (e) => {
     const files = Array.from(document.getElementById('exp-image').files);
     const date = new Date().toLocaleDateString();
 
-    if (files.length === 0) {
-        state.expenses.push({ id: Date.now(), desc, amount, images: [], date });
-        saveState(); e.target.reset(); return;
-    }
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
 
-    const compressed = [];
-    let done = 0;
-    files.forEach((file, i) => {
-        compressImage(file, (b64) => {
-            compressed[i] = b64;
-            done++;
-            if (done === files.length) {
-                state.expenses.push({ id: Date.now(), desc, amount, images: compressed, date });
-                saveState(); e.target.reset();
-                const prev = document.getElementById('exp-preview'); if (prev) prev.innerHTML = '';
-            }
-        });
-    });
+    const saveExpense = (imagesData) => {
+        const newItem = { id: Date.now(), desc, amount, images: imagesData, date };
+        fbSet('expenses/' + newItem.id, newItem);
+        e.target.reset();
+        const prev = document.getElementById('exp-preview'); if (prev) prev.innerHTML = '';
+        if (btn) { btn.disabled = false; btn.textContent = 'Registrar'; }
+    };
+
+    if (files.length === 0) {
+        saveExpense([]);
+    } else {
+        Promise.all(files.map(f => uploadFileToCloudinary(f, 'gastos')))
+            .then(urls => saveExpense(urls.filter(u => u)))
+            .catch(() => {
+                alert('Error subiendo imágenes');
+                if (btn) { btn.disabled = false; btn.textContent = 'Registrar'; }
+            });
+    }
 });
 
 window.previewRequestImage = (input) => {
@@ -994,7 +1049,7 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
     const note = document.getElementById('req-note').value;
 
     const saveRequest = (imagesData) => {
-        state.requests.push({
+        const newItem = {
             id: Date.now(),
             item,
             teacher,
@@ -1002,8 +1057,8 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
             note,
             images: imagesData || [],
             status: 'Pendiente'
-        });
-        saveState();
+        };
+        fbSet('requests/' + newItem.id, newItem);
         e.target.reset();
         document.getElementById('req-preview').innerHTML = '';
     };
@@ -1032,8 +1087,7 @@ document.getElementById('event-form')?.addEventListener('submit', (e) => {
         return;
     }
     e.preventDefault();
-    state.events.push({ id: Date.now(), name: document.getElementById('event-name').value, date: document.getElementById('event-date').value });
-    saveState(); e.target.reset();
+    const newItem = { id: Date.now(), name: document.getElementById('event-name').value, date: document.getElementById('event-date').value }; fbSet('events/' + newItem.id, newItem); e.target.reset();
 });
 
 // --- Announcements Logic ---
@@ -1078,15 +1132,15 @@ document.getElementById('announcement-form')?.addEventListener('submit', (e) => 
     const text = document.getElementById('ann-text').value;
     const type = document.getElementById('ann-type').value;
     if (!state.announcements) state.announcements = [];
-    state.announcements.unshift({ id: Date.now(), text, type, date: new Date().toLocaleDateString() });
-    saveState(); e.target.reset();
+    const newItem = { id: Date.now(), text, type, date: new Date().toLocaleDateString() };
+    fbSet('announcements/' + newItem.id, newItem); e.target.reset();
     alert("Comunicado publicado con éxito.");
 });
 
 window.deleteAnnouncement = (index) => {
     if (confirm("¿Borrar este comunicado?")) {
-        state.announcements.splice(index, 1);
-        saveState();
+        const item = state.announcements[index];
+        if (item) fbRemove('announcements/' + item.id);
     }
 };
 
@@ -1151,14 +1205,14 @@ window.updateParticipationStatus = (id, newStatus) => {
     const part = state.participations.find(p => p.id === id);
     if (part) {
         part.status = newStatus;
-        saveState();
+        fbSet('participations/' + part.id, part);
     }
 };
 
 window.deleteParticipation = (id) => {
     if (confirm("¿Borrar esta participación?")) {
-        state.participations = state.participations.filter(p => p.id !== id);
-        saveState();
+        const item = state.participations.find(p => p.id === id);
+        if (item) fbRemove('participations/' + item.id);
     }
 };
 
@@ -1213,8 +1267,8 @@ function renderRelevantInfo() {
 
 window.deleteRelevantInfo = (id) => {
     if (confirm("¿Borrar esta información?")) {
-        state.relevantInfo = state.relevantInfo.filter(i => i.id !== id);
-        saveState();
+        const item = state.relevantInfo.find(i => i.id === id);
+        if (item) fbRemove('relevantInfo/' + item.id);
     }
 };
 
@@ -1253,8 +1307,7 @@ window.createFolder = function(e) {
         createdAt: new Date().toLocaleDateString('es-CL'),
         photos: []
     };
-    state.gallery.push(newFolder);
-    saveState();
+    fbSet('gallery/' + newFolder.id, newFolder);
     document.getElementById('gallery-folder-form').reset();
     populateFolderSelect();
     alert(`Carpeta "${folderName}" creada con éxito`);
@@ -1294,7 +1347,7 @@ window.uploadPhotoToFolder = function(e) {
     const checkIfDone = () => {
         totalProcessed++;
         if (totalProcessed === files.length) {
-            saveState();
+            // saveState() removed in favor of fbSet above
             e.target.reset();
             submitBtn.disabled = false;
             submitBtn.textContent = 'Subir Fotos';
@@ -1328,6 +1381,7 @@ window.uploadPhotoToFolder = function(e) {
                 });
                 uploadedCount++;
                 console.log(`✓ Foto ${index + 1} subida: ${file.name}`);
+                fbSet('gallery/' + folder.id + '/photos', folder.photos);
             } else {
                 failedCount++;
                 console.error(`✗ Error en foto ${index + 1}:`, data);
@@ -1349,8 +1403,7 @@ window.deletePhotoFromFolder = function(folderIndex, photoIndex) {
     }
     if (confirm("¿Eliminar esta foto?")) {
         if (state.gallery[folderIndex] && state.gallery[folderIndex].photos) {
-            state.gallery[folderIndex].photos.splice(photoIndex, 1);
-            saveState();
+            fbSet('gallery/' + state.gallery[folderIndex].id + '/photos', state.gallery[folderIndex].photos);
         }
     }
 };
@@ -1369,8 +1422,8 @@ window.deleteFolderWithPhotos = function(folderIndex) {
         : `¿Eliminar la carpeta vacía "${folder.name}"?`;
 
     if (confirm(message)) {
-        state.gallery.splice(folderIndex, 1);
-        saveState();
+        const folderId = state.gallery[folderIndex].id;
+        fbRemove('gallery/' + folderId);
         populateFolderSelect();
     }
 };
@@ -1380,7 +1433,7 @@ window.openRenameFolderModal = function(folderIndex) {
     const newName = prompt(`Renombrar carpeta:\n\nNombre actual: "${folder.name}"`, folder.name);
     if (newName && newName.trim()) {
         folder.name = newName.trim();
-        saveState();
+        fbSet('gallery/' + folder.id + '/name', folder.name);
     }
 };
 
@@ -1392,8 +1445,7 @@ document.getElementById('donation-form')?.addEventListener('submit', (e) => {
     const type = document.getElementById('donation-type').value;
     const desc = document.getElementById('donation-desc').value;
     if (!state.donations) state.donations = [];
-    state.donations.push({ id: Date.now(), type, desc, date: new Date().toLocaleDateString() });
-    saveState(); e.target.reset();
+    const newItem = { id: Date.now(), type, desc, date: new Date().toLocaleDateString() }; fbSet('donations/' + newItem.id, newItem); e.target.reset();
     alert("Donación registrada con éxito.");
 });
 
@@ -1409,15 +1461,14 @@ document.getElementById('relevant-info-form')?.addEventListener('submit', (e) =>
     const desc = document.getElementById('info-desc').value;
 
     const saveRelevantInfo = (imageData) => {
-        if (!state.relevantInfo) state.relevantInfo = [];
-        state.relevantInfo.push({
+        const newItem = {
             id: Date.now(),
             title,
             desc,
             image: imageData || null,
             date: new Date().toLocaleDateString()
-        });
-        saveState();
+        };
+        fbSet('relevantInfo/' + newItem.id, newItem);
         e.target.reset();
         document.getElementById('info-preview').innerHTML = '';
         alert("Información publicada con éxito.");
@@ -1443,16 +1494,15 @@ document.getElementById('participation-form')?.addEventListener('submit', (e) =>
     const status = document.getElementById('part-status').value;
 
     const saveParticipation = (imageData) => {
-        if (!state.participations) state.participations = [];
-        state.participations.push({
+        const newItem = {
             id: Date.now(),
             type,
             desc,
             status,
             image: imageData || null,
             date: new Date().toLocaleDateString()
-        });
-        saveState();
+        };
+        fbSet('participations/' + newItem.id, newItem);
         e.target.reset();
         document.getElementById('part-preview').innerHTML = '';
         alert("Participación registrada con éxito.");
@@ -1487,8 +1537,8 @@ function renderReviews() {
 
 window.deleteReview = (index) => {
     if (confirm("¿Borrar esta reseña?")) {
-        state.reviews.splice(index, 1);
-        saveState();
+        const item = state.reviews[index];
+        if (item) fbRemove('reviews/' + item.id);
     }
 };
 
@@ -1533,7 +1583,7 @@ window.registerSupport = (studentId, studentName) => {
         date: new Date().toLocaleDateString()
     });
 
-    saveState();
+    fbSet('requestSupports/' + currentSupportRequest, state.requestSupports[currentSupportRequest]);
     document.getElementById('modal-support').style.display = 'none';
     alert(`¡Gracias! ${studentName} ha registrado su apoyo a este requerimiento.`);
 };
@@ -1543,9 +1593,10 @@ window.deleteSupportFromRequest = (requestId, supportIndex) => {
         if (!state.requestSupports || !state.requestSupports[requestId]) return;
         state.requestSupports[requestId].splice(supportIndex, 1);
         if (state.requestSupports[requestId].length === 0) {
-            delete state.requestSupports[requestId];
+            fbRemove('requestSupports/' + requestId);
+        } else {
+            fbSet('requestSupports/' + requestId, state.requestSupports[requestId]);
         }
-        saveState();
     }
 };
 
@@ -1745,7 +1796,7 @@ window.handleCreateUser = (e) => {
                     history: document.getElementById('p-history')?.checked || false,
                     full: document.getElementById('p-full')?.checked || false
                 };
-                saveState();
+                fbSet('users/' + userIndex + '/permissions', state.users[userIndex].permissions);
                 renderUsersList();
                 window.closeUserModal();
                 alert("Permisos actualizados correctamente.");
@@ -1791,10 +1842,9 @@ window.handleCreateUser = (e) => {
         console.log("Nuevo usuario:", newUser);
 
         if (!state.users) state.users = [];
-        state.users.push(newUser);
+        fbSet('users/' + state.users.length, newUser);
 
         console.log("Usuario añadido, guardando estado...");
-        saveState();
 
         console.log("Estado guardado, renderizando lista...");
         renderUsersList();
@@ -1832,8 +1882,8 @@ window.deleteUserAccount = (index) => {
     if (!user) return;
 
     if (confirm(`¿Deseas eliminar el acceso de "${user.realname}"?\n\nYa no podrá entrar al sistema.`)) {
-        state.users.splice(index, 1);
-        saveState();
+        const item = state.users[index];
+        if (item) fbRemove('users/' + item.id);
         renderUsersList();
         alert("Acceso eliminado correctamente. Este usuario ya no podrá acceder al sistema.");
     }
