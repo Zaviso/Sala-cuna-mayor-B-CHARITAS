@@ -372,28 +372,48 @@ function renderExpenses() {
             return parse(b) - parse(a);
         });
 
-        gallery.innerHTML = sortedDates.map(fecha => {
+        gallery.innerHTML = sortedDates.map((fecha, idx) => {
             const exps = byDate[fecha];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
+            const folderId = 'admin-exp-' + idx;
+            
+            let previews = '';
+            exps.forEach(exp => {
+                const imgs = exp.images || (exp.image ? [exp.image] : []);
+                if (imgs.length > 0) {
+                    previews += `<img src="${imgs[0]}" class="folder-preview-img">`;
+                } else {
+                    previews += `<div class="folder-preview-icon"><i class="fas fa-receipt"></i></div>`;
+                }
+            });
+
             const items = exps.map(exp => {
                 const imgs = exp.images || (exp.image ? [exp.image] : []);
                 return adminCard({
                     imgSrc: imgs.length > 0 ? imgs[0] : null,
                     icon: 'fas fa-receipt', iconBg: '#f1f5f9',
                     title: exp.desc,
-                    subtitle: `-$${Number(exp.amount).toLocaleString('es-CL')}`,
+                    subtitle: `-${Number(exp.amount).toLocaleString('es-CL')}`,
                     onDelete: `deleteExpense(${exp.id})`,
                     canDelete: hasPermission('expenses')
                 });
             }).join('');
 
             return `
-            <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;overflow:hidden;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                    <span style="font-size:0.8rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-calendar-day"></i> ${fecha}</span>
-                    <span style="font-size:0.75rem;background:var(--p-red);color:white;padding:2px 8px;border-radius:20px;font-weight:700;">-$${total.toLocaleString('es-CL')}</span>
+            <div class="folder-card">
+                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                    <div class="folder-header-top">
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-meta">
+                            <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
+                            <i class="fas fa-chevron-down folder-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="folder-preview">${previews}</div>
                 </div>
-                ${items}
+                <div class="folder-content" id="folder-content-${folderId}">
+                    ${items}
+                </div>
             </div>`;
         }).join('');
     } else {
@@ -521,17 +541,84 @@ function renderEvents() {
         return;
     }
     const isAdmin = !!document.getElementById('students-table');
+    
+    const byDate = {};
+    state.events.forEach((ev, i) => {
+        const key = ev.date || 'Sin fecha';
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push({ ...ev, originalIndex: i });
+    });
+    
+    const sortedDates = Object.keys(byDate).sort((a, b) => {
+        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
+        return parse(b) - parse(a);
+    });
+
     if (isAdmin) {
-        list.innerHTML = state.events.map(ev =>
-            adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})`, canDelete: hasPermission('events') })
-        ).join('');
+        list.innerHTML = sortedDates.map((fecha, idx) => {
+            const evs = byDate[fecha];
+            const folderId = 'adm-ev-' + idx;
+            
+            let previews = '';
+            evs.forEach(() => {
+                previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+            });
+
+            const items = evs.map(ev => 
+                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})`, canDelete: hasPermission('events') })
+            ).join('');
+
+            return `
+            <div class="folder-card">
+                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                    <div class="folder-header-top">
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-meta">
+                            <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
+                            <i class="fas fa-chevron-down folder-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="folder-preview">${previews}</div>
+                </div>
+                <div class="folder-content" id="folder-content-${folderId}">
+                    ${items}
+                </div>
+            </div>`;
+        }).join('');
     } else {
-        list.innerHTML = state.events.map(ev => `
-            <div class="card" style="border-left: 5px solid var(--p-blue);">
-                <h4>${ev.name}</h4>
-                <p style="color: var(--p-blue); font-weight:bold;">${ev.date}</p>
-            </div>
-        `).join('');
+        list.innerHTML = sortedDates.map((fecha, idx) => {
+            const evs = byDate[fecha];
+            const folderId = 'pub-ev-' + idx;
+            
+            let previews = '';
+            evs.forEach(() => {
+                previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+            });
+
+            const items = evs.map(ev => `
+                <div class="card" style="border-left: 5px solid var(--p-blue); background:#f8fafc; box-shadow:none; padding:15px; margin-bottom:10px;">
+                    <h4 style="margin:0 0 5px 0;">${ev.name}</h4>
+                    <p style="color: var(--p-blue); font-weight:bold; margin:0;">${ev.date}</p>
+                </div>
+            `).join('');
+
+            return `
+            <div class="folder-card">
+                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                    <div class="folder-header-top">
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-meta">
+                            <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
+                            <i class="fas fa-chevron-down folder-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="folder-preview">${previews}</div>
+                </div>
+                <div class="folder-content" id="folder-content-${folderId}">
+                    ${items}
+                </div>
+            </div>`;
+        }).join('');
     }
 }
 
@@ -1098,15 +1185,55 @@ function renderAnnouncements() {
         container.innerHTML = '<p class="empty-msg">No hay comunicados recientes.</p>';
         return;
     }
-    container.innerHTML = state.announcements.map(ann => `
-        <div class="card" style="border-left: 5px solid ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: white; padding: 20px;">
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <span style="font-weight: 800; color: var(--p-text-light); font-size: 0.75rem;">${ann.type.toUpperCase()}</span>
-                <span style="color: #999; font-size: 0.75rem;">${ann.date}</span>
+    
+    const byDate = {};
+    state.announcements.forEach(ann => {
+        const key = ann.date || 'Sin fecha';
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push(ann);
+    });
+
+    const sortedDates = Object.keys(byDate).sort((a, b) => {
+        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
+        return parse(b) - parse(a);
+    });
+
+    container.innerHTML = sortedDates.map((fecha, idx) => {
+        const anns = byDate[fecha];
+        const folderId = 'pub-ann-' + idx;
+        
+        let previews = '';
+        anns.forEach(ann => {
+            const iconColor = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
+            previews += `<div class="folder-preview-icon" style="color:${iconColor}"><i class="fas fa-bullhorn"></i></div>`;
+        });
+
+        const items = anns.map(ann => `
+            <div class="card" style="border-left: 5px solid ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: #f8fafc; padding: 15px; margin-bottom:10px; box-shadow:none;">
+                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                    <span style="font-weight: 800; color: var(--p-text-light); font-size: 0.75rem;">${ann.type.toUpperCase()}</span>
+                </div>
+                <p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-line;">${ann.text}</p>
             </div>
-            <p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-line;">${ann.text}</p>
-        </div>
-    `).join('');
+        `).join('');
+
+        return `
+        <div class="folder-card">
+            <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                <div class="folder-header-top">
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-meta">
+                        <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
+                        <i class="fas fa-chevron-down folder-chevron"></i>
+                    </div>
+                </div>
+                <div class="folder-preview">${previews}</div>
+            </div>
+            <div class="folder-content" id="folder-content-${folderId}">
+                ${items}
+            </div>
+        </div>`;
+    }).join('');
 }
 
 function renderAnnouncementsAdmin() {
@@ -1116,9 +1243,57 @@ function renderAnnouncementsAdmin() {
         list.innerHTML = '<p class="empty-msg">No hay comunicados activos.</p>';
         return;
     }
-    list.innerHTML = state.announcements.map((ann, index) => {
-        const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
-        return adminCard({ icon:'fas fa-comment', iconBg: bg, title: ann.text.substring(0,40) + (ann.text.length>40?'…':''), subtitle:`${ann.type} · ${ann.date}`, onDelete:`deleteAnnouncement(${index})`, canDelete: hasPermission('announcements') });
+
+    const byDate = {};
+    state.announcements.forEach((ann, i) => {
+        const key = ann.date || 'Sin fecha';
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push({ ...ann, originalIndex: i });
+    });
+
+    const sortedDates = Object.keys(byDate).sort((a, b) => {
+        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
+        return parse(b) - parse(a);
+    });
+
+    list.innerHTML = sortedDates.map((fecha, idx) => {
+        const anns = byDate[fecha];
+        const folderId = 'adm-ann-' + idx;
+        
+        let previews = '';
+        anns.forEach(ann => {
+            const iconColor = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
+            previews += `<div class="folder-preview-icon" style="color:${iconColor}"><i class="fas fa-bullhorn"></i></div>`;
+        });
+
+        const items = anns.map(ann => {
+            const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
+            return adminCard({ 
+                icon:'fas fa-comment', 
+                iconBg: bg, 
+                title: ann.text.substring(0,40) + (ann.text.length>40?'.':''), 
+                subtitle:`${ann.type}`, 
+                onDelete:`deleteAnnouncement(${ann.originalIndex})`, 
+                canDelete: hasPermission('announcements') 
+            });
+        }).join('');
+
+        return `
+        <div class="folder-card">
+            <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                <div class="folder-header-top">
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-meta">
+                        <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
+                        <i class="fas fa-chevron-down folder-chevron"></i>
+                    </div>
+                </div>
+                <div class="folder-preview">${previews}</div>
+            </div>
+            <div class="folder-content" id="folder-content-${folderId}">
+                ${items}
+            </div>
+        </div>`;
     }).join('');
 }
 
@@ -1942,3 +2117,18 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
+// --- Accordion Logic ---
+window.toggleFolder = (id) => {
+    const header = document.getElementById('folder-header-' + id);
+    const content = document.getElementById('folder-content-' + id);
+    if (!header || !content) return;
+    
+    if (content.classList.contains('is-open')) {
+        content.classList.remove('is-open');
+        header.classList.remove('is-open');
+    } else {
+        content.classList.add('is-open');
+        header.classList.add('is-open');
+    }
+};
