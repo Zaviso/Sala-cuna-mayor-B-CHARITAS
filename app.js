@@ -1913,3 +1913,19 @@ window.logout = () => {
     sessionStorage.clear();
     window.location.href = 'login.html';
 };
+
+window.downloadBackup = () => {
+    try {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        const dateStr = new Date().toISOString().split('T')[0];
+        downloadAnchorNode.setAttribute("download", "respaldo_jardin_" + dateStr + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    } catch (e) {
+        console.error("Error creating backup:", e);
+        alert("Ocurrió un error al generar el respaldo.");
+    }
+};
