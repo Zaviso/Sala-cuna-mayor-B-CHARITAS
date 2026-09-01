@@ -435,10 +435,21 @@ function renderExpenses() {
             return parse(b) - parse(a);
         });
 
-        gallery.innerHTML = `<div class="expense-timeline">` +
-        sortedDates.map(fecha => {
+        gallery.innerHTML = sortedDates.map((fecha, idx) => {
             const exps = byDate[fecha];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
+            const folderId = 'pub-exp-' + idx;
+            
+            let previews = '';
+            exps.forEach(exp => {
+                const imgs = exp.images || (exp.image ? [exp.image] : []);
+                if (imgs.length > 0) {
+                    previews += `<img src="${imgs[0]}" class="folder-preview-img">`;
+                } else {
+                    previews += `<div class="folder-preview-icon"><i class="fas fa-receipt"></i></div>`;
+                }
+            });
+
             const items = exps.map(exp => {
                 const imgs = exp.images || (exp.image ? [exp.image] : []);
                 const foto = imgs.length > 0
@@ -450,7 +461,7 @@ function renderExpenses() {
                     ? `<span style="font-size:0.75rem;color:var(--p-blue);cursor:pointer;" onclick="openPreview('${imgs[1]}')">(+${imgs.length - 1} foto${imgs.length > 2 ? 's' : ''})</span>`
                     : '';
                 return `
-                <div class="expense-item">
+                <div class="expense-item" style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
                     ${foto}
                     <div class="expense-item-info">
                         <p class="expense-item-desc">${exp.desc}</p>
@@ -461,15 +472,22 @@ function renderExpenses() {
             }).join('');
 
             return `
-            <div class="expense-day-block">
-                <div class="expense-day-header">
-                    <span class="expense-day-date"><i class="fas fa-calendar-day"></i> ${fecha}</span>
-                    <span class="expense-day-total">Total: $${total.toLocaleString('es-CL')}</span>
+            <div class="folder-card">
+                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
+                    <div class="folder-header-top">
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-meta">
+                            <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
+                            <i class="fas fa-chevron-down folder-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="folder-preview">${previews}</div>
                 </div>
-                <div class="expense-day-items">${items}</div>
+                <div class="folder-content" id="folder-content-${folderId}">
+                    ${items}
+                </div>
             </div>`;
-        }).join('') +
-        `</div>`;
+        }).join('');
     }
 }
 
