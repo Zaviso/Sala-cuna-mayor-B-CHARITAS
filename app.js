@@ -394,7 +394,7 @@ function renderExpenses() {
                     icon: 'fas fa-receipt', iconBg: '#f1f5f9',
                     title: exp.desc,
                     subtitle: `-${Number(exp.amount).toLocaleString('es-CL')}`,
-                    onDelete: `deleteExpense(${exp.id})`,
+                    onDelete: `deleteExpense('${exp.id}')`,
                     canDelete: hasPermission('expenses')
                 });
             }).join('');
@@ -513,7 +513,7 @@ function renderRequests() {
                 iconBg:'var(--p-orange)',
                 title: req.item,
                 subtitle: `${req.teacher || '—'} • ${supportText}`,
-                onDelete:`deleteRequest(${req.id})`,
+                onDelete:`deleteRequest('${req.id}')`,
                 canDelete: hasPermission('requests')
             });
         }).join('');
@@ -587,7 +587,7 @@ function renderEvents() {
             });
 
             const items = evs.map(ev => 
-                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent(${ev.id})`, canDelete: hasPermission('events') })
+                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
             ).join('');
 
             return `
@@ -920,7 +920,7 @@ function renderDonations() {
             return;
         }
         adminContainer.innerHTML = state.donations.map(d =>
-            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation(${d.id})`, canDelete: hasPermission('donations') })
+            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation('${d.id}')`, canDelete: hasPermission('donations') })
         ).join('');
     }
 }
@@ -1391,7 +1391,7 @@ function renderParticipations() {
                             </select>
                         </div>
                     </div>
-                    ${hasPermission('participations') ? `<button class="btn-mini btn-mini-delete" onclick="deleteParticipation(${p.id})" title="Eliminar participación"><i class="fas fa-trash"></i></button>` : ''}
+                    ${hasPermission('participations') ? `<button class="btn-mini btn-mini-delete" onclick="deleteParticipation('${p.id}')" title="Eliminar participación"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `;
         }).join('');
@@ -1455,7 +1455,7 @@ function renderRelevantInfo() {
                         <p style="margin:0;font-size:0.8rem;color:#666;white-space:pre-wrap;">${info.desc || '—'}</p>
                         <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${info.date}</p>
                     </div>
-                    ${hasPermission('relevantInfo') ? `<button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo(${info.id})" title="Eliminar información"><i class="fas fa-trash"></i></button>` : ''}
+                    ${hasPermission('relevantInfo') ? `<button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo('${info.id}')" title="Eliminar información"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `;
         }).join('');
@@ -1816,7 +1816,7 @@ function renderRequestSupports() {
                     <p style="margin:0; font-weight:600; font-size:0.9rem;">${s.studentName}</p>
                     <p style="margin:0; font-size:0.8rem; color:#888;">${s.date}</p>
                 </div>
-                <button onclick="deleteSupportFromRequest(${req.id}, ${idx})" class="btn-mini btn-mini-delete" title="Eliminar apoyo">
+                <button onclick="deleteSupportFromRequest('${req.id}', ${idx})" class="btn-mini btn-mini-delete" title="Eliminar apoyo">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
