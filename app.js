@@ -927,7 +927,7 @@ function renderDonations() {
 
 window.deleteDonation = (id) => {
     if (confirm("¿Borrar esta donación?")) {
-        const item = state.donations.find(d => d.id === id);
+        const item = state.donations.find(d => d.id == id);
         if (item) fbRemove('donations/' + item.id);
     }
 };
@@ -1005,10 +1005,10 @@ window.togglePayment = (id, field) => {
     if (sIdx !== -1) fbSet('students/' + sIdx, s);
 };
 
-window.deleteExpense = (id) => { if (!hasPermission('expenses')) { alert("No tienes permiso para eliminar gastos."); return; } if (confirm("¿Borrar gasto?")) { const item = state.expenses.find(e => e.id === id); if(item) { fbRemove('expenses/' + item.id); } } };
-window.deleteRequest = (id) => { if (!hasPermission('requests')) { alert("No tienes permiso para eliminar requerimientos."); return; } if (confirm("¿Borrar requerimiento?")) { const item = state.requests.find(e => e.id === id); if(item) { fbRemove('requests/' + item.id); } } };
-window.deleteEvent = (id) => { if (!hasPermission('events')) { alert("No tienes permiso para eliminar eventos."); return; } if (confirm("¿Borrar evento?")) { const item = state.events.find(e => e.id === id); if(item) { fbRemove('events/' + item.id); } } };
-window.deletePhoto = (id) => { if (!hasPermission('gallery')) { alert("No tienes permiso para eliminar fotos."); return; } if (confirm("¿Borrar foto?")) { const item = state.gallery.find(e => e.id === id); if(item) { fbRemove('gallery/' + item.id); } } };
+window.deleteExpense = (id) => { if (!hasPermission('expenses')) { alert("No tienes permiso para eliminar gastos."); return; } if (confirm("¿Borrar gasto?")) { const item = state.expenses.find(e => e.id == id); if(item) { fbRemove('expenses/' + item.id); } } };
+window.deleteRequest = (id) => { if (!hasPermission('requests')) { alert("No tienes permiso para eliminar requerimientos."); return; } if (confirm("¿Borrar requerimiento?")) { const item = state.requests.find(e => e.id == id); if(item) { fbRemove('requests/' + item.id); } } };
+window.deleteEvent = (id) => { if (!hasPermission('events')) { alert("No tienes permiso para eliminar eventos."); return; } if (confirm("¿Borrar evento?")) { const item = state.events.find(e => e.id == id); if(item) { fbRemove('events/' + item.id); } } };
+window.deletePhoto = (id) => { if (!hasPermission('gallery')) { alert("No tienes permiso para eliminar fotos."); return; } if (confirm("¿Borrar foto?")) { const item = state.gallery.find(e => e.id == id); if(item) { fbRemove('gallery/' + item.id); } } };
 window.deleteProof = (id, type) => { if (confirm("¿Borrar comprobante?")) { 
     const s = state.students.find(s => s.id === id); 
     if(s) { 
@@ -1399,7 +1399,7 @@ function renderParticipations() {
 }
 
 window.updateParticipationStatus = (id, newStatus) => {
-    const part = state.participations.find(p => p.id === id);
+    const part = state.participations.find(p => p.id == id);
     if (part) {
         part.status = newStatus;
         fbSet('participations/' + part.id, part);
@@ -1408,7 +1408,7 @@ window.updateParticipationStatus = (id, newStatus) => {
 
 window.deleteParticipation = (id) => {
     if (confirm("¿Borrar esta participación?")) {
-        const item = state.participations.find(p => p.id === id);
+        const item = state.participations.find(p => p.id == id);
         if (item) fbRemove('participations/' + item.id);
     }
 };
@@ -1464,7 +1464,7 @@ function renderRelevantInfo() {
 
 window.deleteRelevantInfo = (id) => {
     if (confirm("¿Borrar esta información?")) {
-        const item = state.relevantInfo.find(i => i.id === id);
+        const item = state.relevantInfo.find(i => i.id == id);
         if (item) fbRemove('relevantInfo/' + item.id);
     }
 };
