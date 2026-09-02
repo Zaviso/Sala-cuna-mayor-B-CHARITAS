@@ -116,46 +116,42 @@ let state = {
 function saveState() {
     // Deprecated, all mutations now use fbSet/fbRemove
 }
+function parseFirebaseList(listObj) {
+    if (!listObj) return [];
+    if (Array.isArray(listObj)) {
+        return listObj.map((item, idx) => {
+            if (item && typeof item === 'object') {
+                if (item.id === undefined) item.id = idx;
+            }
+            return item;
+        }).filter(u => u != null);
+    }
+    return Object.keys(listObj).map(key => {
+        let item = listObj[key];
+        if (item && typeof item === 'object') {
+            item.id = key; // Force the id to match the Firebase key
+        }
+        return item;
+    }).filter(u => u != null);
+}
 
 db.ref('jardin_state').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
         state = { ...state, ...data };
 
-        // Asegurar que los arrays sean arrays (Firebase puede devolverlos como objetos con nulls)
-        state.users = Array.isArray(state.users)
-            ? state.users.filter(u => u != null)
-            : (state.users ? Object.values(state.users).filter(u => u != null) : []);
-        state.students = Array.isArray(state.students)
-            ? state.students.filter(u => u != null)
-            : (state.students ? Object.values(state.students).filter(u => u != null) : []);
-        state.expenses = Array.isArray(state.expenses)
-            ? state.expenses.filter(u => u != null)
-            : (state.expenses ? Object.values(state.expenses).filter(u => u != null) : []);
-        state.requests = Array.isArray(state.requests)
-            ? state.requests.filter(u => u != null)
-            : (state.requests ? Object.values(state.requests).filter(u => u != null) : []);
-        state.events = Array.isArray(state.events)
-            ? state.events.filter(u => u != null)
-            : (state.events ? Object.values(state.events).filter(u => u != null) : []);
-        state.gallery = Array.isArray(state.gallery)
-            ? state.gallery.filter(u => u != null)
-            : (state.gallery ? Object.values(state.gallery).filter(u => u != null) : []);
-        state.announcements = Array.isArray(state.announcements)
-            ? state.announcements.filter(u => u != null)
-            : (state.announcements ? Object.values(state.announcements).filter(u => u != null) : []);
-        state.donations = Array.isArray(state.donations)
-            ? state.donations.filter(u => u != null)
-            : (state.donations ? Object.values(state.donations).filter(u => u != null) : []);
-        state.participations = Array.isArray(state.participations)
-            ? state.participations.filter(u => u != null)
-            : (state.participations ? Object.values(state.participations).filter(u => u != null) : []);
-        state.relevantInfo = Array.isArray(state.relevantInfo)
-            ? state.relevantInfo.filter(u => u != null)
-            : (state.relevantInfo ? Object.values(state.relevantInfo).filter(u => u != null) : []);
-        state.deletedUsernames = Array.isArray(state.deletedUsernames)
-            ? state.deletedUsernames.filter(u => u != null)
-            : (state.deletedUsernames ? Object.values(state.deletedUsernames).filter(u => u != null) : []);
+        // Asegurar que los arrays sean arrays y asignar el ID correcto si falta o está mal
+        state.users = parseFirebaseList(state.users);
+        state.students = parseFirebaseList(state.students);
+        state.expenses = parseFirebaseList(state.expenses);
+        state.requests = parseFirebaseList(state.requests);
+        state.events = parseFirebaseList(state.events);
+        state.gallery = parseFirebaseList(state.gallery);
+        state.announcements = parseFirebaseList(state.announcements);
+        state.donations = parseFirebaseList(state.donations);
+        state.participations = parseFirebaseList(state.participations);
+        state.relevantInfo = parseFirebaseList(state.relevantInfo);
+        state.deletedUsernames = parseFirebaseList(state.deletedUsernames);
 
         render();
         checkPermissions(); // Verificar qué puede ver el usuario actual
