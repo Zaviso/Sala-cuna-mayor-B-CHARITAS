@@ -493,37 +493,6 @@ function renderExpenses() {
 
 function renderRequests() {
     const list = document.getElementById('requests-list');
-    if (!list) return;
-    if (!state.requests || state.requests.length === 0) {
-        list.innerHTML = '<p class="empty-msg">No hay solicitudes.</p>';
-        return;
-    }
-    const isAdmin = !!document.getElementById('students-table');
-    if (isAdmin) {
-        list.innerHTML = state.requests.map(req => {
-            const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
-            const supportText = supports.length > 0 ? `${supports.length} familia(s) apoyando` : 'Sin apoyos aún';
-            return adminCard({
-                imgSrc: req.image,
-                icon:'fas fa-bullhorn',
-                iconBg:'var(--p-orange)',
-                title: req.item,
-                subtitle: `${req.teacher || '—'} • ${supportText}`,
-                onDelete:`deleteRequest('${req.id}')`,
-                canDelete: hasPermission('requests')
-            });
-        }).join('');
-    } else {
-        const colors = ['blue', 'green', 'orange'];
-        list.innerHTML = (state.requests || []).map((req, index) => {
-            const color = colors[index % 3];
-            const images = req.images || (req.image ? [req.image] : []);
-            const profileImg = images.length > 0 ? images[0] : `https://i.pravatar.cc/150?img=${(index + 10)}`;
-            const teacherName = req.teacher && req.teacher.trim() ? req.teacher : 'Profesora';
-            const roomName = req.room && req.room.trim() ? req.room : 'Sala';
-
-            const thumbsHTML = images.length > 1 ? `
-                <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
                     ${images.map((img, i) => `<img src="${img}" onclick="openPreview('${img}')" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd;">`).join('')}
                 </div>
             ` : '';
@@ -560,21 +529,18 @@ function renderEvents() {
     }
     const isAdmin = !!document.getElementById('students-table');
     
-    const byDate = {};
+    const byName = {};
     state.events.forEach((ev, i) => {
-        const key = ev.date || 'Sin fecha';
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push({ ...ev, originalIndex: i });
+        const key = ev.name || 'Evento';
+        if (!byName[key]) byName[key] = [];
+        byName[key].push({ ...ev, originalIndex: i });
     });
     
-    const sortedDates = Object.keys(byDate).sort((a, b) => {
-        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
-        return parse(b) - parse(a);
-    });
+    const sortedNames = Object.keys(byName);
 
     if (isAdmin) {
-        list.innerHTML = sortedDates.map((fecha, idx) => {
-            const evs = byDate[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
@@ -583,14 +549,14 @@ function renderEvents() {
             });
 
             const items = evs.map(ev => 
-                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: ev.date, onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
+                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: '', onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
             ).join('');
 
             return `
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -604,8 +570,8 @@ function renderEvents() {
             </div>`;
         }).join('');
     } else {
-        list.innerHTML = sortedDates.map((fecha, idx) => {
-            const evs = byDate[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
@@ -613,18 +579,21 @@ function renderEvents() {
                 previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
             });
 
-            const items = evs.map(ev => `
+            const items = evs.map(ev => {
+                const imgHTML = ev.image ? `<div style="margin-top:10px;"><img src="${ev.image}" onclick="openPreview('${ev.image}')" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd;"></div>` : '';
+                return `
                 <div class="card" style="border-left: 5px solid var(--p-blue); background:#f8fafc; box-shadow:none; padding:15px; margin-bottom:10px;">
                     <h4 style="margin:0 0 5px 0;">${ev.name}</h4>
-                    <p style="color: var(--p-blue); font-weight:bold; margin:0;">${ev.date}</p>
+                    ${imgHTML}
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             return `
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
