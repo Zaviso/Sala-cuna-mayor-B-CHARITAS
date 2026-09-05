@@ -399,7 +399,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -473,7 +473,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -493,6 +493,37 @@ function renderExpenses() {
 
 function renderRequests() {
     const list = document.getElementById('requests-list');
+    if (!list) return;
+    if (!state.requests || state.requests.length === 0) {
+        list.innerHTML = '<p class="empty-msg">No hay solicitudes.</p>';
+        return;
+    }
+    const isAdmin = !!document.getElementById('students-table');
+    if (isAdmin) {
+        list.innerHTML = state.requests.map(req => {
+            const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
+            const supportText = supports.length > 0 ? `${supports.length} familia(s) apoyando` : 'Sin apoyos aún';
+            return adminCard({
+                imgSrc: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&backgroundColor=b6e3f4',
+                icon:'fas fa-bullhorn',
+                iconBg:'var(--p-orange)',
+                title: req.item,
+                subtitle: `${req.teacher || '—'} • ${supportText}`,
+                onDelete:`deleteRequest('${req.id}')`,
+                canDelete: hasPermission('requests')
+            });
+        }).join('');
+    } else {
+        const colors = ['blue', 'green', 'orange'];
+        list.innerHTML = (state.requests || []).map((req, index) => {
+            const color = colors[index % 3];
+            const images = req.images || (req.image ? [req.image] : []);
+            const profileImg = 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&backgroundColor=b6e3f4';
+            const teacherName = req.teacher && req.teacher.trim() ? req.teacher : 'Profesora';
+            const roomName = req.room && req.room.trim() ? req.room : 'Sala';
+
+            const thumbsHTML = images.length > 1 ? `
+                <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
                     ${images.map((img, i) => `<img src="${img}" onclick="openPreview('${img}')" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd;">`).join('')}
                 </div>
             ` : '';
@@ -1208,7 +1239,7 @@ function renderAnnouncements() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1269,7 +1300,7 @@ function renderAnnouncementsAdmin() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
