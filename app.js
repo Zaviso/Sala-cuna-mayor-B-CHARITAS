@@ -399,7 +399,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -473,7 +473,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -570,8 +570,8 @@ function renderEvents() {
     const sortedNames = Object.keys(byName);
 
     if (isAdmin) {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
+        list.innerHTML = sortedNames.map((fecha, idx) => {
+            const evs = byName[fecha];
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
@@ -587,7 +587,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -601,8 +601,8 @@ function renderEvents() {
             </div>`;
         }).join('');
     } else {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
+        list.innerHTML = sortedNames.map((fecha, idx) => {
+            const evs = byName[fecha];
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
@@ -624,7 +624,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1239,7 +1239,7 @@ function renderAnnouncements() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1300,7 +1300,7 @@ function renderAnnouncementsAdmin() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
