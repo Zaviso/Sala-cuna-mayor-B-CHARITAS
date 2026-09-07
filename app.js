@@ -356,20 +356,17 @@ function renderExpenses() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        // Agrupar por fecha, más recientes primero
-        const byDate = {};
+        // Agrupar por desc (publico)
+        const byNamePub = {};
         state.expenses.forEach(exp => {
-            const key = exp.date || 'Sin fecha';
-            if (!byDate[key]) byDate[key] = [];
-            byDate[key].push(exp);
+            const key = exp.desc || 'Gasto';
+            if (!byNamePub[key]) byNamePub[key] = [];
+            byNamePub[key].push(exp);
         });
-        const sortedDates = Object.keys(byDate).sort((a, b) => {
-            const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
-            return parse(b) - parse(a);
-        });
+        const sortedNamesPub = Object.keys(byNamePub);
 
-        gallery.innerHTML = sortedDates.map((fecha, idx) => {
-            const exps = byDate[fecha];
+        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
+            const exps = byNamePub[folderName];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'admin-exp-' + idx;
             
@@ -399,7 +396,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -431,8 +428,8 @@ function renderExpenses() {
             return parse(b) - parse(a);
         });
 
-        gallery.innerHTML = sortedDates.map((fecha, idx) => {
-            const exps = byDate[fecha];
+        gallery.innerHTML = sortedNames.map((folderName, idx) => {
+            const exps = byName[folderName];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'pub-exp-' + idx;
             
@@ -473,7 +470,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -570,8 +567,8 @@ function renderEvents() {
     const sortedNames = Object.keys(byName);
 
     if (isAdmin) {
-        list.innerHTML = sortedNames.map((fecha, idx) => {
-            const evs = byName[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
@@ -587,7 +584,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -601,8 +598,8 @@ function renderEvents() {
             </div>`;
         }).join('');
     } else {
-        list.innerHTML = sortedNames.map((fecha, idx) => {
-            const evs = byName[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
@@ -624,7 +621,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -656,7 +653,7 @@ function renderMomentsGallery() {
                         <i class="fas fa-folder"></i> ${folder.name}
                     </h3>
                     <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">
-                        ${folder.createdAt} • ${folder.photos?.length || 0} foto(s)
+                        ${folder.photos?.length || 0} foto(s)
                     </p>
                     ${folder.desc ? `<p style="margin: 8px 0 0 0; font-size: 0.9rem; color: var(--p-text); line-height: 1.4;">${folder.desc}</p>` : ''}
                 </div>
@@ -758,7 +755,7 @@ function renderGalleryPublic() {
             <div style="background:white;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:15px;overflow:hidden;">
                 <div style="padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                     <span style="font-size:0.85rem;font-weight:700;color:var(--p-blue);"><i class="fas fa-folder"></i> ${folder.name}</span>
-                    <span style="font-size:0.8rem;color:#666;margin-left:10px;">${folder.createdAt} • ${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}</span>
+                    <span style="font-size:0.8rem;color:#666;margin-left:10px;">${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}</span>
                     ${folder.desc ? `<p style="margin:8px 0 0 0;font-size:0.8rem;color:var(--p-text);line-height:1.3;">${folder.desc}</p>` : ''}
                 </div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;padding:14px;">
@@ -900,7 +897,7 @@ function renderDonations() {
             <div class="card" style="border-left: 5px solid var(--p-green); background:white; padding:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-weight:800; color:var(--p-green); font-size:0.85rem;">DONACIÓN</span>
-                    <span style="color:#aaa; font-size:0.8rem;">${d.date}</span>
+                    
                 </div>
                 <p style="font-weight:700; margin-bottom:4px;">${d.type}</p>
                 <p style="color:#666; font-size:0.9rem;">${d.desc || ''}</p>
@@ -916,7 +913,7 @@ function renderDonations() {
             return;
         }
         adminContainer.innerHTML = state.donations.map(d =>
-            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: `${d.desc || '—'} • ${d.date}`, onDelete:`deleteDonation('${d.id}')`, canDelete: hasPermission('donations') })
+            adminCard({ icon:'fas fa-gift', iconBg:'var(--p-green)', title: d.type, subtitle: d.desc || '—', onDelete:`deleteDonation('${d.id}')`, canDelete: hasPermission('donations') })
         ).join('');
     }
 }
@@ -1204,20 +1201,16 @@ function renderAnnouncements() {
         return;
     }
     
-    const byDate = {};
+    const byType = {};
     state.announcements.forEach(ann => {
-        const key = ann.date || 'Sin fecha';
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push(ann);
+        const key = ann.type || 'Comunicado';
+        if (!byType[key]) byType[key] = [];
+        byType[key].push(ann);
     });
+    const sortedTypes = Object.keys(byType);
 
-    const sortedDates = Object.keys(byDate).sort((a, b) => {
-        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
-        return parse(b) - parse(a);
-    });
-
-    container.innerHTML = sortedDates.map((fecha, idx) => {
-        const anns = byDate[fecha];
+    container.innerHTML = sortedTypes.map((folderName, idx) => {
+        const anns = byType[folderName];
         const folderId = 'pub-ann-' + idx;
         
         let previews = '';
@@ -1239,7 +1232,7 @@ function renderAnnouncements() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1262,20 +1255,16 @@ function renderAnnouncementsAdmin() {
         return;
     }
 
-    const byDate = {};
+    const byType = {};
     state.announcements.forEach((ann, i) => {
-        const key = ann.date || 'Sin fecha';
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push({ ...ann, originalIndex: i });
+        const key = ann.type || 'Comunicado';
+        if (!byType[key]) byType[key] = [];
+        byType[key].push({ ...ann, originalIndex: i });
     });
+    const sortedTypes = Object.keys(byType);
 
-    const sortedDates = Object.keys(byDate).sort((a, b) => {
-        const parse = d => { const p = d.split('/'); return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(0); };
-        return parse(b) - parse(a);
-    });
-
-    list.innerHTML = sortedDates.map((fecha, idx) => {
-        const anns = byDate[fecha];
+    list.innerHTML = sortedTypes.map((folderName, idx) => {
+        const anns = byType[folderName];
         const folderId = 'adm-ann-' + idx;
         
         let previews = '';
@@ -1300,7 +1289,7 @@ function renderAnnouncementsAdmin() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${fecha}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1355,7 +1344,7 @@ function renderParticipations() {
                     ${imgHTML}
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span style="font-weight:800; color:${statusColor}; font-size:0.85rem;">${p.type.toUpperCase()}</span>
-                        <span style="color:#aaa; font-size:0.8rem;">${p.date}</span>
+                        
                     </div>
                     <p style="color:#666; font-size:0.9rem; margin-bottom:8px; white-space: pre-wrap;">${p.desc || ''}</p>
                     <span style="display:inline-block; padding:4px 10px; border-radius:20px; background:${statusColor}; color:white; font-size:0.75rem; font-weight:700;">${p.status}</span>
@@ -1419,8 +1408,7 @@ function renderRelevantInfo() {
                 ${imgHTML}
                 <h3 style="margin:0 0 10px 0; color:var(--p-text);">${info.title}</h3>
                 <p style="color:#666; font-size:0.9rem; white-space: pre-wrap; margin-bottom:8px;">${info.desc || ''}</p>
-                <span style="font-size:0.75rem;color:#aaa;">${info.date}</span>
-            </div>
+                            </div>
         `;
     };
 
@@ -1449,8 +1437,7 @@ function renderRelevantInfo() {
                     <div style="flex:1; min-width:0;">
                         <p style="margin:0;font-size:0.85rem;font-weight:600;color:var(--p-text);">${info.title}</p>
                         <p style="margin:0;font-size:0.8rem;color:#666;white-space:pre-wrap;">${info.desc || '—'}</p>
-                        <p style="margin:4px 0 0 0;font-size:0.75rem;color:#999;">${info.date}</p>
-                    </div>
+                                            </div>
                     ${hasPermission('relevantInfo') ? `<button class="btn-mini btn-mini-delete" onclick="deleteRelevantInfo('${info.id}')" title="Eliminar información"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `;
