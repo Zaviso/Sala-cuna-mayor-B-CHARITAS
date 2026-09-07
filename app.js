@@ -410,26 +410,17 @@ function renderExpenses() {
             </div>`;
         }).join('');
     } else {
-        // Agrupar por fecha
-        const byDate = {};
+        // Agrupar por nombre (desc)
+        const byNamePub = {};
         state.expenses.forEach(exp => {
-            const key = exp.date || 'Sin fecha';
-            if (!byDate[key]) byDate[key] = [];
-            byDate[key].push(exp);
+            const key = exp.desc || 'Gasto';
+            if (!byNamePub[key]) byNamePub[key] = [];
+            byNamePub[key].push(exp);
         });
+        const sortedNamesPub = Object.keys(byNamePub);
 
-        // Ordenar fechas más recientes primero
-        const sortedDates = Object.keys(byDate).sort((a, b) => {
-            const parse = d => {
-                const parts = d.split('/');
-                if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
-                return new Date(0);
-            };
-            return parse(b) - parse(a);
-        });
-
-        gallery.innerHTML = sortedNames.map((folderName, idx) => {
-            const exps = byName[folderName];
+        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
+            const exps = byNamePub[folderName];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'pub-exp-' + idx;
             
