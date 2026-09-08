@@ -58,29 +58,14 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        .admin-tabs-nav {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee;
-        }
-        .admin-tab-btn {
-            padding: 10px 15px; border: none; background: #f1f5f9; border-radius: 8px 8px 0 0;
-            cursor: pointer; font-weight: 600; white-space: nowrap; color: #64748b; transition: all 0.2s;
-        }
+        .admin-tabs-nav { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .admin-tab-btn { padding: 10px 15px; border: none; background: #f1f5f9; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; white-space: nowrap; color: #64748b; transition: all 0.2s; }
         .admin-tab-btn.active { background: var(--p-blue); color: white; }
         .admin-tab-content { display: none; animation: fadeIn 0.3s ease; }
         .admin-tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-        /* Cleanup */
-        .admin-dashboard-wrapper, .admin-quick-actions, .admin-grid-bottom, .admin-history-sections {
-            display: block !important; grid-template-columns: none !important; gap: 0 !important;
-        }
-        /* Ocultar sidebar movil porque las pestañas ya lo reemplazan */
-        .admin-sidebar-mobile { display: none !important; }
-        .hamburger-btn { display: none !important; }
+        .admin-sidebar-mobile, .hamburger-btn { display: none !important; }
     </style>
-    <script>
-        // Override adjustLayout ANTES de que body corra
-        window.adjustLayout = function() { console.log('adjustLayout bloqueado'); };
-    </script>
 
 </head>
 <body>
@@ -598,102 +583,94 @@
     </script>
 
     <script>
-        // Función para cambiar de pestaña global
+        window.adjustLayout = function() {}; // Anular logica legacy que movia el dom
+
         window.switchAdminTab = function(tabId, btn) {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
-            
-            document.querySelectorAll('.admin-tab-content').forEach(t => {
-                t.style.display = 'none';
-                t.classList.remove('active');
-            });
-            
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.style.display = 'none');
             const target = document.getElementById(tabId);
-            if(target) {
-                target.style.display = 'block';
-                target.classList.add('active');
-            }
+            if(target) target.style.display = 'block';
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             const main = document.querySelector('main.container');
             if(!main) return;
-            main.insertAdjacentHTML('afterbegin', `
-    <div class="admin-tabs-nav" id="admin-main-tabs">
-        <button class="admin-tab-btn active" onclick="switchAdminTab('tab-alumnos', this)"><i class="fas fa-users"></i> Alumnos/Pagos</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-gastos', this)" id="tab-btn-expenses"><i class="fas fa-cart-plus"></i> Gastos</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-req', this)" id="tab-btn-requests"><i class="fas fa-bullhorn"></i> Requerimientos</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-galeria', this)" id="tab-btn-gallery"><i class="fas fa-images"></i> Galería</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-eventos', this)" id="tab-btn-events"><i class="fas fa-star"></i> Eventos</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-comunicados', this)" id="tab-btn-announcements"><i class="fas fa-file-alt"></i> Comunicados</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-donaciones', this)" id="tab-btn-donations"><i class="fas fa-hand-holding-heart"></i> Donaciones</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-info', this)" id="tab-btn-info"><i class="fas fa-info-circle"></i> Info Relevante</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-participacion', this)" id="tab-btn-participations"><i class="fas fa-hands-helping"></i> Participación</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-equipo', this)" id="tab-btn-team"><i class="fas fa-user-shield"></i> Equipo</button>
-        <button class="admin-tab-btn" onclick="switchAdminTab('tab-trash', this)" id="tab-btn-trash"><i class="fas fa-trash"></i> Papelera</button>
-    </div>
-`);
             
+            const tabsMenu = `
+                <div class="admin-tabs-nav" id="admin-main-tabs">
+                    <button class="admin-tab-btn active" onclick="switchAdminTab('tab-alumnos', this)"><i class="fas fa-users"></i> Alumnos/Pagos</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-gastos', this)" id="tab-btn-expenses"><i class="fas fa-cart-plus"></i> Gastos</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-req', this)" id="tab-btn-requests"><i class="fas fa-bullhorn"></i> Requerimientos</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-galeria', this)" id="tab-btn-gallery"><i class="fas fa-images"></i> Galería</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-eventos', this)" id="tab-btn-events"><i class="fas fa-star"></i> Eventos</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-comunicados', this)" id="tab-btn-announcements"><i class="fas fa-file-alt"></i> Comunicados</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-donaciones', this)" id="tab-btn-donations"><i class="fas fa-hand-holding-heart"></i> Donaciones</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-info', this)" id="tab-btn-info"><i class="fas fa-info-circle"></i> Info Relevante</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-participacion', this)" id="tab-btn-participations"><i class="fas fa-hands-helping"></i> Participación</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-equipo', this)" id="tab-btn-team"><i class="fas fa-user-shield"></i> Equipo</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-trash', this)" id="tab-btn-trash"><i class="fas fa-trash"></i> Papelera</button>
+                </div>
+            `;
+
+            main.insertAdjacentHTML('afterbegin', tabsMenu);
             const tabsContainer = document.createElement('div');
             tabsContainer.id = 'admin-tabs-container';
-            main.appendChild(tabsContainer);
-            
-            const createTab = (id, formId, listId, isActive = false) => {
+            main.insertBefore(tabsContainer, main.children[1]);
+
+            const createTab = (id, formId, histId, isActive = false) => {
                 const tab = document.createElement('div');
-                tab.className = 'admin-tab-content' + (isActive ? ' active' : '');
+                tab.className = 'admin-tab-content';
                 tab.id = id;
                 if(isActive) tab.style.display = 'block';
                 
-                // Mover formulario
-                const formEl = document.getElementById(formId);
-                // NOTA: Algunas cosas no tienen ID sino clase, como .admin-main-card, lo ajustaremos
-                if(formEl) tab.appendChild(formEl);
+                const formEl = formId ? document.getElementById(formId) : null;
+                const histEl = histId ? document.getElementById(histId) : null;
                 
-                // Mover lista
-                const listEl = document.getElementById(listId);
-                if(listEl) {
-                    const listTitle = listEl.previousElementSibling;
-                    if(listTitle && listTitle.tagName.match(/^H[1-6]$/)) {
-                        tab.appendChild(listTitle);
-                    }
-                    tab.appendChild(listEl);
+                if(formEl) tab.appendChild(formEl);
+                if(histEl) {
+                    // Mover también el h2 hermano si existe justo antes (para historial)
+                    const prev = histEl.previousElementSibling;
+                    if(prev && prev.tagName === 'H2') tab.appendChild(prev);
+                    tab.appendChild(histEl);
                 }
+                
                 tabsContainer.appendChild(tab);
             };
 
-            // Creamos tabs...
-            createTab('tab-gastos', 'expense-section', 'expenses-gallery');
-            createTab('tab-req', 'request-section', 'requests-list-admin');
-            createTab('tab-galeria', 'gallery-section', 'gallery-list-admin');
-            createTab('tab-eventos', 'event-section', 'events-list-admin');
-            createTab('tab-comunicados', 'announcement-section', 'announcements-list-admin');
-            createTab('tab-donaciones', 'donation-section', 'manage-donations-container');
-            createTab('tab-info', 'info-section', 'info-list-admin');
-            createTab('tab-participacion', 'participation-section', 'participations-list-admin');
-            createTab('tab-equipo', 'team-section', null);
-            createTab('tab-trash', null, 'trash-container');
-
-            // El de alumnos es especial por ser .admin-main-card
             const tabAlumnos = document.createElement('div');
-            tabAlumnos.className = 'admin-tab-content active';
+            tabAlumnos.className = 'admin-tab-content';
             tabAlumnos.id = 'tab-alumnos';
             tabAlumnos.style.display = 'block';
             const adminMainCard = document.querySelector('.admin-main-card');
             if(adminMainCard) tabAlumnos.appendChild(adminMainCard);
             tabsContainer.appendChild(tabAlumnos);
 
-            // Limpieza visual
-            document.querySelectorAll('h2').forEach(h => {
-                if(h.innerText.includes('Historial') && !h.closest('.admin-tab-content')) h.remove();
-            });
-            document.querySelectorAll('.admin-history-sections, .admin-dashboard-wrapper, .admin-quick-actions, .admin-grid-bottom').forEach(e => {
-                if(e.children.length === 0) e.remove();
-                e.style.display = 'none'; // forzar ocultamiento si sobró
+            // Requerimos los divs que envuelven las listas para los que las tienen.
+            createTab('tab-gastos', 'expense-section', 'expenses-gallery'); 
+            createTab('tab-req', 'request-section', 'requests-list-admin'); 
+            createTab('tab-galeria', 'gallery-section', 'gallery-list-admin'); 
+            createTab('tab-eventos', 'event-section', 'events-list-admin'); 
+            createTab('tab-comunicados', 'announcement-section', 'announcements-list-admin'); 
+            
+            // Los siguientes tenian una tarjeta (.card) que agrupaba el historial, la llevamos completa
+            createTab('tab-donaciones', 'donation-section', 'manage-donations-container');
+            createTab('tab-info', 'info-section', 'manage-relevant-info-container');
+            createTab('tab-participacion', 'participation-section', 'manage-participations-container');
+            
+            createTab('tab-equipo', 'team-section', null);
+            createTab('tab-trash', null, 'trash-container');
+
+            // Limpieza absoluta de la estructura antigua:
+            // Borrar todo lo que quede en <main> que NO sea admin-main-tabs o admin-tabs-container
+            Array.from(main.children).forEach(child => {
+                if(child.id !== 'admin-main-tabs' && child.id !== 'admin-tabs-container') {
+                    child.remove();
+                }
             });
             
-            const sidebar = document.getElementById('admin-sidebar');
-            if(sidebar) sidebar.style.display = 'none';
-
+            // Asegurar que si habian contenedores de historial globales, desaparezcan (por si estaban fuera de main)
+            document.querySelectorAll('.admin-history-sections').forEach(el => el.remove());
         });
     </script>
 
