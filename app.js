@@ -428,8 +428,8 @@ function renderExpenses() {
             return parse(b) - parse(a);
         });
 
-        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
-            const exps = byNamePub[folderName];
+        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
+            const exps = byDatePub[fecha];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'pub-exp-' + idx;
             
