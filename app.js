@@ -584,12 +584,16 @@ function renderEvents() {
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
-            evs.forEach(() => {
-                previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+            evs.forEach(ev => {
+                if (ev.image) {
+                    previews += `<img src="${ev.image}" class="folder-preview-img">`;
+                } else {
+                    previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+                }
             });
 
             const items = evs.map(ev => 
-                adminCard({ icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: '', onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
+                adminCard({ imgSrc: ev.image || null, icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: '', onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
             ).join('');
 
             return `
@@ -615,8 +619,12 @@ function renderEvents() {
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
-            evs.forEach(() => {
-                previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+            evs.forEach(ev => {
+                if (ev.image) {
+                    previews += `<img src="${ev.image}" class="folder-preview-img">`;
+                } else {
+                    previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
+                }
             });
 
             const items = evs.map(ev => {

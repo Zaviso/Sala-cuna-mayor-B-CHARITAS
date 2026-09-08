@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Centro de Padres</title>
@@ -64,9 +62,25 @@
         .admin-tab-content { display: none; animation: fadeIn 0.3s ease; }
         .admin-tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-        .admin-sidebar-mobile, .hamburger-btn { display: none !important; }
     </style>
-
+    <script>
+        // Nueva funcion super estricta e inline
+        window.switchAdminTab = function(tabId, btn) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            document.querySelectorAll('.admin-tab-content').forEach(t => {
+                t.style.display = 'none';
+                t.classList.remove('active');
+            });
+            
+            const target = document.getElementById(tabId);
+            if(target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+        };
+    </script>
 </head>
 <body>
 
@@ -87,9 +101,7 @@
                 <button onclick="logout()" class="btn btn-mini btn-logout" title="Salir">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
-                <button class="hamburger-btn" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars"></i>
-                </button>
+                
             </div>
         </div>
     </header>
@@ -102,10 +114,20 @@
     </script>
 
     <main class="container">
-        <!-- SECCIÓN SUPERIOR: CONTROL TOTAL -->
-        <div class="admin-dashboard-wrapper">
-            <!-- Izquierda: Tabla de Pagos -->
-            <div class="card admin-main-card">
+    <div class="admin-tabs-nav" id="admin-main-tabs">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('tab-alumnos', this)"><i class="fas fa-users"></i> Alumnos/Pagos</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-gastos', this)"><i class="fas fa-cart-plus"></i> Gastos</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-req', this)"><i class="fas fa-bullhorn"></i> Requerimientos</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-galeria', this)"><i class="fas fa-images"></i> Galería</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-eventos', this)"><i class="fas fa-star"></i> Eventos</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-comunicados', this)"><i class="fas fa-file-alt"></i> Comunicados</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-donaciones', this)"><i class="fas fa-hand-holding-heart"></i> Donaciones</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-info', this)"><i class="fas fa-info-circle"></i> Info Relevante</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-participacion', this)"><i class="fas fa-hands-helping"></i> Participación</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-equipo', this)"><i class="fas fa-user-shield"></i> Equipo</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tab-trash', this)"><i class="fas fa-trash"></i> Papelera</button>
+    </div>
+<div id="admin-tabs-container"><div class="admin-tab-content active" id="tab-alumnos" style="display: block;"><div class="card admin-main-card">
                 <div class="admin-card-title">
                     <h3><i class="fas fa-users"></i> Control de Pagos y Alumnos</h3>
                     <button class="btn btn-mini" onclick="document.getElementById('add-student-form').style.display = document.getElementById('add-student-form').style.display === 'none' ? 'flex' : 'none'" style="background:var(--p-green); color:white;">+ Alumno</button>
@@ -153,44 +175,38 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- Derecha: Acciones Rápidas -->
-            <div class="admin-quick-actions">
-                <div class="card action-card" id="expense-section">
+            </div></div><div class="admin-tab-content" id="tab-gastos"><div class="card action-card" id="expense-section">
                     <h3><i class="fas fa-cart-plus"></i> Registrar Gasto</h3>
                     <form id="expense-form">
                         <div class="form-group">
                             <label>¿En qué se gastó?</label>
-                            <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required>
+                            <input type="text" id="exp-desc" placeholder="Ej: Material didáctico" required="">
                         </div>
                         <div class="form-group">
                             <label>Monto ($)</label>
-                            <input type="number" id="exp-amount" placeholder="0" required>
+                            <input type="number" id="exp-amount" placeholder="0" required="">
                         </div>
                         <div class="form-group">
                             <label>Fotos de Boleta (puedes subir varias)</label>
-                            <input type="file" id="exp-image" accept="image/*" multiple onchange="previewExpenseImages(this)">
+                            <input type="file" id="exp-image" accept="image/*" multiple="" onchange="previewExpenseImages(this)">
                             <div id="exp-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Gasto</button>
                     </form>
-                </div>
-
-                <div class="card action-card" id="request-section">
+                </div><h2 style="margin-top:20px;">Historial de Gastos</h2><div id="expenses-gallery" style="display: grid; gap: 15px;"></div></div><div class="admin-tab-content" id="tab-req"><div class="card action-card" id="request-section">
                     <h3><i class="fas fa-bullhorn"></i> Requerimiento de las Tías</h3>
                     <form id="request-form">
                         <div class="form-group">
                             <label>Solicitud</label>
-                            <input type="text" id="req-item" placeholder="Ej: solicitud" required>
+                            <input type="text" id="req-item" placeholder="Ej: solicitud" required="">
                         </div>
                         <div class="form-group">
                             <label>Nombre de la Tía / Profesor</label>
-                            <input type="text" id="req-teacher" placeholder="Ej: Laura Barcia" required>
+                            <input type="text" id="req-teacher" placeholder="Ej: Laura Barcia" required="">
                         </div>
                         <div class="form-group">
                             <label>Sala / Jardín</label>
-                            <select id="req-room" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
+                            <select id="req-room" required="" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
                                 <option value="">-- Selecciona --</option>
                                 <option value="Sala">Sala</option>
                                 <option value="Jardín">Jardín</option>
@@ -202,34 +218,17 @@
                         </div>
                         <div class="form-group">
                             <label>Fotos de la Tía (puedes subir varias)</label>
-                            <input type="file" id="req-image" accept="image/*" multiple onchange="previewRequestImage(this)">
+                            <input type="file" id="req-image" accept="image/*" multiple="" onchange="previewRequestImage(this)">
                             <div id="req-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
                         </div>
                         <button type="submit" class="btn btn-secondary" style="width: 100%;">Publicar Requerimiento</button>
                     </form>
-                </div>
-
-                <!-- SECCIÓN EXCLUSIVA PARA SUPERADMIN: GESTIÓN DE EQUIPO -->
-                <div class="card action-card" id="team-section" style="border-top: 5px solid var(--p-red); background: #fff5f5;">
-                    <div class="admin-card-title">
-                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
-                        <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
-                    </div>
-                    <div id="users-list-container" style="margin-top: 10px;">
-                        <!-- Lista de usuarios -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECCIÓN INFERIOR: CONTENIDO Y EVENTOS -->
-        <div class="admin-grid-bottom" id="admin-bottom-tools">
-            <div class="card tool-card" id="gallery-section">
+                </div></div><div class="admin-tab-content" id="tab-galeria"><div class="card tool-card" id="gallery-section">
                 <h3><i class="fas fa-images"></i> 📸 Galería</h3>
                 <form id="gallery-folder-form" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
                     <div class="form-group">
                         <label>Crear Carpeta de Evento</label>
-                        <input type="text" id="folder-name" placeholder="Nombre del evento (ej: Cumpleaños, Paseo)" required style="margin-bottom: 10px;">
+                        <input type="text" id="folder-name" placeholder="Nombre del evento (ej: Cumpleaños, Paseo)" required="" style="margin-bottom: 10px;">
                         <textarea id="folder-desc" placeholder="Descripción del evento (opcional)" style="height: 60px; margin-bottom: 10px;"></textarea>
                         <button type="submit" class="btn btn-primary" style="background: var(--p-orange); width: 100%;">+ Crear Carpeta</button>
                     </div>
@@ -237,30 +236,28 @@
                 <form id="gallery-form">
                     <div class="form-group">
                         <label>Seleccionar Carpeta</label>
-                        <select id="folder-select" required style="margin-bottom: 10px;">
+                        <select id="folder-select" required="" style="margin-bottom: 10px;">
                             <option value="">-- Selecciona una carpeta --</option>
                         </select>
                         <label style="margin-top: 10px;">Subir Fotos (puedes seleccionar múltiples)</label>
-                        <input type="file" id="photo-file" multiple required>
+                        <input type="file" id="photo-file" multiple="" required="">
                         <small style="color: #999; display: block; margin-top: 5px;">Selecciona una o más fotos de cualquier tipo. Se guardarán con el nombre original.</small>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Subir Fotos</button>
                 </form>
-            </div>
-
-            <div class="card tool-card" id="event-section">
+            </div><h2 style="margin-top:20px;">Galería Publicada</h2><div id="gallery-list-admin" style="margin-top: 15px;">
+                <!-- Generado por JS -->
+            </div></div><div class="admin-tab-content" id="tab-eventos"><div class="card tool-card" id="event-section">
                 <h3><i class="fas fa-star"></i> ✨ Evento</h3>
                 <form id="event-form">
                     <div class="form-group">
                         <label>Nombre del evento</label>
-                        <input type="text" id="event-name" placeholder="Evento" required>
-                        <input type="date" id="event-date" required style="margin-top:10px;">
+                        <input type="text" id="event-name" placeholder="Evento" required="">
+                        <input type="date" id="event-date" required="" style="margin-top:10px;">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Programar</button>
                 </form>
-            </div>
-
-            <div class="card tool-card" id="announcement-section">
+            </div></div><div class="admin-tab-content" id="tab-comunicados"><div class="card tool-card" id="announcement-section">
                 <h3><i class="fas fa-bullhorn"></i> Comunicados Directiva</h3>
                 <form id="announcement-form">
                     <div class="form-group">
@@ -269,52 +266,41 @@
                             <option value="Consejo">💡 Consejo / Tip</option>
                             <option value="Nota">📝 Nota</option>
                         </select>
-                        <textarea id="ann-text" placeholder="Palabras para los papás..." required style="height: 80px;"></textarea>
+                        <textarea id="ann-text" placeholder="Palabras para los papás..." required="" style="height: 80px;"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Publicar</button>
                 </form>
-            </div>
-
-            <div class="card tool-card" id="donation-section">
+            </div></div><div class="admin-tab-content" id="tab-donaciones"><div class="card tool-card" id="donation-section">
                 <h3><i class="fas fa-gift"></i> Donaciones</h3>
                 <form id="donation-form">
                     <div class="form-group">
                         <label>Tipo de donación</label>
-                        <input type="text" id="donation-type" placeholder="Ej: Materiales, Recursos" required>
+                        <input type="text" id="donation-type" placeholder="Ej: Materiales, Recursos" required="">
                         <label style="margin-top: 10px;">Descripción</label>
                         <textarea id="donation-desc" placeholder="Detalles de la donación..." style="height: 60px;"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-green); width: 100%;">Registrar Donación</button>
                 </form>
+            </div><div class="card" id="manage-donations-container" style="margin-top: 30px;">
+            <div class="admin-card-title">
+                <h3><i class="fas fa-gift"></i> Donaciones Registradas</h3>
             </div>
-
-            <div class="card tool-card" id="relevant-info-section">
+            <div id="donations-list-admin" style="margin-top: 15px;">
+                <!-- Generado por JS -->
+            </div>
+        </div></div><div class="admin-tab-content" id="tab-info"><div class="card" id="manage-relevant-info-container" style="margin-top: 30px;">
+            <div class="admin-card-title">
                 <h3><i class="fas fa-lightbulb"></i> Información Relevante</h3>
-                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Planificación de Minuta y Calendarización de Aula</p>
-                <form id="relevant-info-form">
-                    <div class="form-group">
-                        <label>Título</label>
-                        <input type="text" id="info-title" placeholder="Ej: Minuta de Comida, Horarios, Calendario" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea id="info-desc" placeholder="Detalles de la información..." style="height: 80px;"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Foto (opcional)</label>
-                        <input type="file" id="info-image" accept="image/*" onchange="previewRelevantInfoImage(this)">
-                        <div id="info-preview" style="display:flex;gap:8px;margin-top:8px;align-items:center;"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="background: #9C27B0; width: 100%;">Publicar Información</button>
-                </form>
             </div>
-
-            <div class="card tool-card" id="participation-section">
+            <div id="relevant-info-list-admin" style="margin-top: 15px;">
+                <!-- Generado por JS -->
+            </div>
+        </div></div><div class="admin-tab-content" id="tab-participacion"><div class="card tool-card" id="participation-section">
                 <h3><i class="fas fa-handshake"></i> Participación</h3>
                 <form id="participation-form">
                     <div class="form-group">
                         <label>Tipo de Participación</label>
-                        <input type="text" id="part-type" placeholder="Ej: Limpieza, Actividad, Evento" required>
+                        <input type="text" id="part-type" placeholder="Ej: Limpieza, Actividad, Evento" required="">
                     </div>
                     <div class="form-group">
                         <label>Descripción</label>
@@ -327,162 +313,29 @@
                     </div>
                     <div class="form-group">
                         <label>Estado</label>
-                        <select id="part-status" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
+                        <select id="part-status" required="" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-family:inherit;">
                             <option value="Pendiente">Pendiente</option>
                             <option value="Realizado">Realizado</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary" style="background: var(--p-blue); width: 100%;">Registrar Participación</button>
                 </form>
-            </div>
-        </div>
-
-        <!-- SECCIÓN: Gestionar Donaciones -->
-        <div class="card" id="manage-donations-container" style="margin-top: 30px;">
-            <div class="admin-card-title">
-                <h3><i class="fas fa-gift"></i> Donaciones Registradas</h3>
-            </div>
-            <div id="donations-list-admin" style="margin-top: 15px;">
-                <!-- Generado por JS -->
-            </div>
-        </div>
-
-        <!-- SECCIÓN: Gestionar Participaciones -->
-        <div class="card" id="manage-participations-container" style="margin-top: 30px;">
+            </div><div class="card" id="manage-participations-container" style="margin-top: 30px;">
             <div class="admin-card-title">
                 <h3><i class="fas fa-handshake"></i> Participaciones Registradas</h3>
             </div>
             <div id="participations-list-admin" style="margin-top: 15px;">
                 <!-- Generado por JS -->
             </div>
-        </div>
-
-        <!-- SECCIÓN: Información Relevante Registrada -->
-        <div class="card" id="manage-relevant-info-container" style="margin-top: 30px;">
-            <div class="admin-card-title">
-                <h3><i class="fas fa-lightbulb"></i> Información Relevante</h3>
-            </div>
-            <div id="relevant-info-list-admin" style="margin-top: 15px;">
-                <!-- Generado por JS -->
-            </div>
-        </div>
-
-        <!-- SECCIÓN: Galería de Fotos por Fecha -->
-        <div class="card" id="manage-gallery-container" style="margin-top: 30px;">
-            <div class="admin-card-title">
-                <h3><i class="fas fa-images"></i> Galería de Fotos</h3>
-            </div>
-            <div id="gallery-list-admin" style="margin-top: 15px;">
-                <!-- Generado por JS -->
-            </div>
-        </div>
-
-    <!-- Modal para Crear/Editar Usuario y Permisos -->
-    <div id="modal-user" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
-        <div class="card" style="max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <h3 id="user-modal-title">Crear Nuevo Acceso</h3>
-            <form id="user-form" style="margin-top: 20px;" onsubmit="window.handleCreateUser(event)">
-                <div class="form-group">
-                    <label>Nombre de la Persona</label>
-                    <input type="text" id="new-user-realname" placeholder="Ej: Tía María" required>
-                </div>
-                <div class="form-group">
-                    <label>Nombre de Usuario</label>
-                    <input type="text" id="new-username" placeholder="ej: maria2026" required>
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="new-password" placeholder="Clave privada" required>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 15px; border: 1px solid #eef2f6;">
-                    <label style="font-weight: 800; display: block; margin-bottom: 15px; color: var(--p-blue); font-size: 1rem;">
-                        <i class="fas fa-check-square"></i> Permisos de Acceso:
-                    </label>
-                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto;">
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-payments" style="width: 18px; height: 18px; cursor: pointer;"> 
-                            <span>Gestionar Pagos</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-expenses" style="width: 18px; height: 18px; cursor: pointer;"> 
-                            <span>Registrar Gastos</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-requests" style="width: 18px; height: 18px; cursor: pointer;"> 
-                            <span>Requerimientos Tías</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-gallery" style="width: 18px; height: 18px; cursor: pointer;"> 
-                            <span>Galería de Fotos</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-events" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Programar Eventos</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-donations" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Registrar Donaciones</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-announcements" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Crear Comunicados Directiva</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-relevantinfo" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Información Relevante</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-team" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Gestión de Equipo</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">
-                            <input type="checkbox" id="p-history" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>Editar y Eliminar Historial</span>
-                        </label>
-                        <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; color: var(--p-red);">
-                            <input type="checkbox" id="p-full" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>ACCESO TOTAL</span>
-                        </label>
+        </div></div><div class="admin-tab-content" id="tab-equipo"><div class="card action-card" id="team-section" style="border-top: 5px solid var(--p-red); background: #fff5f5;">
+                    <div class="admin-card-title">
+                        <h3 style="color: var(--p-red);"><i class="fas fa-user-shield"></i> Gestión de Equipo</h3>
+                        <button class="btn btn-mini" onclick="openUserModal()" style="background: var(--p-red); color:white;">+</button>
                     </div>
-                </div>
-
-                <div style="display: flex; gap: 15px; margin-top: 30px;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;">GUARDAR</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()" style="flex: 1; padding: 12px;">CERRAR</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-        <div id="manage-content-section" style="margin-top: 40px; background: #fff; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
-            <h2 style="margin-bottom: 20px;"><i class="fas fa-edit"></i> Gestionar Contenido Publicado</h2>
-            <div class="dashboard-grid">
-                <div>
-                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Gastos Registrados</h3>
-                    <div id="expenses-gallery" style="display: grid; gap: 15px;"></div>
-                </div>
-                <div>
-                    <h3 style="margin-bottom: 15px; color: var(--p-red);">Requerimientos Activos</h3>
-                    <div id="requests-list" class="feed-container" style="display: grid; gap: 15px;"></div>
-                </div>
-                <div>
-                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Eventos Programados</h3>
-                    <div id="events-list" class="feed-container" style="display: grid; gap: 15px;"></div>
-                </div>
-                <div id="manage-announcements-container">
-                    <h3 style="margin-bottom: 15px; color: var(--p-blue);">Comunicados Activos</h3>
-                    <div id="announcements-list" class="feed-container" style="display: grid; gap: 15px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <section class="container" style="padding: 40px 0; text-align: center; border-top: 1px solid #eee;">
-            <p style="color: #95a5a6; font-size: 0.9rem;">Portal Centro de Padres &copy; 2026</p>
-            <a href="login.html" style="color: #ddd; text-decoration: none; font-size: 0.7rem;">Acceso Administrativo</a>
-        </section>
-    </main>
+                    <div id="users-list-container" style="margin-top: 10px;">
+                        <!-- Lista de usuarios -->
+                    </div>
+                </div></div><div class="admin-tab-content" id="tab-trash"></div></div></main>
 
     <!-- Modal para subir comprobante de pago de alumno -->
     <div id="modal-proof" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
@@ -503,7 +356,7 @@
 
     <div id="modal-preview" class="modal-overlay" onclick="this.style.display='none'">
         <img id="preview-img" src="">
-        <div class="close-modal">&times;</div>
+        <div class="close-modal">×</div>
     </div>
 
     <div class="watermark">
@@ -514,19 +367,8 @@
     <script src="app.js"></script>
     
     <!-- Elementos para el Menú Móvil -->
-    <div id="menu-backdrop" class="menu-backdrop" onclick="toggleMobileMenu()"></div>
-    <div id="admin-sidebar" class="admin-sidebar-mobile">
-        <div class="sidebar-header">
-            <h3>Menú Gestión</h3>
-            <button onclick="toggleMobileMenu()" class="close-menu">&times;</button>
-        </div>
-        <div class="help-msg">
-            <i class="fas fa-info-circle"></i> Selecciona una herramienta
-        </div>
-        <div class="mobile-tools-container">
-            <!-- Herramientas se mueven aquí -->
-        </div>
-    </div>
+    
+    
 
     <script>
         function toggleMobileMenu() {
@@ -534,35 +376,6 @@
             const backdrop = document.getElementById('menu-backdrop');
             sidebar.classList.toggle('active');
             backdrop.classList.toggle('active');
-        }
-
-        function adjustLayout() {
-            const isMobile = window.innerWidth <= 900;
-            const mobileContainer = document.querySelector('.mobile-tools-container');
-            const desktopQuickActions = document.querySelector('.admin-quick-actions');
-            const desktopBottomTools = document.getElementById('admin-bottom-tools');
-            const teamSection = document.getElementById('team-section');
-            
-            const tools = [
-                document.getElementById('expense-section'),
-                document.getElementById('request-section'),
-                document.getElementById('gallery-section'),
-                document.getElementById('event-section'),
-                document.getElementById('announcement-section'),
-                teamSection
-            ].filter(t => t !== null);
-
-            tools.forEach(card => {
-                if (isMobile) {
-                    if (card.parentElement !== mobileContainer) mobileContainer.appendChild(card);
-                } else {
-                    if (card.id === 'expense-section' || card.id === 'request-section' || card.id === 'team-section') {
-                        if (card.parentElement !== desktopQuickActions) desktopQuickActions.appendChild(card);
-                    } else {
-                        if (card.parentElement !== desktopBottomTools) desktopBottomTools.appendChild(card);
-                    }
-                }
-            });
         }
 
         // Lógica de Swipe
@@ -575,104 +388,12 @@
             }
         }, {passive: true});
 
-        window.addEventListener('resize', adjustLayout);
-        window.addEventListener('load', adjustLayout);
-        adjustLayout(); // Ejecutar de inmediato
+        
+        
+         // Ejecutar de inmediato
 
         if (typeof renderAdminStudents === 'function') renderAdminStudents();
     </script>
 
-    <script>
-        window.adjustLayout = function() {}; // Anular logica legacy que movia el dom
 
-        window.switchAdminTab = function(tabId, btn) {
-            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            document.querySelectorAll('.admin-tab-content').forEach(t => t.style.display = 'none');
-            const target = document.getElementById(tabId);
-            if(target) target.style.display = 'block';
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const main = document.querySelector('main.container');
-            if(!main) return;
-            
-            const tabsMenu = `
-                <div class="admin-tabs-nav" id="admin-main-tabs">
-                    <button class="admin-tab-btn active" onclick="switchAdminTab('tab-alumnos', this)"><i class="fas fa-users"></i> Alumnos/Pagos</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-gastos', this)" id="tab-btn-expenses"><i class="fas fa-cart-plus"></i> Gastos</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-req', this)" id="tab-btn-requests"><i class="fas fa-bullhorn"></i> Requerimientos</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-galeria', this)" id="tab-btn-gallery"><i class="fas fa-images"></i> Galería</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-eventos', this)" id="tab-btn-events"><i class="fas fa-star"></i> Eventos</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-comunicados', this)" id="tab-btn-announcements"><i class="fas fa-file-alt"></i> Comunicados</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-donaciones', this)" id="tab-btn-donations"><i class="fas fa-hand-holding-heart"></i> Donaciones</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-info', this)" id="tab-btn-info"><i class="fas fa-info-circle"></i> Info Relevante</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-participacion', this)" id="tab-btn-participations"><i class="fas fa-hands-helping"></i> Participación</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-equipo', this)" id="tab-btn-team"><i class="fas fa-user-shield"></i> Equipo</button>
-                    <button class="admin-tab-btn" onclick="switchAdminTab('tab-trash', this)" id="tab-btn-trash"><i class="fas fa-trash"></i> Papelera</button>
-                </div>
-            `;
-
-            main.insertAdjacentHTML('afterbegin', tabsMenu);
-            const tabsContainer = document.createElement('div');
-            tabsContainer.id = 'admin-tabs-container';
-            main.insertBefore(tabsContainer, main.children[1]);
-
-            const createTab = (id, formId, histId, isActive = false) => {
-                const tab = document.createElement('div');
-                tab.className = 'admin-tab-content';
-                tab.id = id;
-                if(isActive) tab.style.display = 'block';
-                
-                const formEl = formId ? document.getElementById(formId) : null;
-                const histEl = histId ? document.getElementById(histId) : null;
-                
-                if(formEl) tab.appendChild(formEl);
-                if(histEl) {
-                    // Mover también el h2 hermano si existe justo antes (para historial)
-                    const prev = histEl.previousElementSibling;
-                    if(prev && prev.tagName === 'H2') tab.appendChild(prev);
-                    tab.appendChild(histEl);
-                }
-                
-                tabsContainer.appendChild(tab);
-            };
-
-            const tabAlumnos = document.createElement('div');
-            tabAlumnos.className = 'admin-tab-content';
-            tabAlumnos.id = 'tab-alumnos';
-            tabAlumnos.style.display = 'block';
-            const adminMainCard = document.querySelector('.admin-main-card');
-            if(adminMainCard) tabAlumnos.appendChild(adminMainCard);
-            tabsContainer.appendChild(tabAlumnos);
-
-            // Requerimos los divs que envuelven las listas para los que las tienen.
-            createTab('tab-gastos', 'expense-section', 'expenses-gallery'); 
-            createTab('tab-req', 'request-section', 'requests-list-admin'); 
-            createTab('tab-galeria', 'gallery-section', 'gallery-list-admin'); 
-            createTab('tab-eventos', 'event-section', 'events-list-admin'); 
-            createTab('tab-comunicados', 'announcement-section', 'announcements-list-admin'); 
-            
-            // Los siguientes tenian una tarjeta (.card) que agrupaba el historial, la llevamos completa
-            createTab('tab-donaciones', 'donation-section', 'manage-donations-container');
-            createTab('tab-info', 'info-section', 'manage-relevant-info-container');
-            createTab('tab-participacion', 'participation-section', 'manage-participations-container');
-            
-            createTab('tab-equipo', 'team-section', null);
-            createTab('tab-trash', null, 'trash-container');
-
-            // Limpieza absoluta de la estructura antigua:
-            // Borrar todo lo que quede en <main> que NO sea admin-main-tabs o admin-tabs-container
-            Array.from(main.children).forEach(child => {
-                if(child.id !== 'admin-main-tabs' && child.id !== 'admin-tabs-container') {
-                    child.remove();
-                }
-            });
-            
-            // Asegurar que si habian contenedores de historial globales, desaparezcan (por si estaban fuera de main)
-            document.querySelectorAll('.admin-history-sections').forEach(el => el.remove());
-        });
-    </script>
-
-</body>
-</html>
+</body></html>
