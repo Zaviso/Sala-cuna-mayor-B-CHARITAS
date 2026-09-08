@@ -396,7 +396,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -497,11 +497,11 @@ function renderRequests() {
     }
     const isAdmin = !!document.getElementById('students-table');
     if (isAdmin) {
-        list.innerHTML = state.requests.map(req => {
+        list.innerHTML = state.requests.slice().reverse().map(req => {
             const supports = (state.requestSupports && state.requestSupports[req.id]) || [];
             const supportText = supports.length > 0 ? `${supports.length} familia(s) apoyando` : 'Sin apoyos aún';
             return adminCard({
-                imgSrc: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&backgroundColor=b6e3f4',
+                imgSrc: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&mouth=smile,twinkle&backgroundColor=b6e3f4',
                 icon:'fas fa-bullhorn',
                 iconBg:'var(--p-orange)',
                 title: req.item,
@@ -512,10 +512,10 @@ function renderRequests() {
         }).join('');
     } else {
         const colors = ['blue', 'green', 'orange'];
-        list.innerHTML = (state.requests || []).map((req, index) => {
+        list.innerHTML = (state.requests || []).slice().reverse().map((req, index) => {
             const color = colors[index % 3];
             const images = req.images || (req.image ? [req.image] : []);
-            const profileImg = 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&backgroundColor=b6e3f4';
+            const profileImg = 'https://api.dicebear.com/9.x/avataaars/svg?seed=Educadora&mouth=smile,twinkle&backgroundColor=b6e3f4';
             const teacherName = req.teacher && req.teacher.trim() ? req.teacher : 'Profesora';
             const roomName = req.room && req.room.trim() ? req.room : 'Sala';
 
@@ -584,7 +584,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -621,7 +621,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -645,7 +645,7 @@ function renderMomentsGallery() {
         return;
     }
 
-    gal.innerHTML = state.gallery.map(folder => `
+    gal.innerHTML = state.gallery.slice().reverse().map(folder => `
         <div style="grid-column: 1/-1;">
             <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px;">
                 <div style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
@@ -688,7 +688,7 @@ function renderGalleryAdmin() {
         return;
     }
 
-    container.innerHTML = state.gallery.map((folder, folderIndex) => {
+    container.innerHTML = state.gallery.slice().reverse().map((folder, folderIndex) => {
         const items = (folder.photos || []).map((photo, photoIndex) => {
             return `
                 <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:6px;">
@@ -740,7 +740,7 @@ function renderGalleryPublic() {
         return;
     }
 
-    container.innerHTML = state.gallery.map(folder => {
+    container.innerHTML = state.gallery.slice().reverse().map(folder => {
         const photos = folder.photos || [];
         if (photos.length === 0) return '';
 
@@ -1232,7 +1232,7 @@ function renderAnnouncements() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1289,7 +1289,7 @@ function renderAnnouncementsAdmin() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
