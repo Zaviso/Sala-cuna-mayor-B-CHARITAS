@@ -201,6 +201,18 @@ function checkPermissions() {
     // 3. Ocultar secciones según permisos individuales
     const perms = user.permissions || {};
 
+    
+    // Ocultar tabs (si existen)
+    const tExp = document.getElementById('tab-btn-expenses'); if(tExp) tExp.style.display = perms.expenses ? 'inline-block' : 'none';
+    const tReq = document.getElementById('tab-btn-requests'); if(tReq) tReq.style.display = perms.requests ? 'inline-block' : 'none';
+    const tTeam = document.getElementById('tab-btn-team'); if(tTeam) tTeam.style.display = (user.role === 'Owner' || perms.team) ? 'inline-block' : 'none';
+    const tGal = document.getElementById('tab-btn-gallery'); if(tGal) tGal.style.display = perms.gallery ? 'inline-block' : 'none';
+    const tEvt = document.getElementById('tab-btn-events'); if(tEvt) tEvt.style.display = perms.events ? 'inline-block' : 'none';
+    const tAnn = document.getElementById('tab-btn-announcements'); if(tAnn) tAnn.style.display = perms.announcements ? 'inline-block' : 'none';
+    const tDon = document.getElementById('tab-btn-donations'); if(tDon) tDon.style.display = perms.donations ? 'inline-block' : 'none';
+    const tInfo = document.getElementById('tab-btn-info'); if(tInfo) tInfo.style.display = perms.relevantInfo ? 'inline-block' : 'none';
+    const tPart = document.getElementById('tab-btn-participations'); if(tPart) tPart.style.display = perms.participations ? 'inline-block' : 'none';
+
     // SECCIONES DE CREACIÓN (Formularios)
     // 1. Control de Pagos
     const adminMainCard = document.querySelector('.admin-main-card');

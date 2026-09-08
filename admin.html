@@ -56,6 +56,49 @@
         }
     </style>
     <link rel="manifest" href="manifest.json">
+
+    <style>
+        .admin-tabs-nav {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .admin-tab-btn {
+            padding: 10px 15px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .admin-tab-btn.active {
+            background: var(--p-blue);
+            color: white;
+        }
+        .admin-tab-btn i { margin-right: 5px; }
+        .admin-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .admin-tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        /* Ajustes para unificar cards en tabs */
+        .admin-tab-content .card { margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .admin-quick-actions, .admin-grid-bottom, .admin-dashboard-wrapper {
+            display: block !important;
+            grid-template-columns: none !important;
+            gap: 0 !important;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -570,5 +613,116 @@
 
         if (typeof renderAdminStudents === 'function') renderAdminStudents();
     </script>
+
+    <script>
+        // --- SCRIPT DE REESTRUCTURACIÓN DE PESTAÑAS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const main = document.querySelector('main.container');
+            if(!main) return;
+            
+            // Insertar el menú de pestañas al inicio del main
+            main.insertAdjacentHTML('afterbegin', `
+        <div class="admin-tabs-nav" id="admin-main-tabs">
+            <button class="admin-tab-btn active" onclick="switchAdminTab('tab-alumnos', this)"><i class="fas fa-users"></i> Alumnos/Pagos</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-gastos', this)" id="tab-btn-expenses"><i class="fas fa-cart-plus"></i> Gastos</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-req', this)" id="tab-btn-requests"><i class="fas fa-bullhorn"></i> Requerimientos</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-galeria', this)" id="tab-btn-gallery"><i class="fas fa-images"></i> Galería</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-eventos', this)" id="tab-btn-events"><i class="fas fa-star"></i> Eventos</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-comunicados', this)" id="tab-btn-announcements"><i class="fas fa-file-alt"></i> Comunicados</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-donaciones', this)" id="tab-btn-donations"><i class="fas fa-hand-holding-heart"></i> Donaciones</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-info', this)" id="tab-btn-info"><i class="fas fa-info-circle"></i> Info Relevante</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-participacion', this)" id="tab-btn-participations"><i class="fas fa-hands-helping"></i> Participación</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-equipo', this)" id="tab-btn-team"><i class="fas fa-user-shield"></i> Equipo</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('tab-trash', this)" id="tab-btn-trash"><i class="fas fa-trash"></i> Papelera</button>
+        </div>
+`);
+            
+            // Crear contenedores de pestañas
+            const tabsContainer = document.createElement('div');
+            tabsContainer.id = 'admin-tabs-container';
+            main.appendChild(tabsContainer);
+            
+            // Función para agrupar elementos en una pestaña
+            const createTab = (id, formSelector, listSelector, isActive = false) => {
+                const tab = document.createElement('div');
+                tab.className = 'admin-tab-content' + (isActive ? ' active' : '');
+                tab.id = id;
+                
+                const formEl = document.querySelector(formSelector);
+                const listEl = document.querySelector(listSelector);
+                
+                // Mover los elementos a la pestaña si existen
+                if(formEl) tab.appendChild(formEl);
+                if(listEl) {
+                    // Si el listado tiene un padre "historial" con título, traemos todo el bloque
+                    const listTitle = listEl.previousElementSibling;
+                    if(listTitle && listTitle.tagName.match(/^H[1-6]$/)) {
+                        tab.appendChild(listTitle);
+                    }
+                    tab.appendChild(listEl);
+                }
+                
+                tabsContainer.appendChild(tab);
+            };
+
+            // Mapeo de secciones a pestañas
+            // 1. Alumnos/Pagos
+            createTab('tab-alumnos', '.admin-main-card', null, true);
+            // 2. Gastos
+            createTab('tab-gastos', '#expense-section', '#expenses-gallery');
+            // 3. Requerimientos
+            createTab('tab-req', '#request-section', '#requests-list-admin');
+            // 4. Galería
+            createTab('tab-galeria', '#gallery-section', '#gallery-list-admin');
+            // 5. Eventos
+            createTab('tab-eventos', '#event-section', '#events-list-admin');
+            // 6. Comunicados
+            createTab('tab-comunicados', '#announcement-section', '#announcements-list-admin');
+            // 7. Donaciones
+            createTab('tab-donaciones', '#donation-section', '#donations-list-admin');
+            // 8. Info Relevante
+            createTab('tab-info', '#info-section', '#info-list-admin');
+            // 9. Participación
+            createTab('tab-participacion', '#participation-section', '#participations-list-admin');
+            // 10. Equipo
+            createTab('tab-equipo', '#team-section', null);
+            // 11. Papelera
+            createTab('tab-trash', null, '#trash-list'); // Asumiendo que el basurero usa #trash-list o similar
+            
+            // Limpiar los contenedores antiguos que quedaron vacíos o tienen títulos irrelevantes
+            const wrappers = ['.admin-dashboard-wrapper', '.admin-quick-actions', '.admin-grid-bottom', '.admin-history-sections'];
+            wrappers.forEach(w => {
+                const el = document.querySelector(w);
+                if(el && el.children.length === 0) el.remove();
+                // Ocultar los títulos "Historial de X" que quedaron huérfanos
+                if(el && el.id === 'historial-container') el.style.display = 'none'; 
+            });
+            
+            // Ocultar el contenedor padre original del historial si quedó
+            const historyWrapper = document.querySelector('.admin-history-sections');
+            if(historyWrapper) historyWrapper.style.display = 'none';
+
+            // Ajuste especial para Papelera
+            const trashContainer = document.getElementById('trash-container');
+            if(trashContainer) {
+                document.getElementById('tab-trash').appendChild(trashContainer);
+            }
+        });
+
+        // Función para cambiar de pestaña
+        window.switchAdminTab = function(tabId, btn) {
+            // Quitar active de botones
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            // Añadir active al botón clicado
+            btn.classList.add('active');
+            
+            // Quitar active de pestañas
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+            // Añadir active a la pestaña objetivo
+            const target = document.getElementById(tabId);
+            if(target) target.classList.add('active');
+        };
+    </script>
+
 </body>
 </html>
