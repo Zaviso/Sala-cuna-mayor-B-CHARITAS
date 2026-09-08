@@ -473,15 +473,6 @@ function renderRequests() {
                                 ${thumbsHTML}
                             </div>
                         </div>
-                        <div class="teacher-actions" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                            <div style="font-size: 0.85rem; color: var(--p-text-light);">
-                                <i class="fas fa-users" style="color: var(--p-${color});"></i> 
-                                ${state.requestSupports && state.requestSupports[req.id] ? state.requestSupports[req.id].length : 0} familia(s) apoyando
-                            </div>
-                            <button onclick="openSupportModal('${req.id}')" style="background: var(--p-${color}); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: opacity 0.2s;">
-                                Apoyar
-                            </button>
-                        </div>
                     </div>
                 </div>
             `;
