@@ -367,135 +367,55 @@ function renderExpenses() {
         return;
     }
     const isAdmin = !!document.getElementById('students-table');
+    
+    // Todos los gastos se muestran individualmente, los más recientes primero
+    const exps = state.expenses.slice().reverse();
+
     if (isAdmin) {
-        // Agrupar por desc (publico)
-        const byNamePub = {};
-        state.expenses.forEach(exp => {
-            const key = exp.desc || 'Gasto';
-            if (!byNamePub[key]) byNamePub[key] = [];
-            byNamePub[key].push(exp);
-        });
-        const sortedNamesPub = Object.keys(byNamePub);
-
-        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
-            const exps = byNamePub[folderName];
-            const total = exps.reduce((s, e) => s + Number(e.amount), 0);
-            const folderId = 'admin-exp-' + idx;
-            
-            let previews = '';
-            exps.forEach(exp => {
-                const imgs = exp.images || (exp.image ? [exp.image] : []);
-                if (imgs.length > 0) {
-                    previews += `<img src="${imgs[0]}" class="folder-preview-img">`;
-                } else {
-                    previews += `<div class="folder-preview-icon"><i class="fas fa-receipt"></i></div>`;
-                }
+        gallery.innerHTML = exps.map(exp => {
+            const imgs = exp.images || (exp.image ? [exp.image] : []);
+            return adminCard({
+                imgSrc: imgs.length > 0 ? imgs[0] : null,
+                icon: 'fas fa-receipt', iconBg: '#f1f5f9',
+                title: exp.desc,
+                subtitle: `-$${Number(exp.amount).toLocaleString('es-CL')}`,
+                onDelete: `deleteExpense('${exp.id}')`,
+                canDelete: hasPermission('expenses')
             });
-
-            const items = exps.map(exp => {
-                const imgs = exp.images || (exp.image ? [exp.image] : []);
-                return adminCard({
-                    imgSrc: imgs.length > 0 ? imgs[0] : null,
-                    icon: 'fas fa-receipt', iconBg: '#f1f5f9',
-                    title: exp.desc,
-                    subtitle: `-${Number(exp.amount).toLocaleString('es-CL')}`,
-                    onDelete: `deleteExpense('${exp.id}')`,
-                    canDelete: hasPermission('expenses')
-                });
-            }).join('');
-
-            return `
-            <div class="folder-card">
-                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                    <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
-                        <div class="folder-meta">
-                            <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
-                            <i class="fas fa-chevron-down folder-chevron"></i>
-                        </div>
-                    </div>
-                    <div class="folder-preview">${previews}</div>
-                </div>
-                <div class="folder-content" id="folder-content-${folderId}">
-                    ${items}
-                </div>
-            </div>`;
         }).join('');
     } else {
-        // Agrupar por fecha
-        const byDatePub = {};
-        state.expenses.forEach(exp => {
-            const key = exp.date || 'Sin fecha';
-            if (!byDatePub[key]) byDatePub[key] = [];
-            byDatePub[key].push(exp);
-        });
-        
-        // Ordenar fechas más recientes primero
-        const sortedDatesPub = Object.keys(byDatePub).sort((a, b) => {
-            const parse = d => {
-                const parts = d.split('/');
-                if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
-                return new Date(0);
-            };
-            return parse(b) - parse(a);
-        });
-
-        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
-            const exps = byDatePub[fecha];
-            const total = exps.reduce((s, e) => s + Number(e.amount), 0);
-            const folderId = 'pub-exp-' + idx;
+        const colors = ['blue', 'green', 'orange'];
+        gallery.innerHTML = exps.map((exp, index) => {
+            const color = colors[index % 3];
+            const imgs = exp.images || (exp.image ? [exp.image] : []);
             
-            let previews = '';
-            exps.forEach(exp => {
-                const imgs = exp.images || (exp.image ? [exp.image] : []);
-                if (imgs.length > 0) {
-                    previews += `<img src="${imgs[0]}" class="folder-preview-img">`;
-                } else {
-                    previews += `<div class="folder-preview-icon"><i class="fas fa-receipt"></i></div>`;
-                }
-            });
-
-            const items = exps.map(exp => {
-                const imgs = exp.images || (exp.image ? [exp.image] : []);
-                const foto = imgs.length > 0
-                    ? `<img src="${imgs[0]}" onclick="openPreview('${imgs[0]}')"
-                        loading="lazy"
-                        style="width:100%;height:90px;object-fit:cover;border-radius:8px;cursor:pointer;display:block;">`
-                    : `<div style="width:100%;height:90px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-receipt" style="color:#cbd5e1;font-size:1.5rem;"></i></div>`;
-                const masImgs = imgs.length > 1
-                    ? `<span style="display:block;font-size:0.7rem;color:var(--p-blue);cursor:pointer;margin-top:2px;" onclick="openPreview('${imgs[1]}')">(+${imgs.length - 1} foto${imgs.length > 2 ? 's' : ''})</span>`
-                    : '';
-                return `
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; padding:8px; display:flex; flex-direction:column;">
-                    ${foto}
-                    <div style="margin-top:8px; flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div>
-                            <p style="font-size:0.75rem; font-weight:600; color:#334155; margin:0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${exp.desc}</p>
-                            ${masImgs}
-                        </div>
-                        <span style="font-size:0.8rem; font-weight:700; color:var(--p-red); margin-top:6px; display:block;">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
-                    </div>
-                </div>`;
-            }).join('');
-
+            const thumbsHTML = imgs.length > 0 ? `
+                <div style="display:flex; overflow-x:auto; gap:6px; margin-top:10px; padding-bottom:8px; -webkit-overflow-scrolling: touch;">
+                    ${imgs.map(img => `<img src="${img}" onclick="openPreview('${img}')" style="height:100px; min-width:100px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd; flex-shrink:0;">`).join('')}
+                </div>
+            ` : '';
+            
             return `
-            <div class="folder-card">
-                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                    <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
-                        <div class="folder-meta">
-                            <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
-                            <i class="fas fa-chevron-down folder-chevron"></i>
+                <div class="teacher-card">
+                    <div class="teacher-header card-${color}">
+                        <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--p-${color});">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div class="teacher-label">
+                            Gastos Registrados
                         </div>
                     </div>
-                    <div class="folder-preview">${previews}</div>
-                </div>
-                <div class="folder-content" id="folder-content-${folderId}">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        ${items}
+                    <div class="teacher-content">
+                        <div class="teacher-content-inner">
+                            <div class="teacher-text">
+                                <h4 style="margin: 0 0 5px 0;">${exp.desc}</h4>
+                                <span style="font-size:1.1rem; font-weight:700; color:var(--p-red);">-$${Number(exp.amount).toLocaleString('es-CL')}</span>
+                                ${thumbsHTML}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>`;
+            `;
         }).join('');
     }
 }
@@ -569,90 +489,42 @@ function renderEvents() {
     }
     const isAdmin = !!document.getElementById('students-table');
     
-    const byName = {};
-    state.events.forEach((ev, i) => {
-        const key = ev.name || 'Evento';
-        if (!byName[key]) byName[key] = [];
-        byName[key].push({ ...ev, originalIndex: i });
-    });
-    
-    const sortedNames = Object.keys(byName);
+    // Todos los eventos se muestran individualmente, los más recientes primero
+    const evs = state.events.slice().reverse();
 
     if (isAdmin) {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
-            const folderId = 'adm-ev-' + idx;
-            
-            let previews = '';
-            evs.forEach(ev => {
-                if (ev.image) {
-                    previews += `<img src="${ev.image}" class="folder-preview-img">`;
-                } else {
-                    previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
-                }
-            });
-
-            const items = evs.map(ev => 
-                adminCard({ imgSrc: ev.image || null, icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: '', onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
-            ).join('');
-
-            return `
-            <div class="folder-card">
-                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                    <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
-                        <div class="folder-meta">
-                            <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
-                            <i class="fas fa-chevron-down folder-chevron"></i>
-                        </div>
-                    </div>
-                    <div class="folder-preview">${previews}</div>
-                </div>
-                <div class="folder-content" id="folder-content-${folderId}">
-                    ${items}
-                </div>
-            </div>`;
-        }).join('');
+        list.innerHTML = evs.map(ev => 
+            adminCard({ imgSrc: ev.image || null, icon:'fas fa-calendar', iconBg:'var(--p-blue)', title: ev.name, subtitle: '', onDelete:`deleteEvent('${ev.id}')`, canDelete: hasPermission('events') })
+        ).join('');
     } else {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
-            const folderId = 'pub-ev-' + idx;
-            
-            let previews = '';
-            evs.forEach(ev => {
-                if (ev.image) {
-                    previews += `<img src="${ev.image}" class="folder-preview-img">`;
-                } else {
-                    previews += `<div class="folder-preview-icon" style="color:var(--p-blue)"><i class="fas fa-calendar"></i></div>`;
-                }
-            });
-
-            const items = evs.map(ev => {
-                const imgHTML = ev.image ? `<div style="margin-top:10px;"><img src="${ev.image}" onclick="openPreview('${ev.image}')" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd;"></div>` : '';
-                return `
-                <div class="card" style="border-left: 5px solid var(--p-blue); background:#f8fafc; box-shadow:none; padding:15px; margin-bottom:10px;">
-                    <h4 style="margin:0 0 5px 0;">${ev.name}</h4>
-                    ${imgHTML}
+        const colors = ['blue', 'green', 'orange'];
+        list.innerHTML = evs.map((ev, index) => {
+            const color = colors[index % 3];
+            const imgHTML = ev.image ? `
+                <div style="margin-top:10px; padding-bottom:8px;">
+                    <img src="${ev.image}" onclick="openPreview('${ev.image}')" style="width:100%; max-height:200px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;">
                 </div>
-                `;
-            }).join('');
-
+            ` : '';
             return `
-            <div class="folder-card">
-                <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                    <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
-                        <div class="folder-meta">
-                            <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
-                            <i class="fas fa-chevron-down folder-chevron"></i>
+                <div class="teacher-card">
+                    <div class="teacher-header card-${color}">
+                        <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--p-${color});">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="teacher-label">
+                            Evento Programado
                         </div>
                     </div>
-                    <div class="folder-preview">${previews}</div>
+                    <div class="teacher-content">
+                        <div class="teacher-content-inner">
+                            <div class="teacher-text">
+                                <h4 style="margin: 0 0 5px 0;">${ev.name}</h4>
+                                ${imgHTML}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="folder-content" id="folder-content-${folderId}">
-                    ${items}
-                </div>
-            </div>`;
+            `;
         }).join('');
     }
 }
@@ -665,39 +537,43 @@ function renderMomentsGallery() {
         return;
     }
 
-    gal.innerHTML = state.gallery.slice().reverse().map(folder => `
-        <div style="grid-column: 1/-1;">
-            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px;">
-                <div style="padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                    <h3 style="margin: 0; color: var(--p-blue); font-size: 1.1rem;">
-                        <i class="fas fa-folder"></i> ${folder.name}
-                    </h3>
-                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">
+    const colors = ['blue', 'green', 'orange'];
+    gal.innerHTML = state.gallery.slice().reverse().map((folder, index) => {
+        const color = colors[index % 3];
+        
+        const thumbsHTML = (folder.photos && folder.photos.length > 0) ? `
+            <div style="display:flex; overflow-x:auto; gap:10px; margin-top:15px; padding-bottom:12px; -webkit-overflow-scrolling: touch;">
+                ${folder.photos.map(photo => `
+                    <div style="flex-shrink:0; width:150px; display:flex; flex-direction:column; gap:5px;">
+                        <img src="${photo.url}" onclick="openPreview('${photo.url}')" loading="lazy" alt="${photo.originalName}" style="height:120px; width:100%; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;">
+                        <p style="margin:0; font-size:0.75rem; color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${photo.originalName}">${photo.originalName}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '<p style="color:#999; font-size:0.85rem; margin-top:10px;">Esta carpeta no tiene fotos.</p>';
+
+        return `
+            <div class="teacher-card" style="grid-column: 1/-1;">
+                <div class="teacher-header card-${color}">
+                    <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--p-${color});">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="teacher-label">
                         ${folder.photos?.length || 0} foto(s)
-                    </p>
-                    ${folder.desc ? `<p style="margin: 8px 0 0 0; font-size: 0.9rem; color: var(--p-text); line-height: 1.4;">${folder.desc}</p>` : ''}
+                    </div>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px;">
-                    ${(folder.photos || []).map(photo => `
-                        <div class="gallery-item">
-                            <div class="gallery-img-container">
-                                <img src="${photo.url}" loading="lazy" alt="${photo.originalName}">
-                            </div>
-                            <div class="gallery-info"><p title="${photo.originalName}">${photo.originalName}</p></div>
-                            <div class="gallery-actions">
-                                <a href="${photo.url}" download="${photo.originalName}" class="gallery-btn btn-download" title="Descargar">
-                                    <i class="fas fa-download"></i>
-                                </a>
-                                <button onclick="openPreview('${photo.url}')" class="gallery-btn btn-view" title="Ver en pantalla completa">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                            </div>
+                <div class="teacher-content">
+                    <div class="teacher-content-inner">
+                        <div class="teacher-text">
+                            <h4 style="margin: 0 0 5px 0;">${folder.name}</h4>
+                            ${folder.desc ? `<p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-wrap;">${folder.desc}</p>` : ''}
+                            ${thumbsHTML}
                         </div>
-                    `).join('')}
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderGalleryAdmin() {
@@ -1255,49 +1131,30 @@ function renderAnnouncements() {
         return;
     }
     
-    const byType = {};
-    state.announcements.forEach(ann => {
-        const key = ann.type || 'Comunicado';
-        if (!byType[key]) byType[key] = [];
-        byType[key].push(ann);
-    });
-    const sortedTypes = Object.keys(byType);
+    // Todos los comunicados individuales, los más recientes primero
+    const anns = state.announcements.slice().reverse();
 
-    container.innerHTML = sortedTypes.map((folderName, idx) => {
-        const anns = byType[folderName];
-        const folderId = 'pub-ann-' + idx;
-        
-        let previews = '';
-        anns.forEach(ann => {
-            const iconColor = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
-            previews += `<div class="folder-preview-icon" style="color:${iconColor}"><i class="fas fa-bullhorn"></i></div>`;
-        });
-
-        const items = anns.map(ann => `
-            <div class="card" style="border-left: 5px solid ${ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)'}; background: #f8fafc; padding: 15px; margin-bottom:10px; box-shadow:none;">
-                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-                    <span style="font-weight: 800; color: var(--p-text-light); font-size: 0.75rem;">${ann.type.toUpperCase()}</span>
-                </div>
-                <p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-line;">${ann.text}</p>
-            </div>
-        `).join('');
-
+    container.innerHTML = anns.map(ann => {
+        const typeColor = ann.type === 'Nota' ? 'red' : ann.type === 'Consejo' ? 'green' : 'blue';
         return `
-        <div class="folder-card">
-            <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
-                    <div class="folder-meta">
-                        <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
-                        <i class="fas fa-chevron-down folder-chevron"></i>
+            <div class="teacher-card">
+                <div class="teacher-header card-${typeColor}">
+                    <div style="background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--p-${typeColor});">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="teacher-label">
+                        ${ann.type.toUpperCase()}
                     </div>
                 </div>
-                <div class="folder-preview">${previews}</div>
+                <div class="teacher-content">
+                    <div class="teacher-content-inner">
+                        <div class="teacher-text">
+                            <p style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--p-text); white-space: pre-line;">${ann.text}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="folder-content" id="folder-content-${folderId}">
-                ${items}
-            </div>
-        </div>`;
+        `;
     }).join('');
 }
 
@@ -1309,52 +1166,19 @@ function renderAnnouncementsAdmin() {
         return;
     }
 
-    const byType = {};
-    state.announcements.forEach((ann, i) => {
-        const key = ann.type || 'Comunicado';
-        if (!byType[key]) byType[key] = [];
-        byType[key].push({ ...ann, originalIndex: i });
-    });
-    const sortedTypes = Object.keys(byType);
+    // Todos los comunicados, más recientes primero
+    const anns = state.announcements.map((ann, i) => ({ ...ann, originalIndex: i })).reverse();
 
-    list.innerHTML = sortedNames.map((folderName, idx) => {
-        const anns = byType[folderName];
-        const folderId = 'adm-ann-' + idx;
-        
-        let previews = '';
-        anns.forEach(ann => {
-            const iconColor = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
-            previews += `<div class="folder-preview-icon" style="color:${iconColor}"><i class="fas fa-bullhorn"></i></div>`;
+    list.innerHTML = anns.map(ann => {
+        const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
+        return adminCard({ 
+            icon:'fas fa-comment', 
+            iconBg: bg, 
+            title: ann.text.substring(0,40) + (ann.text.length>40?'.':''), 
+            subtitle:`${ann.type}`, 
+            onDelete:`deleteAnnouncement(${ann.originalIndex})`, 
+            canDelete: hasPermission('announcements') 
         });
-
-        const items = anns.map(ann => {
-            const bg = ann.type === 'Nota' ? 'var(--p-red)' : ann.type === 'Consejo' ? 'var(--p-green)' : 'var(--p-blue)';
-            return adminCard({ 
-                icon:'fas fa-comment', 
-                iconBg: bg, 
-                title: ann.text.substring(0,40) + (ann.text.length>40?'.':''), 
-                subtitle:`${ann.type}`, 
-                onDelete:`deleteAnnouncement(${ann.originalIndex})`, 
-                canDelete: hasPermission('announcements') 
-            });
-        }).join('');
-
-        return `
-        <div class="folder-card">
-            <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
-                <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
-                    <div class="folder-meta">
-                        <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
-                        <i class="fas fa-chevron-down folder-chevron"></i>
-                    </div>
-                </div>
-                <div class="folder-preview">${previews}</div>
-            </div>
-            <div class="folder-content" id="folder-content-${folderId}">
-                ${items}
-            </div>
-        </div>`;
     }).join('');
 }
 
