@@ -73,7 +73,14 @@
         .admin-dashboard-wrapper, .admin-quick-actions, .admin-grid-bottom, .admin-history-sections {
             display: block !important; grid-template-columns: none !important; gap: 0 !important;
         }
+        /* Ocultar sidebar movil porque las pestañas ya lo reemplazan */
+        .admin-sidebar-mobile { display: none !important; }
+        .hamburger-btn { display: none !important; }
     </style>
+    <script>
+        // Override adjustLayout ANTES de que body corra
+        window.adjustLayout = function() { console.log('adjustLayout bloqueado'); };
+    </script>
 
 </head>
 <body>
@@ -591,8 +598,22 @@
     </script>
 
     <script>
-        // Anular adjustLayout para que no rompa el DOM de las pestañas en móvil
-        window.adjustLayout = function() {}; 
+        // Función para cambiar de pestaña global
+        window.switchAdminTab = function(tabId, btn) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            document.querySelectorAll('.admin-tab-content').forEach(t => {
+                t.style.display = 'none';
+                t.classList.remove('active');
+            });
+            
+            const target = document.getElementById(tabId);
+            if(target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             const main = document.querySelector('main.container');
@@ -621,9 +642,15 @@
                 const tab = document.createElement('div');
                 tab.className = 'admin-tab-content' + (isActive ? ' active' : '');
                 tab.id = id;
+                if(isActive) tab.style.display = 'block';
+                
+                // Mover formulario
                 const formEl = document.getElementById(formId);
-                const listEl = document.getElementById(listId);
+                // NOTA: Algunas cosas no tienen ID sino clase, como .admin-main-card, lo ajustaremos
                 if(formEl) tab.appendChild(formEl);
+                
+                // Mover lista
+                const listEl = document.getElementById(listId);
                 if(listEl) {
                     const listTitle = listEl.previousElementSibling;
                     if(listTitle && listTitle.tagName.match(/^H[1-6]$/)) {
@@ -634,12 +661,7 @@
                 tabsContainer.appendChild(tab);
             };
 
-            // Form id list: (se busca por ID específico)
-            createTab('tab-alumnos', 'students-table', null, true);
-            // El de alumnos requiere la card principal
-            const adminMainCard = document.querySelector('.admin-main-card');
-            if(adminMainCard) document.getElementById('tab-alumnos').appendChild(adminMainCard);
-
+            // Creamos tabs...
             createTab('tab-gastos', 'expense-section', 'expenses-gallery');
             createTab('tab-req', 'request-section', 'requests-list-admin');
             createTab('tab-galeria', 'gallery-section', 'gallery-list-admin');
@@ -651,26 +673,28 @@
             createTab('tab-equipo', 'team-section', null);
             createTab('tab-trash', null, 'trash-container');
 
+            // El de alumnos es especial por ser .admin-main-card
+            const tabAlumnos = document.createElement('div');
+            tabAlumnos.className = 'admin-tab-content active';
+            tabAlumnos.id = 'tab-alumnos';
+            tabAlumnos.style.display = 'block';
+            const adminMainCard = document.querySelector('.admin-main-card');
+            if(adminMainCard) tabAlumnos.appendChild(adminMainCard);
+            tabsContainer.appendChild(tabAlumnos);
+
             // Limpieza visual
             document.querySelectorAll('h2').forEach(h => {
                 if(h.innerText.includes('Historial') && !h.closest('.admin-tab-content')) h.remove();
             });
             document.querySelectorAll('.admin-history-sections, .admin-dashboard-wrapper, .admin-quick-actions, .admin-grid-bottom').forEach(e => {
                 if(e.children.length === 0) e.remove();
+                e.style.display = 'none'; // forzar ocultamiento si sobró
             });
             
-            // Ocultar wrapper de historial si sobró
-            const hWrap = document.querySelector('.admin-history-sections');
-            if(hWrap) hWrap.style.display = 'none';
-        });
+            const sidebar = document.getElementById('admin-sidebar');
+            if(sidebar) sidebar.style.display = 'none';
 
-        window.switchAdminTab = function(tabId, btn) {
-            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
-            const target = document.getElementById(tabId);
-            if(target) target.classList.add('active');
-        };
+        });
     </script>
 
 </body>
