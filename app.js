@@ -365,8 +365,8 @@ function renderExpenses() {
         });
         const sortedNamesPub = Object.keys(byNamePub);
 
-        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
-            const exps = byNamePub[folderName];
+        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
+            const exps = byDatePub[fecha];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'admin-exp-' + idx;
             
@@ -396,7 +396,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -410,17 +410,26 @@ function renderExpenses() {
             </div>`;
         }).join('');
     } else {
-        // Agrupar por nombre (desc)
-        const byNamePub = {};
+        // Agrupar por fecha
+        const byDatePub = {};
         state.expenses.forEach(exp => {
-            const key = exp.desc || 'Gasto';
-            if (!byNamePub[key]) byNamePub[key] = [];
-            byNamePub[key].push(exp);
+            const key = exp.date || 'Sin fecha';
+            if (!byDatePub[key]) byDatePub[key] = [];
+            byDatePub[key].push(exp);
         });
-        const sortedNamesPub = Object.keys(byNamePub);
+        
+        // Ordenar fechas más recientes primero
+        const sortedDatesPub = Object.keys(byDatePub).sort((a, b) => {
+            const parse = d => {
+                const parts = d.split('/');
+                if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
+                return new Date(0);
+            };
+            return parse(b) - parse(a);
+        });
 
-        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
-            const exps = byNamePub[folderName];
+        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
+            const exps = byDatePub[fecha];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'pub-exp-' + idx;
             
@@ -461,7 +470,7 @@ function renderExpenses() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                         <div class="folder-meta">
                             <span class="folder-badge">-$${total.toLocaleString('es-CL')}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -558,8 +567,8 @@ function renderEvents() {
     const sortedNames = Object.keys(byName);
 
     if (isAdmin) {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
+        list.innerHTML = sortedDates.map((fecha, idx) => {
+            const evs = byDate[fecha];
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
@@ -575,7 +584,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -589,8 +598,8 @@ function renderEvents() {
             </div>`;
         }).join('');
     } else {
-        list.innerHTML = sortedNames.map((folderName, idx) => {
-            const evs = byName[folderName];
+        list.innerHTML = sortedDates.map((fecha, idx) => {
+            const evs = byDate[fecha];
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
@@ -612,7 +621,7 @@ function renderEvents() {
             <div class="folder-card">
                 <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                     <div class="folder-header-top">
-                        <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                        <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                         <div class="folder-meta">
                             <span class="folder-badge" style="background:var(--p-blue)">${evs.length}</span>
                             <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1200,8 +1209,8 @@ function renderAnnouncements() {
     });
     const sortedTypes = Object.keys(byType);
 
-    container.innerHTML = sortedTypes.map((folderName, idx) => {
-        const anns = byType[folderName];
+    container.innerHTML = sortedDates.map((fecha, idx) => {
+        const anns = byDate[fecha];
         const folderId = 'pub-ann-' + idx;
         
         let previews = '';
@@ -1223,7 +1232,7 @@ function renderAnnouncements() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
@@ -1254,8 +1263,8 @@ function renderAnnouncementsAdmin() {
     });
     const sortedTypes = Object.keys(byType);
 
-    list.innerHTML = sortedTypes.map((folderName, idx) => {
-        const anns = byType[folderName];
+    list.innerHTML = sortedDates.map((fecha, idx) => {
+        const anns = byDate[fecha];
         const folderId = 'adm-ann-' + idx;
         
         let previews = '';
@@ -1280,7 +1289,7 @@ function renderAnnouncementsAdmin() {
         <div class="folder-card">
             <div class="folder-header" id="folder-header-${folderId}" onclick="toggleFolder('${folderId}')">
                 <div class="folder-header-top">
-                    <div class="folder-title"><i class="fas fa-folder"></i> ${folderName}</div>
+                    <div class="folder-title"><i class="fas fa-folder"></i> Carpeta #${idx + 1}</div>
                     <div class="folder-meta">
                         <span class="folder-badge" style="background:var(--p-blue)">${anns.length}</span>
                         <i class="fas fa-chevron-down folder-chevron"></i>
