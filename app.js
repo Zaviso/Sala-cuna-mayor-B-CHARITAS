@@ -1684,7 +1684,6 @@ function renderRequestSupports() {
             <div style="padding:8px 12px; background:#f9fafb; border-radius:8px; border-left:3px solid var(--p-blue); display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <p style="margin:0; font-weight:600; font-size:0.9rem;">${s.studentName}</p>
-                    <p style="margin:0; font-size:0.8rem; color:#888;">${s.date}</p>
                 </div>
                 <button onclick="deleteSupportFromRequest('${req.id}', ${idx})" class="btn-mini btn-mini-delete" title="Eliminar apoyo">
                     <i class="fas fa-trash"></i>
