@@ -254,6 +254,8 @@
                         <label>Nombre del evento</label>
                         <input type="text" id="event-name" placeholder="Evento" required="">
                         <input type="date" id="event-date" required="" style="margin-top:10px;">
+                        <input type="file" id="event-image" accept="image/*" onchange="previewEventImage(this)" style="margin-top:10px;">
+                        <div id="event-preview" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Programar</button>
                 </form>

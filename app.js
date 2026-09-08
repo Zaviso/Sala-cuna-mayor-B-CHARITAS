@@ -1202,6 +1202,19 @@ document.getElementById('request-form')?.addEventListener('submit', (e) => {
     }
 });
 
+window.previewEventImage = (input) => {
+    const preview = document.getElementById('event-preview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+};
+
 document.getElementById('event-form')?.addEventListener('submit', (e) => {
     if (!hasPermission('events')) {
         alert("No tienes permiso para programar eventos.");
@@ -1209,7 +1222,28 @@ document.getElementById('event-form')?.addEventListener('submit', (e) => {
         return;
     }
     e.preventDefault();
-    const newItem = { id: Date.now(), name: document.getElementById('event-name').value, date: document.getElementById('event-date').value }; fbSet('events/' + newItem.id, newItem); e.target.reset();
+    const file = document.getElementById('event-image')?.files[0];
+    const name = document.getElementById('event-name').value;
+    const date = document.getElementById('event-date').value;
+
+    const saveEvent = (imageData) => {
+        const newItem = { 
+            id: Date.now(), 
+            name: name, 
+            date: date,
+            image: imageData || null
+        }; 
+        fbSet('events/' + newItem.id, newItem); 
+        e.target.reset();
+        const preview = document.getElementById('event-preview');
+        if (preview) preview.innerHTML = '';
+    };
+
+    if (file) {
+        compressImage(file, saveEvent);
+    } else {
+        saveEvent(null);
+    }
 });
 
 // --- Announcements Logic ---
