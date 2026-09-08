@@ -2191,3 +2191,20 @@ window.toggleFolder = (id) => {
         header.classList.add('is-open');
     }
 };
+
+// --- TEMPORARY MIGRATION SCRIPT ---
+setTimeout(() => {
+    if (window.state && state.participations && state.events) {
+        state.events.forEach(ev => {
+            const evName = (ev.name || '').toLowerCase();
+            const match = state.participations.find(p => {
+                const pName = (p.type || '').toLowerCase();
+                return pName.includes(evName) || evName.includes(pName);
+            });
+            if (match && match.image && !ev.image) {
+                console.log('Migrando imagen para evento:', ev.name);
+                fbSet('events/' + ev.id + '/image', match.image);
+            }
+        });
+    }
+}, 3000);
