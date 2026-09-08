@@ -365,8 +365,8 @@ function renderExpenses() {
         });
         const sortedNamesPub = Object.keys(byNamePub);
 
-        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
-            const exps = byDatePub[fecha];
+        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
+            const exps = byNamePub[folderName];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'admin-exp-' + idx;
             
@@ -428,8 +428,8 @@ function renderExpenses() {
             return parse(b) - parse(a);
         });
 
-        gallery.innerHTML = sortedDatesPub.map((fecha, idx) => {
-            const exps = byDatePub[fecha];
+        gallery.innerHTML = sortedNamesPub.map((folderName, idx) => {
+            const exps = byNamePub[folderName];
             const total = exps.reduce((s, e) => s + Number(e.amount), 0);
             const folderId = 'pub-exp-' + idx;
             
@@ -567,8 +567,8 @@ function renderEvents() {
     const sortedNames = Object.keys(byName);
 
     if (isAdmin) {
-        list.innerHTML = sortedDates.map((fecha, idx) => {
-            const evs = byDate[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'adm-ev-' + idx;
             
             let previews = '';
@@ -598,8 +598,8 @@ function renderEvents() {
             </div>`;
         }).join('');
     } else {
-        list.innerHTML = sortedDates.map((fecha, idx) => {
-            const evs = byDate[fecha];
+        list.innerHTML = sortedNames.map((folderName, idx) => {
+            const evs = byName[folderName];
             const folderId = 'pub-ev-' + idx;
             
             let previews = '';
@@ -1209,8 +1209,8 @@ function renderAnnouncements() {
     });
     const sortedTypes = Object.keys(byType);
 
-    container.innerHTML = sortedDates.map((fecha, idx) => {
-        const anns = byDate[fecha];
+    container.innerHTML = sortedTypes.map((folderName, idx) => {
+        const anns = byType[folderName];
         const folderId = 'pub-ann-' + idx;
         
         let previews = '';
@@ -1263,8 +1263,8 @@ function renderAnnouncementsAdmin() {
     });
     const sortedTypes = Object.keys(byType);
 
-    list.innerHTML = sortedDates.map((fecha, idx) => {
-        const anns = byDate[fecha];
+    list.innerHTML = sortedNames.map((folderName, idx) => {
+        const anns = byType[folderName];
         const folderId = 'adm-ann-' + idx;
         
         let previews = '';
